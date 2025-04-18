@@ -39,10 +39,10 @@ if (! function_exists('wpwbdGetObservationsList')) {
         $db = new wpwbdDB();
         $startTime = wpwbdGetStartTime();
         $endTime = wpwbdGetEndTime();
-        $results = $db->query("SELECT BirdNET_ID, SpeciesName from BirdObservations where TimeInMillis >= $startTime and TimeInMillis < $endTime and Probability > .4 group by BirdNET_ID order by min(TimeInMillis)");
+        $results = $db->query("SELECT BirdNET_ID, SpeciesName, group_concat(TimeInMillis) as timestamps from BirdObservations where TimeInMillis >= $startTime and TimeInMillis < $endTime and Probability > .4 group by BirdNET_ID order by min(TimeInMillis)");
         $list='';
         while ($row = $results->fetchArray()) {
-            $list .= '<li>';
+            $list .= '<li data-timestamps="'.$row['timestamps'].'">';
             $list .= $row['SpeciesName'];
             $list .= '</li>';
         }
