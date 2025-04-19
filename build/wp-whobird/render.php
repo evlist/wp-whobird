@@ -8,12 +8,18 @@
 <p <?php echo get_block_wrapper_attributes(); ?>>
 <?php 
 
+global $wpwbd_recordings_path; 
+global $wpwbd_database_path;
+$wpwbd_recordings_path = 'WhoBird/recordings';
+$wpwbd_database_path = 'WhoBird/databases/BirdDatabase.db';
+
 if (! class_exists('wpwbdDB')) {
     class wpwbdDB extends SQLite3
     {
         function __construct()
         {
-            $dbPath = wp_get_upload_dir()['basedir'].'/WhoBird/databases/BirdDatabase.db';
+            global $wpwbd_database_path;
+            $dbPath = wp_get_upload_dir()['basedir'].'/'. $wpwbd_database_path;
             $this->open($dbPath, SQLITE3_OPEN_READONLY);
         }
     }       
@@ -33,6 +39,23 @@ if (! function_exists('wpwbdGetEndTime')) {
     }
 }
 
+if (! function_exists('wpwdbGetRecoringsUrls')) {
+    function wpwbdGetRecordingsUrls($recordingIdsString) {
+        global $wpwbd_recordings_path;
+        $recordingIds = explode(',', $recordingIdsString);
+        $recordingUrls = array();
+        $uploadDir = wp_get_upload_dir();
+        foreach ($recordingIds as $recordingId) {
+            $recordingPath = $uploadDir['basedir'].'/'. $wpwbd_recordings_path. '/' . $recordingId . '.wav';
+            if (is_readable($recordingPath) && is_file($recordingPath)) {
+                $recordingUrl = $uploadDir['baseurl'].'/'.$wpwbd_recordings_path.'/'.$recordingId.'.wav';
+                $recordingUrls[] = $recordingUrl;
+            }
+        }
+        return join(',', $recordingUrls);
+    }
+}
+
 if (! function_exists('wpwbdGetObservationsList')) {
     function wpwbdGetObservationsList() 
     {
@@ -42,13 +65,14 @@ if (! function_exists('wpwbdGetObservationsList')) {
         $results = $db->query("SELECT BirdNET_ID, SpeciesName, group_concat(TimeInMillis) as timestamps from BirdObservations where TimeInMillis >= $startTime and TimeInMillis < $endTime and Probability > .4 group by BirdNET_ID order by min(TimeInMillis)");
         $list='';
         while ($row = $results->fetchArray()) {
-            $list .= '<li data-timestamps="'.$row['timestamps'].'">';
+            $list .= '<li data-recordings="'.wpwbdGetRecordingsUrls($row['timestamps']).'">';
             $list .= $row['SpeciesName'];
             $list .= '</li>';
         }
         return $list;
     }
 }
+
 if (! function_exists('wpwbdDisplayObservations')) {
     function wpwbdDisplayObservations() 
     {
