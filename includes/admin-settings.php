@@ -38,13 +38,22 @@ class WhoBirdAdminSettings
 
     public function registerSettings()
     {
+        // Register settings with default values
         register_setting('wpwhobird_settings', 'wpwhobird_recordings_path', [
             'default' => 'WhoBird/recordings',
         ]);
         register_setting('wpwhobird_settings', 'wpwhobird_database_path', [
             'default' => 'WhoBird/databases/BirdDatabase.db',
         ]);
+        register_setting('wpwhobird_settings', 'wpwhobird_threshold', [
+            'default' => 0.4,
+            'sanitize_callback' => function ($value) {
+                $value = floatval($value);
+                return ($value >= 0 && $value <= 1) ? $value : 0.7; // Ensure it's between 0 and 1
+            },
+        ]);
 
+        // Add settings section
         add_settings_section(
             'wpwhobird_main_settings',
             __('Main Settings', 'wpwhobird'),
@@ -52,6 +61,7 @@ class WhoBirdAdminSettings
             'wpwhobird-settings'
         );
 
+        // Add settings fields
         add_settings_field(
             'wpwhobird_recordings_path',
             __('Recordings Path', 'wpwhobird'),
@@ -75,6 +85,18 @@ class WhoBirdAdminSettings
                 'option_name' => 'wpwhobird_database_path',
             ]
         );
+
+        add_settings_field(
+            'wpwhobird_threshold',
+            __('Threshold', 'wpwhobird'),
+            [$this, 'renderNumberInput'],
+            'wpwhobird-settings',
+            'wpwhobird_main_settings',
+            [
+                'label_for' => 'wpwhobird_threshold',
+                'option_name' => 'wpwhobird_threshold',
+            ]
+        );
     }
 
     public function renderTextInput($args)
@@ -85,6 +107,17 @@ class WhoBirdAdminSettings
                name="<?php echo esc_attr($args['option_name']); ?>" 
                value="<?php echo esc_attr($option); ?>" 
                class="regular-text">
+        <?php
+    }
+
+    public function renderNumberInput($args)
+    {
+        $option = get_option($args['option_name'], '0.7');
+        ?>
+        <input type="number" id="<?php echo esc_attr($args['label_for']); ?>" 
+               name="<?php echo esc_attr($args['option_name']); ?>" 
+               value="<?php echo esc_attr($option); ?>" 
+               min="0" max="1" step="0.01" class="small-text">
         <?php
     }
 }

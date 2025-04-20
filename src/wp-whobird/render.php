@@ -11,6 +11,7 @@ class WhoBirdRenderer
 
     public function __construct()
     {
+        // Retrieve the dynamic values from the WordPress options
         $this->recordingsPath = get_option('wpwhobird_recordings_path', 'WhoBird/recordings');
         $this->databasePath = get_option('wpwhobird_database_path', 'WhoBird/databases/BirdDatabase.db');
     }
@@ -62,6 +63,9 @@ class WhoBirdRenderer
         $startTime = $this->getStartTime();
         $endTime = $this->getEndTime();
 
+        // Get the threshold value from the admin settings
+        $threshold = floatval(get_option('wpwhobird_threshold', 0.7));
+
         $query = $db->prepare(
             "SELECT BirdNET_ID, SpeciesName, group_concat(TimeInMillis) as timestamps 
              FROM BirdObservations 
@@ -71,7 +75,7 @@ class WhoBirdRenderer
 
         $query->bindValue(':startTime', $startTime, SQLITE3_INTEGER);
         $query->bindValue(':endTime', $endTime, SQLITE3_INTEGER);
-        $query->bindValue(':threshold', 0.7, SQLITE3_FLOAT);
+        $query->bindValue(':threshold', $threshold, SQLITE3_FLOAT);
 
         $results = $query->execute();
 
@@ -107,4 +111,3 @@ class WhoBirdRenderer
 // Initialize and render the observations
 $renderer = new WhoBirdRenderer();
 $renderer->displayObservations();
-?>
