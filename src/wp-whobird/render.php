@@ -1,101 +1,110 @@
 <?php
-/**
- * vim: set ai sw=4 smarttab expandtab: tabstop=8 softtabstop=0
- *
- * @see https://github.com/WordPress/gutenberg/blob/trunk/docs/reference-guides/block-api/block-metadata.md#render
- */
-?>
-<p <?php echo get_block_wrapper_attributes(); ?>>
-<?php 
+namespace WPWhoBird;
 
-global $wpwbd_recordings_path; 
-global $wpwbd_database_path;
-$wpwbd_recordings_path = 'WhoBird/recordings';
-$wpwbd_database_path = 'WhoBird/databases/BirdDatabase.db';
+use DateTime;
+use SQLite3;
 
-if (! class_exists('wpwbdDB')) {
-    class wpwbdDB extends SQLite3
+class WhoBirdRenderer
+{
+    private string $recordingsPath;
+    private string $databasePath;
+
+    public function __construct()
     {
-        function __construct()
-        {
-            global $wpwbd_database_path;
-            $dbPath = wp_get_upload_dir()['basedir'].'/'. $wpwbd_database_path;
-            $this->open($dbPath, SQLITE3_OPEN_READONLY);
+        $this->recordingsPath = get_option('wpwhobird_recordings_path', 'WhoBird/recordings');
+        $this->databasePath = get_option('wpwhobird_database_path', 'WhoBird/databases/BirdDatabase.db');
+    }
+
+    private function getDatabaseConnection(): SQLite3
+    {
+        $dbPath = wp_get_upload_dir()['basedir'] . '/' . $this->databasePath;
+
+        $db = new SQLite3($dbPath, SQLITE3_OPEN_READONLY);
+        if (!$db) {
+            throw new \Exception(__('Failed to open database at', 'wpwhobird') . ' ' . $dbPath);
         }
-    }       
-}
 
-if (! function_exists('wpwbdGetStartTime')) {
-    function wpwbdGetStartTime() {
-        $iso_date=get_the_date('Y-m-d');
-        $date=new DateTime($iso_date);
-        return $date->getTimestamp() * 1000;
+        return $db;
     }
-}
 
-if (! function_exists('wpwbdGetEndTime')) {
-    function wpwbdGetEndTime() {
-        return wpwbdGetStartTime() + 24 * 60 * 60 * 1000;
+    private function getStartTime(): int
+    {
+        $isoDate = get_the_date('Y-m-d');
+        $date = new DateTime($isoDate);
+        return $date->getTimestamp() * 1000; // Convert to milliseconds
     }
-}
 
-if (! function_exists('wpwdbGetRecoringsUrls')) {
-    function wpwbdGetRecordingsUrls($recordingIdsString) {
-        global $wpwbd_recordings_path;
+    private function getEndTime(): int
+    {
+        return $this->getStartTime() + 24 * 60 * 60 * 1000; // Add 24 hours in milliseconds
+    }
+
+    private function getRecordingsUrls(string $recordingIdsString): string
+    {
         $recordingIds = explode(',', $recordingIdsString);
-        $recordingUrls = array();
+        $recordingUrls = [];
         $uploadDir = wp_get_upload_dir();
+
         foreach ($recordingIds as $recordingId) {
-            $recordingPath = $uploadDir['basedir'].'/'. $wpwbd_recordings_path. '/' . $recordingId . '.wav';
-            if (is_readable($recordingPath) && is_file($recordingPath)) {
-                $recordingUrl = $uploadDir['baseurl'].'/'.$wpwbd_recordings_path.'/'.$recordingId.'.wav';
+            $recordingPath = $uploadDir['basedir'] . '/' . $this->recordingsPath . '/' . $recordingId . '.wav';
+            if (is_file($recordingPath) && is_readable($recordingPath)) {
+                $recordingUrl = $uploadDir['baseurl'] . '/' . $this->recordingsPath . '/' . $recordingId . '.wav';
                 $recordingUrls[] = $recordingUrl;
             }
         }
-        return join(',', $recordingUrls);
-    }
-}
 
-if (! function_exists('wpwbdGetObservationsList')) {
-    function wpwbdGetObservationsList() 
+        return implode(',', $recordingUrls);
+    }
+
+    private function getObservationsList(): string
     {
-        $db = new wpwbdDB();
-        $startTime = wpwbdGetStartTime();
-        $endTime = wpwbdGetEndTime();
-        $results = $db->query("SELECT BirdNET_ID, SpeciesName, group_concat(TimeInMillis) as timestamps from BirdObservations where TimeInMillis >= $startTime and TimeInMillis < $endTime and Probability > .4 group by BirdNET_ID order by min(TimeInMillis)");
-        $list='';
-        while ($row = $results->fetchArray()) {
-            $list .= '<li data-recordings="'.wpwbdGetRecordingsUrls($row['timestamps']).'">';
-            $list .= $row['SpeciesName'];
+        $db = $this->getDatabaseConnection();
+        $startTime = $this->getStartTime();
+        $endTime = $this->getEndTime();
+
+        $query = $db->prepare(
+            "SELECT BirdNET_ID, SpeciesName, group_concat(TimeInMillis) as timestamps 
+             FROM BirdObservations 
+             WHERE TimeInMillis >= :startTime AND TimeInMillis < :endTime AND Probability >= :threshold 
+             GROUP BY BirdNET_ID, SpeciesName"
+        );
+
+        $query->bindValue(':startTime', $startTime, SQLITE3_INTEGER);
+        $query->bindValue(':endTime', $endTime, SQLITE3_INTEGER);
+        $query->bindValue(':threshold', 0.7, SQLITE3_FLOAT);
+
+        $results = $query->execute();
+
+        $list = '';
+        while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
+            $list .= '<li data-recordings="' . esc_attr($this->getRecordingsUrls($row['timestamps'])) . '">';
+            $list .= esc_html($row['SpeciesName']);
             $list .= '</li>';
         }
+
         return $list;
     }
-}
 
-if (! function_exists('wpwbdDisplayObservations')) {
-    function wpwbdDisplayObservations() 
+    public function displayObservations(): void
     {
+        $list = $this->getObservationsList();
 
-        $list = wpwbdGetObservationsList();
-        if ($list == '') {
+        if (empty($list)) {
             echo '<div class="wpwbd_observations wpwbd_empty_observations">';
-            echo '<p>Nous n\'avons identifié aucun oiseau avec l\'application WhoBIRD aujourd\'hui.</p>';
+            echo '<p>' . __('We did not identify any birds with the WhoBIRD application today.', 'wpwhobird') . '</p>';
             echo '</div>';
         } else {
             echo '<div class="wpwbd_observations">';
-            echo '<p>Aujourd\'hui nous avons entendu et identifié les oiseaux suivants avec l\'application WhoBIRD : </p>';
+            echo '<p>' . __('Today we heard and identified the following birds with the WhoBIRD application:', 'wpwhobird') . '</p>';
             echo '<ul class="wpwbd_list">';
             echo $list;
             echo '</ul>';
             echo '</div>';
         }
-
-
     }
-
 }
-wpwbdDisplayObservations();
 
+// Initialize and render the observations
+$renderer = new WhoBirdRenderer();
+$renderer->displayObservations();
 ?>
-</p>
