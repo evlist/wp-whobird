@@ -5,41 +5,41 @@ msgstr ""
 "Project-Id-Version: WhoBIRD observations 0.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-whobird\n"
 "Last-Translator: \n"
-"Language-Team: French (France)\n"
+"Language-Team: Français\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2025-04-22T10:21:09+00:00\n"
-"PO-Revision-Date: 2025-04-22 11:45+0000\n"
+"PO-Revision-Date: 2025-04-22 12:44+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
-"X-Domain: wpwhobird\n"
+"X-Domain: wp-whobird\n"
 "Language: fr_FR\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Loco-Version: 2.7.2; wp-6.8"
 
-#. Plugin Name of the plugin
-#: wp-whobird.php
+#: build/wp-whobird/block.json
+msgctxt "block description"
+msgid "Display your WhoBIRD observations"
+msgstr "Affichez vos obervations WhoBIRD"
+
+#: build/wp-whobird/block.json
+msgctxt "block title"
 msgid "WhoBIRD observations"
-msgstr "Observations WhoBIRD"
+msgstr "Obervations WhoBIRD"
 
 #. Description of the plugin
 #: wp-whobird.php
 msgid "Display your WhoBIRD observations"
 msgstr "Affichez vos observations WhoBird"
 
-#. Author of the plugin
-#: wp-whobird.php
-msgid "The WordPress Contributors"
-msgstr "Les contributeurs WordPress"
-
 #: build/wp-whobird/render.php:25
 msgid "Failed to open database at"
 msgstr "Echec à l'ouverture de la base de données"
 
-#: build/wp-whobird/render.php:98
-msgid "We did not identify any birds with the WhoBIRD application today."
-msgstr ""
-"Nous n'avons identifié aucun oiseau avec l'application WhoBIRD aujourd'hui."
+#. Author of the plugin
+#: wp-whobird.php
+msgid "The WordPress Contributors"
+msgstr "Les contributeurs WordPress"
 
 #: build/wp-whobird/render.php:102
 msgid ""
@@ -49,23 +49,16 @@ msgstr ""
 "Aujourd'hui nous avons entendu et identifié les oiseaux suivants avec "
 "l'application WhoBIRD :"
 
-#: includes/admin-settings.php:15 includes/admin-settings.php:16
-#: includes/admin-settings.php:27
-msgid "WhoBird Settings"
-msgstr "Paramètres WhoBIRD"
+#: build/wp-whobird/render.php:98
+msgid "We did not identify any birds with the WhoBIRD application today."
+msgstr ""
+"Nous n'avons identifié aucun oiseau avec l'application WhoBIRD aujourd'hui."
 
-#: includes/admin-settings.php:59
-msgid "Main Settings"
-msgstr "Paramètres principaux"
+#. Plugin Name of the plugin
+#: wp-whobird.php
+msgid "WhoBIRD observations"
+msgstr "Observations WhoBIRD"
 
-#: includes/admin-settings.php:67
-msgid "Recordings Path"
-msgstr "Chemin d'accès aux enregistrements"
-
-#: includes/admin-settings.php:79
-msgid "Database Path"
-msgstr "Chemin d'accès à la base de données"
-
-#: includes/admin-settings.php:91
-msgid "Threshold"
-msgstr "Seuil"
+#: build/wp-whobird/index.js:1
+msgid "WhoBIRD observations – hello from the editor!"
+msgstr "Observations WhoBIRD -- coucou de l'éditeur !"

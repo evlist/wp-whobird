@@ -58,3 +58,8 @@ function wpwbd_wp_whobird_block_init() {
 }
 add_action( 'init', 'wpwbd_wp_whobird_block_init' );
 require_once plugin_dir_path(__FILE__).'includes/admin-settings.php';
+
+function wp_whobird_load_textdomain() {
+    load_plugin_textdomain('wp-whobird', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+}
+add_action('plugins_loaded', 'wp_whobird_load_textdomain');
