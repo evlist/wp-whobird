@@ -63,6 +63,22 @@ if (! class_exists('WPWhoBird\WhoBirdRenderer')) {
             return implode(',', $recordingUrls);
         }
 
+        private function playerDisplay(): string
+        {
+            return '<div id="audio-player-container">
+  <div id="audio-player">
+    <div class="player">
+      <button id="prev" class="control-button">⏮</button>
+      <button id="play-pause" class="control-button">▶️</button>
+      <button id="next" class="control-button">⏭</button>
+    </div>
+    <div class="track-info">
+      <span id="current-track">Track 1</span>
+    </div>
+  </div>
+</div>';
+        }
+
         private function getObservationsList(): string
         {
             $db = $this->getDatabaseConnection();
@@ -109,6 +125,7 @@ if (! class_exists('WPWhoBird\WhoBirdRenderer')) {
                 echo '<ul class="wpwbd_list">';
                 echo $list;
                 echo '</ul>';
+                echo $this->playerDisplay();
                 echo '</div>';
             }
         }

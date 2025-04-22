@@ -10,3 +10,57 @@
 	color: #fff;
 	padding: 2px;
 }
+#audio-player-container {
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+}
+
+#audio-player {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.player {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.control-button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin: 0 5px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.control-button:hover {
+  background-color: #0056b3;
+}
+
+.track-info {
+  font-size: 14px;
+  color: #333;
+  margin-top: 10px;
+}
+
+.wpwbd_list {
+  list-style: none;
+  padding: 0;
+}
+
+.wpwbd_list li {
+  cursor: pointer;
+  padding: 10px;
+  background: #f9f9f9;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.wpwbd_list li:hover {
+  background: #efefef;
+}

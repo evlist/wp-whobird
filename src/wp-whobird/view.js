@@ -23,3 +23,77 @@
 /* eslint-disable no-console */
 console.log( 'Hello World! (from wpwbd-wp-whobird block)' );
 /* eslint-enable no-console */
+document.addEventListener("DOMContentLoaded", function () {
+  const listItems = document.querySelectorAll(".wpwbd_list li");
+  const playPauseButton = document.getElementById("play-pause");
+  const prevButton = document.getElementById("prev");
+  const nextButton = document.getElementById("next");
+  const currentTrackInfo = document.getElementById("current-track");
+
+  let currentListItem = null;
+  let recordings = [];
+  let currentIndex = 0;
+  let isPlaying = false;
+
+  const audio = new Audio();
+
+  const updateTrackInfo = () => {
+    currentTrackInfo.textContent = `Track ${currentIndex + 1} (${currentListItem.textContent})`;
+  };
+
+  const playAudio = () => {
+    audio.play();
+    isPlaying = true;
+    playPauseButton.textContent = "⏸";
+  };
+
+  const pauseAudio = () => {
+    audio.pause();
+    isPlaying = false;
+    playPauseButton.textContent = "▶️";
+  };
+
+  const loadRecordings = (listItem) => {
+    currentListItem = listItem;
+    recordings = listItem.getAttribute("data-recordings").split(",");
+    currentIndex = 0;
+    audio.src = recordings[currentIndex];
+    updateTrackInfo();
+  };
+
+  playPauseButton.addEventListener("click", () => {
+    if (isPlaying) {
+      pauseAudio();
+    } else {
+      playAudio();
+    }
+  });
+
+  prevButton.addEventListener("click", () => {
+    if (!currentListItem) return;
+    currentIndex = (currentIndex - 1 + recordings.length) % recordings.length;
+    audio.src = recordings[currentIndex];
+    updateTrackInfo();
+    if (isPlaying) playAudio();
+  });
+
+  nextButton.addEventListener("click", () => {
+    if (!currentListItem) return;
+    currentIndex = (currentIndex + 1) % recordings.length;
+    audio.src = recordings[currentIndex];
+    updateTrackInfo();
+    if (isPlaying) playAudio();
+  });
+
+  listItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      loadRecordings(item);
+      playAudio();
+    });
+  });
+
+  // Initialize the player with the first list item if available
+  if (listItems.length > 0) {
+    loadRecordings(listItems[0]);
+  }
+});
