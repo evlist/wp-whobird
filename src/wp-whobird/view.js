@@ -77,6 +77,18 @@ document.addEventListener("DOMContentLoaded", function () {
     if (isPlaying) playAudio();
   });
 
+  // Automatically play the next track when the current one ends
+  audio.addEventListener("ended", () => {
+    if (currentIndex < recordings.length -1 )
+    {
+      currentIndex = (currentIndex + 1) % recordings.length;
+      audio.src = recordings[currentIndex];
+      updateTrackInfo();
+      playAudio(); // Automatically start playing the next track
+    }
+  });
+
+
   nextButton.addEventListener("click", () => {
     if (!currentListItem) return;
     currentIndex = (currentIndex + 1) % recordings.length;
