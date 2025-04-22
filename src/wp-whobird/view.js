@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const audio = new Audio();
 
   const updateTrackInfo = () => {
-    currentTrackInfo.textContent = `Track ${currentIndex + 1} (${currentListItem.textContent})`;
+    currentTrackInfo.textContent = `Track ${currentIndex + 1} / ${recordings.length} (${currentListItem.textContent})`;
   };
 
   const playAudio = () => {

@@ -52,12 +52,15 @@ if (! class_exists('WPWhoBird\WhoBirdRenderer')) {
             $recordingUrls = [];
             $uploadDir = wp_get_upload_dir();
 
+            $previousRecordingId = 0;
             foreach ($recordingIds as $recordingId) {
-                $recordingPath = $uploadDir['basedir'] . '/' . $this->recordingsPath . '/' . $recordingId . '.wav';
-                if (is_file($recordingPath) && is_readable($recordingPath)) {
-                    $recordingUrl = $uploadDir['baseurl'] . '/' . $this->recordingsPath . '/' . $recordingId . '.wav';
-                    $recordingUrls[] = $recordingUrl;
-                }
+                if ($recordingId - $previousRecordingId >= 3000) {
+                    $previousRecordingId = $recordingId;
+                    $recordingPath = $uploadDir['basedir'] . '/' . $this->recordingsPath . '/' . $recordingId . '.wav';
+                    if (is_file($recordingPath) && is_readable($recordingPath)) {
+                        $recordingUrl = $uploadDir['baseurl'] . '/' . $this->recordingsPath . '/' . $recordingId . '.wav';
+                        $recordingUrls[] = $recordingUrl;
+                    }}
             }
 
             return implode(',', $recordingUrls);
@@ -66,17 +69,17 @@ if (! class_exists('WPWhoBird\WhoBirdRenderer')) {
         private function playerDisplay(): string
         {
             return '<div id="audio-player-container">
-  <div id="audio-player">
-    <div class="player">
-      <button id="prev" class="control-button">⏮</button>
-      <button id="play-pause" class="control-button">▶️</button>
-      <button id="next" class="control-button">⏭</button>
-    </div>
-    <div class="track-info">
-      <span id="current-track">Track 1</span>
-    </div>
-  </div>
-</div>';
+                <div id="audio-player">
+                <div class="player">
+                <button id="prev" class="control-button">⏮</button>
+                <button id="play-pause" class="control-button">▶️</button>
+                <button id="next" class="control-button">⏭</button>
+                </div>
+                <div class="track-info">
+                <span id="current-track">Track 1</span>
+                </div>
+                </div>
+                </div>';
         }
 
         private function getObservationsList(): string
