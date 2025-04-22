@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-04-22T12:31:43+00:00\n"
+"POT-Creation-Date: 2025-04-22T15:29:14+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: wp-whobird\n"
@@ -29,20 +29,24 @@ msgstr ""
 msgid "The WordPress Contributors"
 msgstr ""
 
-#: build/wp-whobird/render.php:25
+#: build/wp-whobird/render.php:31
 msgid "Failed to open database at"
 msgstr ""
 
-#: build/wp-whobird/render.php:98
+#: build/wp-whobird/render.php:123
 msgid "We did not identify any birds with the WhoBIRD application today."
 msgstr ""
 
-#: build/wp-whobird/render.php:102
+#: build/wp-whobird/render.php:127
 msgid "Today we heard and identified the following birds with the WhoBIRD application:"
 msgstr ""
 
 #: build/wp-whobird/index.js:1
 msgid "WhoBIRD observations – hello from the editor!"
+msgstr ""
+
+#: build/wp-whobird/view.js:1
+msgid "Track"
 msgstr ""
 
 #: build/wp-whobird/block.json

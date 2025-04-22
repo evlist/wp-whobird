@@ -38,7 +38,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const audio = new Audio();
 
   const updateTrackInfo = () => {
-    currentTrackInfo.textContent = `Track ${currentIndex + 1} / ${recordings.length} (${currentListItem.textContent})`;
+//    const trackText = __('Track', 'wp-whobird'); // Use wp.i18n for translation
+    const trackText = 'Track';
+    currentTrackInfo.textContent = `${trackText} ${currentIndex + 1} / ${recordings.length} (${currentListItem.textContent})`;
   };
 
   const playAudio = () => {
