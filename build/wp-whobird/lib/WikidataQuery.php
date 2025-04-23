@@ -13,7 +13,9 @@ class WikidataQuery
     {
         $this->locale = $locale;
         $this->language = substr($locale, 0, 2); // Extract the language code (e.g., 'fr', 'es')
+	error_log('locale : ' . $this->locale);
     }
+
 
     /**
      * Fetch information about a bird (Aves class) entity based on a species name.
@@ -28,25 +30,33 @@ class WikidataQuery
 
         // Prepare the SPARQL query to check if the entity belongs to the Aves class
         $query = <<<SPARQL
-SELECT ?item ?itemLabel ?itemDescription ?latinName ?image WHERE {
-  ?item rdfs:label "$speciesName"@$this->language.  # Match the common name in the specified language
+SELECT ?item ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
   {
-    ?item wdt:P31/wdt:P279* wd:Q5113.               # Check if the item is an instance or subclass of Aves (Q5113)
+	?item rdfs:label "$speciesName"@$this->language.  # Match the common name in the specified language
   } UNION {
+        ?item wdt:P1448 "$speciesName"@$this->language.  # Alternative label
+  } UNION {
+        ?item wdt:P1843 "$speciesName"@$this->language.  # Alternative label
+  } UNION {
+        ?item skos:altLabel "$speciesName"@$this->language.  # Alternative label
+ }  
     ?item wdt:P171*/wdt:P279* wd:Q5113.             # Check if the item belongs to Aves through the taxonomic hierarchy
-  }
   OPTIONAL { ?item wdt:P225 ?latinName. }           # Fetch Latin name (scientific name)
   OPTIONAL { ?item wdt:P18 ?image. }                # Fetch image (P18)
+  OPTIONAL {                                                                                                             ?wikipedia schema:about ?item;          # Fetch Wikipedia link                                                                  schema:isPartOf <https://fr.wikipedia.org/>.                                                            }                                                                                                                 
   SERVICE wikibase:label { bd:serviceParam wikibase:language "$this->language,en". }
+}
 }
 LIMIT 1
 SPARQL;
+	error_log('query : ' . $query);
 
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($query);
         $sparqlHeaders = ["Accept: application/json"];
 
         // Fetch the SPARQL response
         $sparqlResponse = $this->executeCurl($sparqlUrl, $sparqlHeaders);
+	error_log('response : ' . print_r($sparqlResponse, true)	);
         $sparqlData = json_decode($sparqlResponse, true);
 
         // Extract the entity information
