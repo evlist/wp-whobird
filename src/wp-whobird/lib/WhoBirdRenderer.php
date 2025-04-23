@@ -103,9 +103,11 @@ class WhoBirdRenderer
 
         $list = '';
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
-            $list .= '<li data-recordings="' . esc_attr($this->getRecordingsUrls($row['timestamps'])) . '">';
-            $list .= esc_html($row['SpeciesName']);
-            $list .= '</li>';
+            $listItemRenderer = new BirdListItemRenderer(
+                $row['SpeciesName'],
+                $this->getRecordingsUrls($row['timestamps'])
+            );
+            $list .= $listItemRenderer->render();
         }
 
         return $list;
