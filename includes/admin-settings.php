@@ -1,4 +1,5 @@
 <?php
+// vi: set ft=php ts=4 sw=4 expandtab:
 namespace WPWhoBird;
 
 class WhoBirdAdminSettings
@@ -7,6 +8,7 @@ class WhoBirdAdminSettings
     {
         add_action('admin_menu', [$this, 'addSettingsPage']);
         add_action('admin_init', [$this, 'registerSettings']);
+        register_activation_hook(__FILE__, [$this, 'setDefaultFallback']); // Hook for default value
     }
 
     public function addSettingsPage()
@@ -38,7 +40,7 @@ class WhoBirdAdminSettings
 
     public function registerSettings()
     {
-        // Register settings with default values
+        // Register existing settings
         register_setting('wpwhobird_settings', 'wpwhobird_recordings_path', [
             'default' => 'WhoBird/recordings',
         ]);
@@ -53,6 +55,16 @@ class WhoBirdAdminSettings
             },
         ]);
 
+        // Register new setting for fallback languages without enforcing "en" by default
+        register_setting('wpwhobird_settings', 'wpwhobird_fallback_languages', [
+            'sanitize_callback' => function ($value) {
+                // Ensure the value is a valid comma-separated list of two-letter language codes
+                return implode(',', array_filter(array_map('trim', explode(',', $value)), function ($lang) {
+                    return preg_match('/^[a-z]{2}$/', $lang); // Validate two-letter language codes
+                }));
+            },
+        ]);
+
         // Add settings section
         add_settings_section(
             'wpwhobird_main_settings',
@@ -62,65 +74,67 @@ class WhoBirdAdminSettings
         );
 
         // Add settings fields
-        add_settings_field(
-            'wpwhobird_recordings_path',
-            __('Recordings Path', 'wpwhobird'),
-            [$this, 'renderTextInput'],
-            'wpwhobird-settings',
-            'wpwhobird_main_settings',
-            [
-                'label_for' => 'wpwhobird_recordings_path',
-                'option_name' => 'wpwhobird_recordings_path',
-            ]
-        );
-
-        add_settings_field(
-            'wpwhobird_database_path',
-            __('Database Path', 'wpwhobird'),
-            [$this, 'renderTextInput'],
-            'wpwhobird-settings',
-            'wpwhobird_main_settings',
-            [
-                'label_for' => 'wpwhobird_database_path',
-                'option_name' => 'wpwhobird_database_path',
-            ]
-        );
-
-        add_settings_field(
-            'wpwhobird_threshold',
-            __('Threshold', 'wpwhobird'),
-            [$this, 'renderNumberInput'],
-            'wpwhobird-settings',
-            'wpwhobird_main_settings',
-            [
-                'label_for' => 'wpwhobird_threshold',
-                'option_name' => 'wpwhobird_threshold',
-            ]
+        $this->addTextField('wpwhobird_recordings_path', __('Recordings Path', 'wpwhobird'));
+        $this->addTextField('wpwhobird_database_path', __('Database Path', 'wpwhobird'));
+        $this->addNumberField('wpwhobird_threshold', __('Threshold', 'wpwhobird'), 0, 1, 0.01);
+        $this->addTextField(
+            'wpwhobird_fallback_languages',
+            __('Fallback Languages', 'wpwhobird'),
+            __('Enter fallback languages as a comma-separated list (e.g., "en,fr,de"). Leave empty to disable fallback.', 'wpwhobird')
         );
     }
 
-    public function renderTextInput($args)
+    private function addTextField($optionName, $label, $description = '')
     {
-        $option = get_option($args['option_name'], '');
-        ?>
-        <input type="text" id="<?php echo esc_attr($args['label_for']); ?>" 
-               name="<?php echo esc_attr($args['option_name']); ?>" 
-               value="<?php echo esc_attr($option); ?>" 
-               class="regular-text">
-        <?php
+        add_settings_field(
+            $optionName,
+            $label,
+            function () use ($optionName, $description) {
+                $value = get_option($optionName, '');
+                ?>
+                <input type="text" id="<?php echo esc_attr($optionName); ?>"
+                       name="<?php echo esc_attr($optionName); ?>"
+                       value="<?php echo esc_attr($value); ?>" class="regular-text">
+                <?php if ($description): ?>
+                    <p class="description"><?php echo esc_html($description); ?></p>
+                <?php endif; ?>
+                <?php
+            },
+            'wpwhobird-settings',
+            'wpwhobird_main_settings'
+        );
     }
 
-    public function renderNumberInput($args)
+    private function addNumberField($optionName, $label, $min, $max, $step)
     {
-        $option = get_option($args['option_name'], '0.7');
-        ?>
-        <input type="number" id="<?php echo esc_attr($args['label_for']); ?>" 
-               name="<?php echo esc_attr($args['option_name']); ?>" 
-               value="<?php echo esc_attr($option); ?>" 
-               min="0" max="1" step="0.01" class="small-text">
-        <?php
+        add_settings_field(
+            $optionName,
+            $label,
+            function () use ($optionName, $min, $max, $step) {
+                $value = get_option($optionName, '0.7');
+                ?>
+                <input type="number" id="<?php echo esc_attr($optionName); ?>"
+                       name="<?php echo esc_attr($optionName); ?>"
+                       value="<?php echo esc_attr($value); ?>"
+                       min="<?php echo esc_attr($min); ?>"
+                       max="<?php echo esc_attr($max); ?>"
+                       step="<?php echo esc_attr($step); ?>" class="small-text">
+                <?php
+            },
+            'wpwhobird-settings',
+            'wpwhobird_main_settings'
+        );
+    }
+
+    public function setDefaultFallback()
+    {
+        // Set default fallback language to "en" only if the option is not already set
+        if (get_option('wpwhobird_fallback_languages') === false) {
+            update_option('wpwhobird_fallback_languages', 'en');
+        }
     }
 }
 
 // Initialize the settings page
 new WhoBirdAdminSettings();
+
