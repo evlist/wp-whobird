@@ -6,6 +6,8 @@
  * @param string $input The input string to sanitize.
  * @return string Sanitized input.
  */
+namespace WPWhoBird;
+
 function sanitizeForSparql($input)
 {
     // Escape special characters for SPARQL

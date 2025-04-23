@@ -1,6 +1,8 @@
 <?php
+namespace WPWhoBird;
 
 require_once 'SparqlUtils.php';
+
 
 class WikidataQuery
 {
