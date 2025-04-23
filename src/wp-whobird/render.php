@@ -7,6 +7,5 @@ namespace WPWhoBird;
 require_once __DIR__ . '/lib/WhoBirdRenderer.php';
 require_once __DIR__ . '/lib/BirdListItemRenderer.php';
 
-// Initialize and render the observations
 $renderer = new WhoBirdRenderer();
-$renderer->displayObservations();
+echo $renderer->displayObservations();

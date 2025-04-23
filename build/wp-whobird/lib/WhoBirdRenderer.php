@@ -113,22 +113,22 @@ class WhoBirdRenderer
         return $list;
     }
 
-    public function displayObservations(): void
+    public function displayObservations(): string
     {
         $list = $this->getObservationsList();
 
         if (empty($list)) {
-            echo '<div class="wpwbd_observations wpwbd_empty_observations">';
-            echo '<p>' . __('We did not identify any birds with the WhoBIRD application today.', 'wp-whobird') . '</p>';
-            echo '</div>';
+            return '<div class="wpwbd_observations wpwbd_empty_observations">' .
+                   '<p>' . __('We did not identify any birds with the WhoBIRD application today.', 'wp-whobird') . '</p>' .
+                   '</div>';
         } else {
-            echo '<div class="wpwbd_observations">';
-            echo '<p>' . __('Today we heard and identified the following birds with the WhoBIRD application:', 'wp-whobird') . '</p>';
-            echo '<ul class="wpwbd_list">';
-            echo $list;
-            echo '</ul>';
-            echo $this->playerDisplay();
-            echo '</div>';
+            return '<div class="wpwbd_observations">' .
+                   '<p>' . __('Today we heard and identified the following birds with the WhoBIRD application:', 'wp-whobird') . '</p>' .
+                   '<ul class="wpwbd_list">' .
+                   $list .
+                   '</ul>' .
+                   $this->playerDisplay() .
+                   '</div>';
         }
     }
 }
