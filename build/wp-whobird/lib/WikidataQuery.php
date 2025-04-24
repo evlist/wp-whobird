@@ -20,10 +20,10 @@ class WikidataQuery
     /**
      * Fetch information about a bird (Aves class) entity based on a species name.
      *
-     * @param string $speciesName The common name of the species to query.
+     * @param string $ebirdId The common name of the species to query.
      * @return array|null Returns an array of entity data or null if no result is found.
      */
-    public function fetchBirdEntity($speciesName)
+    public function fetchBirdEntity($ebirdId)
     {
         global $wpdb;
 
@@ -33,8 +33,8 @@ class WikidataQuery
         // Check if the species is already in the cache
         $cachedResult = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT result, expiration FROM $tableName WHERE species_name = %s",
-                $speciesName
+                "SELECT result, expiration FROM $tableName WHERE ebird_id = %s",
+                $ebirdId
             ),
             ARRAY_A
         );
@@ -45,20 +45,12 @@ class WikidataQuery
         }
 
         // Sanitize species name for SPARQL
-        $speciesName = sanitizeForSparql($speciesName);
+        $ebirdId = sanitizeForSparql($ebirdId);
 
         // Prepare the SPARQL query to check if the entity belongs to the Aves class
         $query = <<<SPARQL
-            SELECT ?item ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
-                {
-                    ?item rdfs:label "$speciesName"@$this->language.  # Match the common name in the specified language
-                } UNION {
-                    ?item wdt:P1448 "$speciesName"@$this->language.  # Alternative label
-                } UNION {
-                    ?item wdt:P1843 "$speciesName"@$this->language.  # Alternative label
-                } UNION {
-                    ?item skos:altLabel "$speciesName"@$this->language.  # Alternative label
-                }  
+            SELECT ?item ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE 
+                ?item wdt:P3445 "$ebirdId".  # eBird Id
                 ?item wdt:P171*/wdt:P279* wd:Q5113.             # Check if the item belongs to Aves through the taxonomic hierarchy
                 OPTIONAL { ?item wdt:P225 ?latinName. }           # Fetch Latin name (scientific name)
                 OPTIONAL { ?item wdt:P18 ?image. }                # Fetch image (P18)
@@ -96,7 +88,7 @@ class WikidataQuery
             $wpdb->replace(
                 $tableName,
                 [
-                    'species_name' => $speciesName,
+                    'ebird_id' => $ebirdId,
                     'result' => json_encode($result),
                     'expiration' => $expiration,
                 ],

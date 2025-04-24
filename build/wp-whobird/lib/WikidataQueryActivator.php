@@ -9,14 +9,12 @@ class WikidataQueryActivator
     {
         global $wpdb;
 
-        error_log('activate()');
-
         $tableName = $wpdb->prefix . 'whobird_sparql_cache';
         $charsetCollate = $wpdb->get_charset_collate();
 
         // SQL to create the table
         $sql = "CREATE TABLE $tableName (
-            species_name VARCHAR(255) NOT NULL UNIQUE, -- Clé unique basée sur species_name
+            ebird_id VARCHAR(255) NOT NULL UNIQUE, -- Clé unique basée sur species_name
             result LONGTEXT NOT NULL,
             expiration DATETIME NOT NULL
         ) $charsetCollate;";

@@ -12,10 +12,15 @@ class BirdListItemRenderer
     private string $recordingsUrls;
     private WikidataQuery $wikidataQuery;
 
-    public function __construct(string $speciesName, string $recordingsUrls, ?WikidataQuery $wikidataQuery = null, ?string $locale = null)
+    public function __construct(string $speciesName, string $birdnetId, string $recordingsUrls, ?WikidataQuery $wikidataQuery = null, ?string $locale = null)
     {
         $this->speciesName = $speciesName;
+        $this->birdnetId = $birdnetId;
         $this->recordingsUrls = $recordingsUrls;
+                
+        // Convert birdnetId to ebirdId using TaxoCodeTableManager
+        $this->ebirdId = getEbirdIdByBirdnetId((int) $birdnetId);
+
 
         // Use the provided WikidataQuery or create one internally
         $this->wikidataQuery = $wikidataQuery ?? new WikidataQuery($locale ?? get_locale());
@@ -24,7 +29,7 @@ class BirdListItemRenderer
     public function render(): string
     {
         // Fetch bird information from Wikidata
-        $birdData = $this->wikidataQuery->fetchBirdEntity($this->speciesName);
+        $birdData = $this->wikidataQuery->fetchBirdEntity($this->ebirdId);
 
         // Prepare additional information from Wikidata
         $description = $birdData['description'] ?? 'No description available';

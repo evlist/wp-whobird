@@ -61,3 +61,17 @@ function taxoCodeTableInit() {
     }
 }
 
+/**
+ * Retrieves the ebirdId for a given birdnetId.
+ *
+ * @param int $birdnetId
+ * @return string|null The corresponding ebirdId or null if not found.
+ */
+function getEbirdIdByBirdnetId(int $birdnetId): ?string {
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'whobird_taxo_codes';
+    $query = $wpdb->prepare("SELECT ebird_id FROM $table_name WHERE birdnet_id = %d", $birdnetId);
+
+    return $wpdb->get_var($query) ?: null;
+}
