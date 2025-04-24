@@ -65,3 +65,6 @@ function wp_whobird_load_textdomain() {
 add_action('plugins_loaded', 'wp_whobird_load_textdomain');
 require_once plugin_dir_path(__FILE__) . 'build/wp-whobird/lib/WikidataQueryActivator.php';
 register_activation_hook(__FILE__, ['WikidataQueryActivator', 'activate']);
+
+require_once plugin_dir_path(__FILE__) . 'build/wp-whobird/lib/TaxoCodeTableManager.php';
+register_activation_hook(__FILE__, 'taxoCodeTableInit');
