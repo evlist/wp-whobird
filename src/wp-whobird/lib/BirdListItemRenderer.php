@@ -12,9 +12,10 @@ class BirdListItemRenderer
     private string $recordingsUrls;
     private WikidataQuery $wikidataQuery;
 
-    public function __construct(string $speciesName, string $recordingsUrls, ?WikidataQuery $wikidataQuery = null, ?string $locale = null)
+    public function __construct(string $speciesName, string birdnetId, string $recordingsUrls, ?WikidataQuery $wikidataQuery = null, ?string $locale = null)
     {
         $this->speciesName = $speciesName;
+        $this->birdnetId = $birdnetId
         $this->recordingsUrls = $recordingsUrls;
 
         // Use the provided WikidataQuery or create one internally
