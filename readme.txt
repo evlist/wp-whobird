@@ -56,4 +56,7 @@ plugins where more information needs to be conveyed that doesn't fit into the ca
 
 == Acknowledgments ==
 
-Special thanks to [GitHub Copilot](https://github.com/features/copilot) for assisting in the development of this project.
+Special thanks to:
+
+* [The WhoBIRD app](https://github.com/woheller69/whoBIRD) for their help and of course for the application without which their would be no bird observations to display.
+* [GitHub Copilot](https://github.com/features/copilot) for assisting in the development of this project.
