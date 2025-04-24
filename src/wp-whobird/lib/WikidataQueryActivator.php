@@ -29,6 +29,3 @@ class WikidataQueryActivator
     }
 }
 
-// Register the activation hook
-error_log('register()');
-register_activation_hook(__FILE__, ['WikidataQueryActivator', 'activate']);
