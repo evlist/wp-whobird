@@ -10,6 +10,8 @@ class BirdListItemRenderer
 {
     private string $speciesName;
     private string $recordingsUrls;
+    private string $ebirdId;
+    private string $birdnetId;
     private WikidataQuery $wikidataQuery;
 
     public function __construct(string $speciesName, string $birdnetId, string $recordingsUrls, ?WikidataQuery $wikidataQuery = null, ?string $locale = null)

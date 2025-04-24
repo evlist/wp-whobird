@@ -49,8 +49,8 @@ class WikidataQuery
 
         // Prepare the SPARQL query to check if the entity belongs to the Aves class
         $query = <<<SPARQL
-            SELECT ?item ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE 
-                ?item wdt:P3445 "$ebirdId".  # eBird Id
+            SELECT ?item ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
+                ?item wdt:P3444 "$ebirdId".  # eBird Id
                 ?item wdt:P171*/wdt:P279* wd:Q5113.             # Check if the item belongs to Aves through the taxonomic hierarchy
                 OPTIONAL { ?item wdt:P225 ?latinName. }           # Fetch Latin name (scientific name)
                 OPTIONAL { ?item wdt:P18 ?image. }                # Fetch image (P18)
