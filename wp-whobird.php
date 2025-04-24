@@ -63,3 +63,4 @@ function wp_whobird_load_textdomain() {
     load_plugin_textdomain('wp-whobird', false, dirname(plugin_basename(__FILE__)) . '/languages/');
 }
 add_action('plugins_loaded', 'wp_whobird_load_textdomain');
+require_once plugin_dir_path(__FILE__) . 'build/wp-whobird/lib/WikidataQueryActivator.php';
