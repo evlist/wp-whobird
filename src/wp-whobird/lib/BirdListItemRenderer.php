@@ -39,7 +39,7 @@ class BirdListItemRenderer
         $image = $birdData['image'] ?? '';
 
         // Transform the image URL to fetch the thumbnail (100px wide)
-        $thumbnailUrl = $image ? getThumbnailUrl($image, '100px') : '';
+        $thumbnailUrl = $image ? getThumbnailUrl($image, '200px') : '';
 
         // Render the <li> element with additional data
         return sprintf(
