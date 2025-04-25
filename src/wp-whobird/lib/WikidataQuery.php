@@ -84,7 +84,7 @@ class WikidataQuery
             ];
 
             // Cache the result in the database
-            $expiration = date('Y-m-d H:i:s', strtotime('+1 day')); // Cache expires in 1 day
+            $expiration = date('Y-m-d H:i:s', strtotime('+10 day')); // Cache expires in 1 day
             $wpdb->replace(
                 $tableName,
                 [
