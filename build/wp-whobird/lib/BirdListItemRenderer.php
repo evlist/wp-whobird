@@ -5,6 +5,7 @@
 namespace WPWhoBird;
 
 require_once 'WikidataQuery.php';
+require_once 'ImageUtils.php';
 
 class BirdListItemRenderer
 {
@@ -23,7 +24,6 @@ class BirdListItemRenderer
         // Convert birdnetId to ebirdId using TaxoCodeTableManager
         $this->ebirdId = getEbirdIdByBirdnetId((int) $birdnetId);
 
-
         // Use the provided WikidataQuery or create one internally
         $this->wikidataQuery = $wikidataQuery ?? new WikidataQuery($locale ?? get_locale());
     }
@@ -38,19 +38,20 @@ class BirdListItemRenderer
         $latinName = $birdData['latinName'] ?? 'Latin name not found';
         $image = $birdData['image'] ?? '';
 
+        // Transform the image URL to fetch the thumbnail (100px wide)
+        $thumbnailUrl = $image ? getThumbnailUrl($image, '100px') : '';
+
         // Render the <li> element with additional data
         return sprintf(
             '<li data-recordings="%s">
                 <strong>%s</strong><br>
                 <em>%s</em><br>
                 %s
-                <p>%s</p>
             </li>',
             esc_attr($this->recordingsUrls),
             esc_html($this->speciesName),
             esc_html($latinName),
-            $image ? sprintf('<img src="%s" alt="%s" style="max-width:150px;">', esc_url($image), esc_attr($this->speciesName)) : '',
-            esc_html($description)
+            $thumbnailUrl ? sprintf('<img src="%s" alt="%s" style="max-width:100px;">', esc_url($thumbnailUrl), esc_attr($this->speciesName)) : ''
         );
     }
 }
