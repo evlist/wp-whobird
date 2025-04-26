@@ -93,3 +93,8 @@ display: flex;
     font-style: italic; /* Italicize Latin names */
 color: #555; /* Subtle color for differentiation */
 }
+
+.wpwbd_list .bird-thumbnail img {
+    display: block; /* Prevent inline alignment issues */
+    margin: 0;      /* Remove extra margin, if any */
+}
