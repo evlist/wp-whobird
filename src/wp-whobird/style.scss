@@ -2,65 +2,94 @@
  * The following styles get applied both on the front of your site
  * and in the editor.
  *
- * Replace them with your own styles or remove the file completely.
  */
 
 .wp-block-wpwbd-wp-whobird {
-	background-color: #21759b;
-	color: #fff;
-	padding: 2px;
+    background-color: #21759b;
+color: #fff;
+padding: 2px;
 }
 #audio-player-container {
-  margin: 20px auto;
-  font-family: Arial, sans-serif;
+margin: 20px auto;
+        font-family: Arial, sans-serif;
 }
 
 #audio-player {
-  margin-bottom: 20px;
-  text-align: center;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 .player {
-  display: flex;
-  justify-content: center;
-  margin: 10px 0;
+display: flex;
+         justify-content: center;
+margin: 10px 0;
 }
 
 .control-button {
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  padding: 10px;
-  margin: 0 5px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 16px;
+    background-color: #007BFF;
+color: white;
+border: none;
+padding: 10px;
+margin: 0 5px;
+        border-radius: 50%;
+cursor: pointer;
+        font-size: 16px;
 }
 
 .control-button:hover {
-  background-color: #0056b3;
+    background-color: #0056b3;
 }
 
 .track-info {
-  font-size: 14px;
-  color: #333;
-  margin-top: 10px;
+    font-size: 14px;
+color: #333;
+       margin-top: 10px;
 }
 
+/* Styles for bird list entries */
 .wpwbd_list {
-  list-style: none;
-  padding: 0;
+    list-style: none;
+padding: 0;
 }
 
-.wpwbd_list li {
-  cursor: pointer;
-  padding: 10px;
-  background: #f9f9f9;
-  margin: 5px 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.wpwbd_list .wpwbd-bird-entry {
+display: flex; /* Align image and text horizontally */
+padding: 2px;
+background: #f9f9f9;
+margin: 2px 0;
+border: 1px solid #ddd;
+        border-radius: 4px;
+cursor: pointer;
 }
 
-.wpwbd_list li:hover {
-  background: #efefef;
+.wpwbd_list .wpwbd-bird-entry:hover {
+background: #efefef;
+}
+
+.wpwbd_list .bird-thumbnail {
+    flex-shrink: 0; /* Prevent the image from shrinking */
+    margin-right: 16px; /* Space between image and text */
+}
+
+.wpwbd_list .bird-thumbnail img {
+width: 80px; /* Fixed image width */
+height: 80px; /* Fixed image height */
+        object-fit: cover; /* Maintain aspect ratio */
+        border-radius: 4px; /* Optional: Rounded corners */
+}
+
+.wpwbd_list .bird-info {
+display: flex;
+         flex-direction: column; /* Stack text vertically */
+}
+
+.wpwbd_list .bird-info .common-name {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.wpwbd_list .bird-info .latin-name {
+    font-size: 14px;
+    font-style: italic; /* Italicize Latin names */
+color: #555; /* Subtle color for differentiation */
 }

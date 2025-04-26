@@ -1,7 +1,7 @@
 <?php
 /**
  * vim: set ai sw=4 smarttab expandtab: tabstop=8 softtabstop=0
-*/
+ */
 namespace WPWhoBird;
 
 require_once 'WikidataQuery.php';
@@ -20,7 +20,7 @@ class BirdListItemRenderer
         $this->speciesName = $speciesName;
         $this->birdnetId = $birdnetId;
         $this->recordingsUrls = $recordingsUrls;
-                
+
         // Convert birdnetId to ebirdId using TaxoCodeTableManager
         $this->ebirdId = getEbirdIdByBirdnetId((int) $birdnetId);
 
@@ -38,20 +38,25 @@ class BirdListItemRenderer
         $latinName = $birdData['latinName'] ?? 'Latin name not found';
         $image = $birdData['image'] ?? '';
 
-        // Transform the image URL to fetch the thumbnail (100px wide)
+        // Transform the image URL to fetch the thumbnail (200px wide)
         $thumbnailUrl = $image ? getThumbnailUrl($image, '200px') : '';
 
-        // Render the <li> element with additional data
+        // Render the <li> element with enriched structure
         return sprintf(
-            '<li data-recordings="%s">
-                <strong>%s</strong><br>
-                <em>%s</em><br>
+                '<li class="wpwbd-bird-entry" data-recordings="%s">
+                <div class="bird-thumbnail">
                 %s
-            </li>',
-            esc_attr($this->recordingsUrls),
-            esc_html($this->speciesName),
-            esc_html($latinName),
-            $thumbnailUrl ? sprintf('<img src="%s" alt="%s" style="max-width:100px;">', esc_url($thumbnailUrl), esc_attr($this->speciesName)) : ''
-        );
+                </div>
+                <div class="bird-info">
+                <div class="common-name">%s</div>
+                <div class="latin-name">%s</div>
+                </div>
+                </li>',
+                esc_attr($this->recordingsUrls),
+                $thumbnailUrl ? sprintf('<img src="%s" alt="%s">', esc_url($thumbnailUrl), esc_attr($this->speciesName)) : '',
+                esc_html($this->speciesName),
+                esc_html($latinName)
+                );
     }
+
 }
