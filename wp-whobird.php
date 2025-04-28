@@ -56,6 +56,16 @@ function wpwbd_wp_whobird_block_init() {
         register_block_type( __DIR__ . "/build/{$block_type}" );
     }
 }
+function wpwhobird_enqueue_fontawesome_local() {
+    // Enqueue the locally hosted FontAwesome CSS
+    wp_enqueue_style(
+        'font-awesome',
+        plugin_dir_url( __FILE__ ) . 'build/css/all.min.css',
+        array(),
+        '6.7.2' // Update to the correct version
+    );
+}
+add_action( 'enqueue_block_assets', 'wpwhobird_enqueue_fontawesome_local' );
 add_action( 'init', 'wpwbd_wp_whobird_block_init' );
 require_once plugin_dir_path(__FILE__).'includes/config.php';
 require_once plugin_dir_path(__FILE__).'includes/admin-settings.php';

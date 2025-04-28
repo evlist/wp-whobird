@@ -30,12 +30,13 @@ import './editor.scss';
  * @return {Element} Element to render.
  */
 export default function Edit() {
-	return (
-		<p { ...useBlockProps() }>
-			{ __(
-				'WhoBIRD observations – hello from the editor!',
-				'wp-whobird'
-			) }
-		</p>
-	);
+    return (
+            <p { ...useBlockProps() }>
+            <i className="fas fa-bird"></i> {/* Example FontAwesome icon */}
+            { __(
+                    'WhoBIRD observations – hello from the editor!',
+                    'wp-whobird'
+                ) }
+            </p>
+           );
 }
