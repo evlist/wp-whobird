@@ -30,7 +30,7 @@ class WikidataQuery
         global $wpdb;
 
         // Table name for caching
-        $tableName = $wpdb->prefix . Config::TABLE_SPARQL_CACHE;
+        $tableName = Config::getTableSparqlCache();
 
         // Check if the species is already in the cache
         $cachedResult = $wpdb->get_row(

@@ -11,7 +11,7 @@ class WikidataQueryActivator
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . Config::TABLE_SPARQL_CACHE;
+        $tableName = Config::getTableSparqlCache();
         $charsetCollate = $wpdb->get_charset_collate();
 
         // SQL to create the table

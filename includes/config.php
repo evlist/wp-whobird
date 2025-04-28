@@ -1,8 +1,18 @@
 <?php
 namespace WPWhoBird;
 
+global $wpdb;
+
 class Config
 {
-    // Define all plugin-wide constants here
-    public const TABLE_SPARQL_CACHE = 'whobird_sparql_cache';
+    /**
+     * Get the full table name for the SPARQL cache.
+     * 
+     * @return string The full table name with the WordPress prefix.
+     */
+    public static function getTableSparqlCache()
+    {
+        global $wpdb;
+        return $wpdb->prefix . 'whobird_sparql_cache';
+    }
 }

@@ -33,7 +33,6 @@ class WhoBirdAdminTools
         // Check if the user has clicked the clear cache button
         if (isset($_POST['wpwhobird_clear_cache']) && check_admin_referer('wpwhobird_clear_cache_action', 'wpwhobird_clear_cache_nonce')) {
             $this->clearCacheTable();
-            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Cache table has been cleared successfully!', 'wpwhobird') . '</p></div>';
         }
         ?>
         <div class="wrap">
@@ -54,11 +53,17 @@ class WhoBirdAdminTools
     {
         global $wpdb;
 
-        // Define the cache table name
-        $table_name = $wpdb->prefix . Config::TABLE_SPARQL_CACHE;
+        // Use the full table name from the configuration
+        $table_name = Config::getTableSparqlCache();
 
-        // Clear the cache table
-        $wpdb->query("TRUNCATE TABLE $table_name");
+        // Attempt to truncate the table and handle errors
+        $result = $wpdb->query("TRUNCATE TABLE $table_name");
+
+        if ($result === false) {
+            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Failed to clear the cache table. Please check the table configuration.', 'wpwhobird') . '</p></div>';
+        } else {
+            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Cache table has been cleared successfully!', 'wpwhobird') . '</p></div>';
+        }
     }
 }
 
