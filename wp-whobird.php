@@ -57,6 +57,7 @@ function wpwbd_wp_whobird_block_init() {
     }
 }
 add_action( 'init', 'wpwbd_wp_whobird_block_init' );
+require_once plugin_dir_path(__FILE__).'includes/config.php';
 require_once plugin_dir_path(__FILE__).'includes/admin-settings.php';
 require_once plugin_dir_path(__FILE__) . 'includes/admin-tools.php';
 

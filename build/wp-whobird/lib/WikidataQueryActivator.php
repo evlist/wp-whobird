@@ -1,5 +1,7 @@
 <?php
 
+use WPWhoBird\Config;
+
 class WikidataQueryActivator
 {
     /**
@@ -9,7 +11,7 @@ class WikidataQueryActivator
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . 'whobird_sparql_cache';
+        $tableName = $wpdb->prefix . Config::TABLE_SPARQL_CACHE;
         $charsetCollate = $wpdb->get_charset_collate();
 
         // SQL to create the table

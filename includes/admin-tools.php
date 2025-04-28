@@ -1,6 +1,8 @@
 <?php
 namespace WPWhoBird;
 
+use WPWhoBird\Config;
+
 class WhoBirdAdminTools
 {
     public function __construct()
@@ -53,7 +55,7 @@ class WhoBirdAdminTools
         global $wpdb;
 
         // Define the cache table name
-        $table_name = $wpdb->prefix . 'whobird_sparql_cache';
+        $table_name = $wpdb->prefix . Config::TABLE_SPARQL_CACHE;
 
         // Clear the cache table
         $wpdb->query("TRUNCATE TABLE $table_name");

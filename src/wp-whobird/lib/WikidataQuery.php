@@ -3,6 +3,8 @@
 
 namespace WPWhoBird;
 
+use WPWhoBird\Config;
+
 require_once 'SparqlUtils.php';
 
 class WikidataQuery
@@ -28,7 +30,7 @@ class WikidataQuery
         global $wpdb;
 
         // Table name for caching
-        $tableName = $wpdb->prefix . 'whobird_sparql_cache';
+        $tableName = $wpdb->prefix . Config::TABLE_SPARQL_CACHE;
 
         // Check if the species is already in the cache
         $cachedResult = $wpdb->get_row(
