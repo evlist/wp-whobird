@@ -68,6 +68,7 @@ class WhoBirdRenderer
         return '<div id="audio-player-container">
             <div id="audio-player">
             <div class="player">
+            (<i className="fas fa-bird"></i>)
             <button id="prev" class="control-button">⏮</button>
             <button id="play-pause" class="control-button">▶️</button>
             <button id="next" class="control-button">⏭</button>
