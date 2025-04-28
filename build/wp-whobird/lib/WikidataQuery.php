@@ -16,7 +16,6 @@ class WikidataQuery
     {
         $this->locale = $locale;
         $this->language = substr($locale, 0, 2); // Extract the language code (e.g., 'fr', 'es')
-        error_log('locale : ' . $this->locale);
     }
 
     /**
@@ -83,6 +82,7 @@ class WikidataQuery
                 'description' => $binding['itemDescription']['value'] ?? null,
                 'latinName' => $binding['latinName']['value'] ?? null,
                 'image' => $binding['image']['value'] ?? null,
+                'wikipedia' => $binding['wikipedia']['value'] ?? null,
             ];
 
             // Cache the result in the database
