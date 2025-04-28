@@ -32,7 +32,7 @@ import './editor.scss';
 export default function Edit() {
     return (
             <p { ...useBlockProps() }>
-            <i className="fas fa-bird"></i> {/* Example FontAwesome icon */}
+            <i className="fas fa-crow"></i> {/* Example FontAwesome icon */}
             { __(
                     'WhoBIRD observations – hello from the editor!',
                     'wp-whobird'
