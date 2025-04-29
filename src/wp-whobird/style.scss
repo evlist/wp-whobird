@@ -98,3 +98,20 @@ color: #555; /* Subtle color for differentiation */
     display: block; /* Prevent inline alignment issues */
     margin: 0;      /* Remove extra margin, if any */
 }
+.bird-wikipedia-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+}
+
+.bird-wikipedia-link i.normal {
+    font-size: 1.5em; /* Adjust size as needed */
+    vertical-align: middle;
+}
+
+.bird-wikipedia-link i.exponent {
+    font-size: .75em;
+    vertical-align: top;
+}

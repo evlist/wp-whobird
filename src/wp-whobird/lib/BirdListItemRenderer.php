@@ -37,6 +37,14 @@ class BirdListItemRenderer
         $description = $birdData['description'] ?? 'No description available';
         $latinName = $birdData['latinName'] ?? 'Latin name not found';
         $image = $birdData['image'] ?? '';
+        $wikipedia = '';
+        // Check if the Wikipedia URL is set
+        if (!empty($birdData['wikipedia'])) {
+            $wikipedia .= '<a href="' . esc_url($birdData['wikipedia']) . '" target="_blank" rel="noopener noreferrer" class="bird-wikipedia-link">';
+            $wikipedia .= '<i class="fab fa-wikipedia-w normal"></i>'; // FontAwesome Wikipedia logo
+            $wikipedia .= '<i class="fas fa-up-right-from-square exponent"></i>'; // FontAwesome "external link" icon
+            $wikipedia .= '</a>';
+        }
 
         // Transform the image URL to fetch the thumbnail (200px wide)
         $thumbnailUrl = $image ? getThumbnailUrl($image, '200px') : '';
@@ -50,12 +58,14 @@ class BirdListItemRenderer
                 <div class="bird-info">
                 <div class="common-name">%s</div>
                 <div class="latin-name">%s</div>
+                %s
                 </div>
                 </li>',
                 esc_attr($this->recordingsUrls),
                 $thumbnailUrl ? sprintf('<img src="%s" alt="%s">', esc_url($thumbnailUrl), esc_attr($this->speciesName)) : '',
                 esc_html($this->speciesName),
-                esc_html($latinName)
+                esc_html($latinName),
+                $wikipedia
                 );
     }
 
