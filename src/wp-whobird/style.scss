@@ -6,12 +6,13 @@
 
 .wp-block-wpwbd-wp-whobird {
     background-color: #21759b;
-color: #fff;
-padding: 2px;
+    color: #fff;
+    padding: 2px;
 }
+
 #audio-player-container {
-margin: 20px auto;
-        font-family: Arial, sans-serif;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
 }
 
 #audio-player {
@@ -20,20 +21,20 @@ margin: 20px auto;
 }
 
 .player {
-display: flex;
-         justify-content: center;
-margin: 10px 0;
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
 }
 
 .control-button {
     background-color: #007BFF;
-color: white;
-border: none;
-padding: 10px;
-margin: 0 5px;
-        border-radius: 50%;
-cursor: pointer;
-        font-size: 16px;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin: 0 5px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
 }
 
 .control-button:hover {
@@ -42,28 +43,30 @@ cursor: pointer;
 
 .track-info {
     font-size: 14px;
-color: #333;
-       margin-top: 10px;
+    color: #333;
+    margin-top: 10px;
 }
 
 /* Styles for bird list entries */
 .wpwbd_list {
     list-style: none;
-padding: 0;
+    padding: 0;
 }
 
 .wpwbd_list .wpwbd-bird-entry {
-display: flex; /* Align image and text horizontally */
-padding: 2px;
-background: #f9f9f9;
-margin: 2px 0;
-border: 1px solid #ddd;
-        border-radius: 4px;
-cursor: pointer;
+    display: flex; /* Align child elements horizontally */
+    align-items: center; /* Vertically center elements */
+    justify-content: space-between; /* Space out elements horizontally */
+    padding: 2px;
+    background: #f9f9f9;
+    margin: 2px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .wpwbd_list .wpwbd-bird-entry:hover {
-background: #efefef;
+    background: #efefef;
 }
 
 .wpwbd_list .bird-thumbnail {
@@ -72,15 +75,15 @@ background: #efefef;
 }
 
 .wpwbd_list .bird-thumbnail img {
-width: 80px; /* Fixed image width */
-height: 80px; /* Fixed image height */
-        object-fit: cover; /* Maintain aspect ratio */
-        border-radius: 4px; /* Optional: Rounded corners */
+    width: 80px; /* Fixed image width */
+    height: 80px; /* Fixed image height */
+    object-fit: cover; /* Maintain aspect ratio */
+    border-radius: 4px; /* Optional: Rounded corners */
 }
 
 .wpwbd_list .bird-info {
-display: flex;
-         flex-direction: column; /* Stack text vertically */
+    display: flex;
+    flex-direction: column; /* Stack text vertically */
 }
 
 .wpwbd_list .bird-info .common-name {
@@ -91,27 +94,35 @@ display: flex;
 .wpwbd_list .bird-info .latin-name {
     font-size: 14px;
     font-style: italic; /* Italicize Latin names */
-color: #555; /* Subtle color for differentiation */
+    color: #555; /* Subtle color for differentiation */
 }
 
 .wpwbd_list .bird-thumbnail img {
     display: block; /* Prevent inline alignment issues */
     margin: 0;      /* Remove extra margin, if any */
 }
+
+.bird-wikipedia-container {
+    margin-left: auto; /* Push the link to the far right */
+}
+
 .bird-wikipedia-link {
     text-decoration: none;
     color: inherit;
     display: inline-flex;
-    align-items: center;
-    gap: 0.2em;
+    align-items: baseline; /* Align icons relative to text baseline */
+    gap: 0.2em; /* Space between icons */
+    position: relative; /* Enable precise positioning */
 }
 
 .bird-wikipedia-link i.normal {
-    font-size: 1.5em; /* Adjust size as needed */
+    font-size: 1.5em; /* Adjust size for the main icon */
     vertical-align: middle;
 }
 
 .bird-wikipedia-link i.exponent {
-    font-size: .75em;
-    vertical-align: top;
+    font-size: 0.65em; /* Smaller size for the exponent icon */
+    position: absolute; /* Use absolute positioning for precise placement */
+    top: 0; /* Move it to the top of the parent container */
+    right: -0.3em; /* Slightly offset to the right */
 }

@@ -38,6 +38,7 @@ class BirdListItemRenderer
         $latinName = $birdData['latinName'] ?? 'Latin name not found';
         $image = $birdData['image'] ?? '';
         $wikipedia = '';
+
         // Check if the Wikipedia URL is set
         if (!empty($birdData['wikipedia'])) {
             $wikipedia .= '<a href="' . esc_url($birdData['wikipedia']) . '" target="_blank" rel="noopener noreferrer" class="bird-wikipedia-link">';
@@ -51,22 +52,23 @@ class BirdListItemRenderer
 
         // Render the <li> element with enriched structure
         return sprintf(
-                '<li class="wpwbd-bird-entry" data-recordings="%s">
+            '<li class="wpwbd-bird-entry" data-recordings="%s">
                 <div class="bird-thumbnail">
-                %s
+                    %s
                 </div>
                 <div class="bird-info">
-                <div class="common-name">%s</div>
-                <div class="latin-name">%s</div>
-                %s
+                    <div class="common-name">%s</div>
+                    <div class="latin-name">%s</div>
                 </div>
-                </li>',
-                esc_attr($this->recordingsUrls),
-                $thumbnailUrl ? sprintf('<img src="%s" alt="%s">', esc_url($thumbnailUrl), esc_attr($this->speciesName)) : '',
-                esc_html($this->speciesName),
-                esc_html($latinName),
-                $wikipedia
-                );
+                <div class="bird-wikipedia-container">
+                    %s
+                </div>
+            </li>',
+            esc_attr($this->recordingsUrls),
+            $thumbnailUrl ? sprintf('<img src="%s" alt="%s">', esc_url($thumbnailUrl), esc_attr($this->speciesName)) : '',
+            esc_html($this->speciesName),
+            esc_html($latinName),
+            $wikipedia
+        );
     }
-
 }
