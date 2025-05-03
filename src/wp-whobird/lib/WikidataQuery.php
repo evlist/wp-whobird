@@ -6,6 +6,7 @@ namespace WPWhoBird;
 use WPWhoBird\Config;
 
 require_once 'SparqlUtils.php';
+require_once 'ImageUtils.php';
 
 class WikidataQuery
 {
@@ -81,7 +82,8 @@ class WikidataQuery
                 'label' => $binding['itemLabel']['value'] ?? null,
                 'description' => $binding['itemDescription']['value'] ?? null,
                 'latinName' => $binding['latinName']['value'] ?? null,
-                'image' => $binding['image']['value'] ?? null,
+                'originalImage' => $binding['image']['value'] ?? null,
+                'image' => $binding['image']['value'] ? resolveSpecialFilePathUrl($binding['image']['value'])  : null,
                 'wikipedia' => $binding['wikipedia']['value'] ?? null,
             ];
 

@@ -14,11 +14,6 @@ function getThumbnailUrl(string $imageUrl, string $size): string
     // Handle Special:FilePath URLs
     if (strpos($imageUrl, 'commons.wikimedia.org/wiki/Special:FilePath') !== false) {
         $resolvedUrl = resolveSpecialFilePathUrl($imageUrl);
-        if ($resolvedUrl) {
-            $imageUrl = $resolvedUrl;
-        } else {
-            return $imageUrl; // Fallback to the original URL if resolution fails
-        }
     }
 
     // Check if the URL is a valid Wikimedia Commons URL
@@ -49,6 +44,10 @@ function getThumbnailUrl(string $imageUrl, string $size): string
  */
 function resolveSpecialFilePathUrl(string $filePathUrl): ?string
 {
+    if (strpos($filePathUrl, 'commons.wikimedia.org/wiki/Special:FilePath') === false) {
+        return $filePathUrl;
+    }
+
     // Initialize a cURL session
     $ch = curl_init();
 
@@ -67,7 +66,7 @@ function resolveSpecialFilePathUrl(string $filePathUrl): ?string
     // Check for errors
     if (curl_errno($ch)) {
         curl_close($ch);
-        return null; // Return null if the request fails
+        return $filePathUrl; // Return the original URL if the request fails
     }
 
     // Close the cURL session
