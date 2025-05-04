@@ -117,11 +117,11 @@ class WhoBirdRenderer
 
         if (empty($list)) {
             return '<div class="wpwbd_observations wpwbd_empty_observations">' .
-                   '<p>' . __('We did not identify any birds with the WhoBIRD application today.', 'wp-whobird') . '</p>' .
+                   '<p>' . __('We did not identify any birds with the whoBIRD application.', 'wp-whobird') . '</p>' .
                    '</div>';
         } else {
             return '<div class="wpwbd_observations">' .
-                   '<p>' . __('Today we heard and identified the following birds with the WhoBIRD application:', 'wp-whobird') . '</p>' .
+                   '<p>' . __('We heard and identified the following birds with the whoBIRD application:', 'wp-whobird') . '</p>' .
                    '<ul class="wpwbd_list">' .
                    $list .
                    '</ul>' .

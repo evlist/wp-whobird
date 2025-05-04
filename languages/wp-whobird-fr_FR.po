@@ -10,55 +10,50 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2025-04-22T10:21:09+00:00\n"
-"PO-Revision-Date: 2025-04-22 12:44+0000\n"
+"PO-Revision-Date: 2025-05-04 18:46+0000\n"
 "X-Generator: Loco https://localise.biz/\n"
 "X-Domain: wp-whobird\n"
 "Language: fr_FR\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Loco-Version: 2.7.2; wp-6.8"
+"X-Loco-Version: 2.7.2; wp-6.8.1"
 
-#: build/wp-whobird/block.json
+#: build/wp-whobird/block.json:1
 msgctxt "block description"
 msgid "Display your WhoBIRD observations"
 msgstr "Affichez vos obervations WhoBIRD"
 
-#: build/wp-whobird/block.json
+#: build/wp-whobird/block.json:1
 msgctxt "block title"
 msgid "WhoBIRD observations"
 msgstr "Obervations WhoBIRD"
 
 #. Description of the plugin
-#: wp-whobird.php
 msgid "Display your WhoBIRD observations"
 msgstr "Affichez vos observations WhoBird"
 
-#: build/wp-whobird/render.php:25
+#: build/wp-whobird/lib/WhoBirdRenderer.php:28
 msgid "Failed to open database at"
 msgstr "Echec à l'ouverture de la base de données"
 
 #. Author of the plugin
-#: wp-whobird.php
 msgid "The WordPress Contributors"
 msgstr "Les contributeurs WordPress"
 
-#: build/wp-whobird/render.php:102
+#: build/wp-whobird/lib/WhoBirdRenderer.php:120
+#| msgid "We did not identify any birds with the WhoBIRD application today."
+msgid "We did not identify any birds with the whoBIRD application."
+msgstr "Nous n'avons identifié aucun oiseau avec l'application whoBIRD."
+
+#: build/wp-whobird/lib/WhoBirdRenderer.php:124
+#| msgid ""
+#| "Today we heard and identified the following birds with the WhoBIRD "
+#| "application:"
 msgid ""
-"Today we heard and identified the following birds with the WhoBIRD "
-"application:"
+"We heard and identified the following birds with the whoBIRD application:"
 msgstr ""
-"Aujourd'hui nous avons entendu et identifié les oiseaux suivants avec "
-"l'application WhoBIRD :"
+"Nous avons entendu et identifié les oiseaux suivants avec l'application "
+"whoBIRD :"
 
-#: build/wp-whobird/render.php:98
-msgid "We did not identify any birds with the WhoBIRD application today."
-msgstr ""
-"Nous n'avons identifié aucun oiseau avec l'application WhoBIRD aujourd'hui."
-
-#. Plugin Name of the plugin
-#: wp-whobird.php
+#. Name of the plugin
 msgid "WhoBIRD observations"
 msgstr "Observations WhoBIRD"
-
-#: build/wp-whobird/index.js:1
-msgid "WhoBIRD observations – hello from the editor!"
-msgstr "Observations WhoBIRD -- coucou de l'éditeur !"
