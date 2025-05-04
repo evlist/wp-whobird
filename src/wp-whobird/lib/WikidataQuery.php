@@ -64,14 +64,14 @@ class WikidataQuery
             }
             LIMIT 1
         SPARQL;
-        error_log('query : ' . $query);
+        // error_log('query : ' . $query);
 
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($query);
         $sparqlHeaders = ["Accept: application/json"];
 
         // Fetch the SPARQL response
         $sparqlResponse = $this->executeCurl($sparqlUrl, $sparqlHeaders);
-        error_log('response : ' . print_r($sparqlResponse, true));
+        // error_log('response : ' . print_r($sparqlResponse, true));
         $sparqlData = json_decode($sparqlResponse, true);
 
         // Extract the entity information

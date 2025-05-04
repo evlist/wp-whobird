@@ -13,6 +13,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { useBlockProps } from '@wordpress/block-editor';
 
+import { TextControl, SelectControl } from '@wordpress/components';
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
  * Those files can contain any CSS code that gets applied to the editor.
@@ -29,14 +30,35 @@ import './editor.scss';
  *
  * @return {Element} Element to render.
  */
-export default function Edit() {
+
+export default function Edit(props) {
+    const { attributes, setAttributes } = props;
+
     return (
-            <p { ...useBlockProps() }>
+        <div {...useBlockProps()}>
+            <p>
             <i className="fas fa-crow"></i> {/* Example FontAwesome icon */}
             { __(
-                    'WhoBIRD observations – hello from the editor!',
+                    'WhoBIRD observations',
                     'wp-whobird'
                 ) }
             </p>
-           );
+            <TextControl
+                label={__('Observation Period', 'wp-whobird')} // Wrap label text with __()
+                value={attributes.periodNumber || 1}
+                onChange={(value) => setAttributes({ periodNumber: value })}
+                type="number"
+            />
+            <SelectControl
+                label={__('Period Unit', 'wp-whobird')} // Wrap label text with __()
+                value={attributes.periodUnit || 'day'}
+                options={[
+                    { label: __('Day(s)', 'wp-whobird'), value: 'day' },
+                    { label: __('Week(s)', 'wp-whobird'), value: 'week' },
+                    { label: __('Month(s)', 'wp-whobird'), value: 'month' },
+                ]}
+                onChange={(value) => setAttributes({ periodUnit: value })}
+            />
+        </div>
+    );
 }

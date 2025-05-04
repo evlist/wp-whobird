@@ -31,18 +31,6 @@ class WhoBirdRenderer
         return $db;
     }
 
-    private function getStartTime(): int
-    {
-        $isoDate = get_the_date('Y-m-d');
-        $date = new DateTime($isoDate);
-        return $date->getTimestamp() * 1000; // Convert to milliseconds
-    }
-
-    private function getEndTime(): int
-    {
-        return $this->getStartTime() + 24 * 60 * 60 * 1000; // Add 24 hours in milliseconds
-    }
-
     private function getRecordingsUrls(string $recordingIdsString): string
     {
         $recordingIds = explode(',', $recordingIdsString);
@@ -79,11 +67,9 @@ class WhoBirdRenderer
             </div>';
     }
 
-    private function getObservationsList(): string
+    private function getObservationsList($startTime, $endTime): string
     {
         $db = $this->getDatabaseConnection();
-        $startTime = $this->getStartTime();
-        $endTime = $this->getEndTime();
 
         // Get the threshold value from the admin settings
         $threshold = floatval(get_option('wp-whobird_threshold', 0.7));
@@ -114,9 +100,20 @@ class WhoBirdRenderer
         return $list;
     }
 
-    public function displayObservations(): string
+    public function displayObservations($attributes): string
     {
-        $list = $this->getObservationsList();
+        // error_log('attributes: ' . print_r($attributes, true));
+        $periodNumber = isset($attributes['periodNumber']) ? intval($attributes['periodNumber']) : 1;
+        $periodUnit = isset($attributes['periodUnit']) ? $attributes['periodUnit'] : 'day';
+        $isoDate = get_the_date('Y-m-d');
+        $date = new DateTime($isoDate);
+        $date->modify('+1 day');
+        // error_log('end: '.$date->format('Y-m-d'));
+        $endTime = $date->getTimestamp() * 1000;
+        $date->modify("-{$periodNumber} {$periodUnit}");
+        // error_log('start: '.$date->format('Y-m-d'));
+        $startTime = $date->getTimestamp() * 1000;
+        $list = $this->getObservationsList($startTime, $endTime);
 
         if (empty($list)) {
             return '<div class="wpwbd_observations wpwbd_empty_observations">' .
