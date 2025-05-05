@@ -1,65 +1,30 @@
 /**
  * The following styles get applied both on the front of your site
  * and in the editor.
- *
  */
 
-.wp-block-wpwbd-wp-whobird {
-    background-color: #21759b;
-    color: #fff;
-    padding: 2px;
-}
-
-#audio-player-container {
-    margin: 20px auto;
-    font-family: Arial, sans-serif;
-}
-
-#audio-player {
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.player {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0;
-}
-
-.control-button {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    padding: 10px;
-    margin: 0 5px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.control-button:hover {
-    background-color: #0056b3;
-}
-
-.track-info {
-    font-size: 14px;
-    color: #333;
-    margin-top: 10px;
-}
-
-/* Styles for bird list entries */
+/* Bird list overall layout */
 .wpwbd_list {
     list-style: none;
     padding: 0;
+    display: grid; /* Use CSS Grid for layout */
+    grid-template-columns: 1fr; /* Default to a single column */
+    gap: 10px; /* Add spacing between rows/columns */
 }
 
+@media (min-width: 768px) { /* Apply two-column layout for wider viewports */
+    .wpwbd_list {
+        grid-template-columns: repeat(2, 1fr); /* Two equal-width columns */
+    }
+}
+
+/* Bird entry styling */
 .wpwbd_list .wpwbd-bird-entry {
-    display: flex; /* Align child elements horizontally */
+    display: flex; /* Keep Flexbox for alignment within each entry */
     align-items: center; /* Vertically center elements */
-    justify-content: space-between; /* Space out elements horizontally */
+    justify-content: space-between; /* Space out child elements */
     padding: 2px;
     background: #f9f9f9;
-    margin: 2px 0;
     border: 1px solid #ddd;
     border-radius: 4px;
     cursor: pointer;
@@ -69,6 +34,7 @@
     background: #efefef;
 }
 
+/* Thumbnail styling */
 .wpwbd_list .bird-thumbnail {
     flex-shrink: 0; /* Prevent the image from shrinking */
     margin-right: 16px; /* Space between image and text */
@@ -81,6 +47,7 @@
     border-radius: 4px; /* Optional: Rounded corners */
 }
 
+/* Bird info styling */
 .wpwbd_list .bird-info {
     display: flex;
     flex-direction: column; /* Stack text vertically */
@@ -97,11 +64,7 @@
     color: #555; /* Subtle color for differentiation */
 }
 
-.wpwbd_list .bird-thumbnail img {
-    display: block; /* Prevent inline alignment issues */
-    margin: 0;      /* Remove extra margin, if any */
-}
-
+/* Wikipedia link styling */
 .bird-wikipedia-container {
     margin-left: auto; /* Push the link to the far right */
 }
@@ -111,7 +74,7 @@
     color: inherit;
     display: inline-flex;
     align-items: baseline; /* Align icons relative to text baseline */
-    gap: 0.2em; /* Space between icons */
+    gap: 0.5em; /* Space between icons */
     position: relative; /* Enable precise positioning */
 }
 
@@ -121,8 +84,8 @@
 }
 
 .bird-wikipedia-link i.exponent {
-    font-size: 0.65em; /* Smaller size for the exponent icon */
+    font-size: 0.75em; /* Smaller size for the exponent icon */
     position: absolute; /* Use absolute positioning for precise placement */
     top: 0; /* Move it to the top of the parent container */
-    right: -0.3em; /* Slightly offset to the right */
+    right: -0.5em; /* Slightly offset to the right */
 }
