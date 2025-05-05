@@ -18,6 +18,12 @@
     }
 }
 
+@media print {
+    .wpwbd_list {
+        grid-template-columns: repeat(2, 1fr); /* Two equal-width columns for print */
+    }
+}
+
 /* Bird entry styling */
 .wpwbd_list .wpwbd-bird-entry {
     display: flex; /* Keep Flexbox for alignment within each entry */
