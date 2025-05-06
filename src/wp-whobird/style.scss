@@ -22,6 +22,28 @@
     .wpwbd_list {
         grid-template-columns: repeat(2, 1fr); /* Two equal-width columns for print */
     }
+    #audio-player-container,
+    .bird-wikipedia-container 
+    {
+        display: none;
+    }
+    .wpwbd-bird-entry
+    {
+        page-break-before: auto; /* 'always,' 'avoid,' 'left,' 'inherit,' or 'right' */
+        page-break-after: auto; /* 'always,' 'avoid,' 'left,' 'inherit,' or 'right' */
+        page-break-inside: avoid; /* or 'auto' */
+    }
+    .wpwbd_list .bird-info {
+        padding-right: 4px;
+    }
+
+    .wpwbd_list .bird-info .common-name {
+        text-align: right;
+    }
+
+    .wpwbd_list .bird-info .latin-name {
+        text-align: right;
+    }
 }
 
 /* Bird entry styling */
