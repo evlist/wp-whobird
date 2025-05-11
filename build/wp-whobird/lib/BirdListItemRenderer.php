@@ -28,11 +28,26 @@ class BirdListItemRenderer
         $this->wikidataQuery = $wikidataQuery ?? new WikidataQuery($locale ?? get_locale());
     }
 
+
+
     public function render(): string
     {
+        $birdData = [
+            'common-name' => $this->speciesName
+        ];
         // Fetch bird information from Wikidata
-        $birdData = $this->wikidataQuery->fetchBirdEntity($this->ebirdId);
+        $cache = $this->wikidataQuery->getCachedData($this->ebirdId);
+        $needsRefresh = true;
+        if ($cache) {
+            $birdData = $cache['data'];
+            $needsRefresh = !$cache['isFresh'];
+        }
 
+        return $this->renderBirdData($birdData, $needsRefresh);
+    }
+
+    public function renderBirdData(array $birdData, bool $needsRefresh): string
+    {
         // Prepare additional information from Wikidata
         $description = $birdData['description'] ?? 'No description available';
         $latinName = $birdData['latinName'] ?? 'Latin name not found';
@@ -49,10 +64,11 @@ class BirdListItemRenderer
 
         // Transform the image URL to fetch the thumbnail (200px wide)
         $thumbnailUrl = $image ? getThumbnailUrl($image, '200px') : '';
+        $dataEbirdId = $needsRefresh ? ' data-ebird-id="'.$this->ebirdId.'"' : '';
 
         // Render the <li> element with enriched structure
         return sprintf(
-            '<li class="wpwbd-bird-entry" data-recordings="%s">
+            '<li class="wpwbd-bird-entry" data-recordings="%s"%s>
                 <div class="bird-thumbnail">
                     %s
                 </div>
@@ -65,10 +81,12 @@ class BirdListItemRenderer
                 </div>
             </li>',
             esc_attr($this->recordingsUrls),
+            $dataEbirdId,
             $thumbnailUrl ? sprintf('<img src="%s" alt="%s">', esc_url($thumbnailUrl), esc_attr($this->speciesName)) : '',
             esc_html($this->speciesName),
             esc_html($latinName),
             $wikipedia
         );
     }
+
 }
