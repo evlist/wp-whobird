@@ -145,36 +145,46 @@ function initializeAjaxQueue() {
     const ebirdId = birdQueue.shift();
 
     console.log(ajaxurl);
-    // Send Ajax request
-    jQuery.ajax({
-      url: ajaxurl,
-      method: 'POST',
-      data: {
-        action: 'update_bird_data',
-        ebird_id: ebirdId,
+    // Send Ajax request using fetch
+    fetch(ajaxurl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      success: function (response) {
-        if (response.success) {
+      body: new URLSearchParams({
+        action: "update_bird_data",
+        ebird_id: ebirdId,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
           const birdEntry = document.querySelector(
             `.wpwbd-bird-entry[data-ebird-id="${ebirdId}"]`
           );
           if (birdEntry) {
-            birdEntry.innerHTML = response.data.html;
+            birdEntry.innerHTML = data.html;
           }
         }
-      },
-      error: function () {
+      })
+      .catch(() => {
         console.error(`Error updating bird data for ${ebirdId}.`);
-      },
-      complete: function () {
+      })
+      .finally(() => {
         isProcessing = false;
         processBirdQueue(); // Process the next item in the queue
-      },
-    });
+      });
   }
 
-// Find all bird entries with data-ebird-id and add them to the queue
-  const birdEntries = document.querySelectorAll(".wpwbd-bird-entry[data-ebird-id]");
+  // Find all bird entries with data-ebird-id and add them to the queue
+  const birdEntries = document.querySelectorAll(
+    ".wpwbd-bird-entry[data-ebird-id]"
+  );
   birdEntries.forEach((entry) => {
     const ebirdId = entry.getAttribute("data-ebird-id");
     queueBirdForUpdate(ebirdId);

@@ -109,6 +109,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/config.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/admin-settings.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/admin-tools.php';
 require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/WikidataQueryActivator.php';
+require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/AjaxBirdListItemRefresher.php';
 register_activation_hook( __FILE__, [ 'WikidataQueryActivator', 'activate' ] );
 require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/TaxoCodeTableManager.php';
 register_activation_hook( __FILE__, 'taxoCodeTableInit' );
