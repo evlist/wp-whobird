@@ -5,6 +5,11 @@ module.exports = {
     // Utiliser la configuration par défaut de wp-scripts
     ...require('@wordpress/scripts/config/webpack.config'),
 
+    optimization: {
+        ...require('@wordpress/scripts/config/webpack.config').optimization,
+        minimize: false, // Disable minification
+    },
+
     plugins: [
         // Copier le contenu du répertoire assets/data dans build/assets/data
         ...require('@wordpress/scripts/config/webpack.config').plugins,
