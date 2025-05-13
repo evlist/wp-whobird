@@ -50,19 +50,18 @@ class WikidataQuery {
             return $cachedData['data'];
         }
 
-        $currentTime = microtime(true) * 1000; // Current time in milliseconds
-        $timeSinceLastRequest = $currentTime - self::$lastRequestTime;
-
-        if ($timeSinceLastRequest < self::$requestIntervalMs) {
-           usleep((self::$requestIntervalMs - $timeSinceLastRequest) * 1000); // Convert ms to microseconds
+        // Ensure the delay between requests is respected
+        while ((microtime(true) * 1000 - self::$lastRequestTime) < self::$requestIntervalMs) {
+            usleep(1000); // Sleep for 1 millisecond to avoid busy waiting
         }
 
-        self::$lastRequestTime = microtime(true) * 1000; // Update the last request time to the current time in milliseconds
+        // Update the last request time to the current time in milliseconds
+        self::$lastRequestTime = microtime(true) * 1000;
+
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($this->buildSparqlQuery($ebirdId));
         $sparqlHeaders = ["Accept: application/json"];
         $sparqlResponse = $this->executeCurl($sparqlUrl, $sparqlHeaders);
         $sparqlData = json_decode($sparqlResponse, true);
-
 
         return $this->processAndCacheData($ebirdId, $sparqlData);
     }
