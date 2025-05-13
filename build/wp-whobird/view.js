@@ -151,7 +151,7 @@ function initializeAjaxQueue() {
       if (data.success) {
         const birdEntry = document.querySelector(`.wpwbd-bird-entry[data-ebird-id="${ebirdId}"]`);
         if (birdEntry) {
-          birdEntry.innerHTML = data.html;
+          birdEntry.innerHTML = data.data.html;
         }
       }
     }).catch(() => {

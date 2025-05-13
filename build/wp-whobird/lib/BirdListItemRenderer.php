@@ -9,48 +9,45 @@ require_once 'ImageUtils.php';
 
 class BirdListItemRenderer
 {
-    private string $speciesName;
-    private string $recordingsUrls;
     private string $ebirdId;
-    private string $birdnetId;
-    private WikidataQuery $wikidataQuery;
 
-    public function __construct(string $speciesName, string $birdnetId, string $recordingsUrls, ?WikidataQuery $wikidataQuery = null, ?string $locale = null)
+    public function __construct(string $birdnetId, ?string $locale = null)
     {
-        $this->speciesName = $speciesName;
-        $this->birdnetId = $birdnetId;
-        $this->recordingsUrls = $recordingsUrls;
-
         // Convert birdnetId to ebirdId using TaxoCodeTableManager
         $this->ebirdId = getEbirdIdByBirdnetId((int) $birdnetId);
-
-        // Use the provided WikidataQuery or create one internally
-        $this->wikidataQuery = $wikidataQuery ?? new WikidataQuery($locale ?? get_locale());
     }
 
 
 
-    public function render(): string
+    public function render(string $speciesName, string $recordingsUrls): string
     {
-        $birdData = [
-            'common-name' => $this->speciesName
-        ];
-        // Fetch bird information from Wikidata
-        $cache = $this->wikidataQuery->getCachedData($this->ebirdId);
-        $needsRefresh = true;
-        if ($cache) {
-            $birdData = $cache['data'];
-            $needsRefresh = !$cache['isFresh'];
-        }
 
-        return $this->renderBirdData($birdData, $needsRefresh);
+        $wikidataQuery = new WikidataQuery($locale ?? get_locale());
+        $cache = $wikidataQuery->getCachedData($this->ebirdId);
+
+        $needsRefresh = true;
+        $birdData = [
+            'common-name' => $speciesName
+        ];
+        if ($cache) {
+            $needsRefresh = !$cache['isFresh'];
+            $birdData = $cache['data'];
+        }
+        $dataEbirdId = $needsRefresh ? ' data-ebird-id="'.$this->ebirdId.'"' : '';
+        return sprintf(
+            '<li class="wpwbd-bird-entry" data-recordings="%s"%s>%s</li>',
+            esc_attr($recordingsUrls),
+            $dataEbirdId,
+            $this->renderBirdData($birdData)
+        );
     }
 
-    public function renderBirdData(array $birdData, bool $needsRefresh): string
+    public function renderBirdData(array $birdData): string
     {
         // Prepare additional information from Wikidata
         $description = $birdData['description'] ?? 'No description available';
         $latinName = $birdData['latinName'] ?? 'Latin name not found';
+        $commonName = $birdData['commonName'] ?? 'Common name not found';
         $image = $birdData['image'] ?? '';
         $wikipedia = '';
 
@@ -64,26 +61,21 @@ class BirdListItemRenderer
 
         // Transform the image URL to fetch the thumbnail (200px wide)
         $thumbnailUrl = $image ? getThumbnailUrl($image, '200px') : '';
-        $dataEbirdId = $needsRefresh ? ' data-ebird-id="'.$this->ebirdId.'"' : '';
 
-        // Render the <li> element with enriched structure
+        // Render the <li> element content with enriched structure
         return sprintf(
-            '<li class="wpwbd-bird-entry" data-recordings="%s"%s>
-                <div class="bird-thumbnail">
-                    %s
-                </div>
-                <div class="bird-info">
-                    <div class="common-name">%s</div>
-                    <div class="latin-name">%s</div>
-                </div>
-                <div class="bird-wikipedia-container">
-                    %s
-                </div>
-            </li>',
-            esc_attr($this->recordingsUrls),
-            $dataEbirdId,
-            $thumbnailUrl ? sprintf('<img src="%s" alt="%s">', esc_url($thumbnailUrl), esc_attr($this->speciesName)) : '',
-            esc_html($this->speciesName),
+            '<div class="bird-thumbnail">
+                %s
+             </div>
+             <div class="bird-info">
+                <div class="common-name">%s</div>
+                <div class="latin-name">%s</div>
+             </div>
+             <div class="bird-wikipedia-container">
+                %s
+             </div>',
+            $thumbnailUrl ? sprintf('<img src="%s" alt="%s">', esc_url($thumbnailUrl), esc_attr($commonName)) : '',
+            esc_html($commonName),
             esc_html($latinName),
             $wikipedia
         );

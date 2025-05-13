@@ -11,18 +11,26 @@ require_once 'ImageUtils.php';
 class WikidataQuery {
     private static $lastRequestTime = 0; // Timestamp of the last request
     private static $requestInterval = 1; // Minimum interval (in seconds) between requests
+    private string $locale;
+    private string $language;
+
+    public function __construct($locale)
+    {
+        $this->locale = $locale;
+        $this->language = substr($locale, 0, 2); // Extract the language code (e.g., 'fr', 'es')
+    }
 
     public function getCachedData(string $ebirdId): ?array {
         global $wpdb;
         $tableName = Config::getTableSparqlCache();
 
         $cachedResult = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT result, expiration FROM $tableName WHERE ebird_id = %s",
-                $ebirdId
-            ),
-            ARRAY_A
-        );
+                $wpdb->prepare(
+                    "SELECT result, expiration FROM $tableName WHERE ebird_id = %s",
+                    $ebirdId
+                    ),
+                ARRAY_A
+                );
 
         if (!$cachedResult) {
             return null;
@@ -37,7 +45,7 @@ class WikidataQuery {
     }
 
     public function fetchAndUpdateCachedData(string $ebirdId): array {
-        $cachedData = getCachedData($ebirdId);
+        $cachedData = $this->getCachedData($ebirdId);
         if ($cachedData && $cache['isFresh']) {
             return $cachedData['data'];
         }
@@ -62,17 +70,17 @@ class WikidataQuery {
         return <<<SPARQL
             SELECT ?item ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
                 ?item wdt:P3444 "$ebirdId".
-                ?item wdt:P171*/wdt:P279* wd:Q5113.
-                OPTIONAL { ?item wdt:P225 ?latinName. }
+                    ?item wdt:P171*/wdt:P279* wd:Q5113.
+                    OPTIONAL { ?item wdt:P225 ?latinName. }
                 OPTIONAL { ?item wdt:P18 ?image. }
                 OPTIONAL {
                     ?wikipedia schema:about ?item;
-                               schema:isPartOf <https://fr.wikipedia.org/>.
+                    schema:isPartOf <https://fr.wikipedia.org/>.
                 }
                 SERVICE wikibase:label { bd:serviceParam wikibase:language "$this->language,en". }
             }
             LIMIT 1
-        SPARQL;
+            SPARQL;
     }
 
     private function processAndCacheData(string $ebirdId, array $sparqlData): array {
@@ -82,7 +90,7 @@ class WikidataQuery {
         if (!empty($sparqlData['results']['bindings'])) {
             $binding = $sparqlData['results']['bindings'][0];
             $result = [
-                'label' => $binding['itemLabel']['value'] ?? null,
+                'commonName' => $binding['itemLabel']['value'] ?? null,
                 'description' => $binding['itemDescription']['value'] ?? null,
                 'latinName' => $binding['latinName']['value'] ?? null,
                 'originalImage' => $binding['image']['value'] ?? null,
@@ -93,14 +101,39 @@ class WikidataQuery {
 
         $tableName = Config::getTableSparqlCache();
         $wpdb->replace(
-            $tableName,
-            [
+                $tableName,
+                [
                 'ebird_id' => $ebirdId,
                 'result' => json_encode($result),
                 'expiration' => date('Y-m-d H:i:s', strtotime('+10 days')),
-            ]
-        );
+                ]
+                );
 
         return $result;
     }
+
+    /**
+     * Execute a cURL request and return the response.
+     *
+     * @param string $url The URL to request.
+     * @param array $headers Optional HTTP headers for the request.
+     * @return string Response data.
+     */
+    private function executeCurl($url, $headers = [])
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        // Ajouter l'en-tête User-Agent
+        $defaultHeaders = [
+            "User-Agent: wp-whobird/0.1 (https://github.com/evlist/wp-whobird ; vdv@dyomede.com)"
+        ];
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($defaultHeaders, $headers));
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return $response;
+    }
+
 }

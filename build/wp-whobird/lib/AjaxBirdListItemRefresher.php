@@ -30,11 +30,11 @@ function update_bird_data() {
     $ebird_id = sanitize_text_field( $_POST['ebird_id'] );
 
     // Initialize the classes
-    $wikidata_query = new WikidataQuery();
-    $bird_renderer  = new BirdListItemRenderer( $ebird_id, $wikidata_query );
+    $bird_renderer  = new BirdListItemRenderer( $ebird_id );
 
     // Fetch the bird data
-    $fresh_data = $wikidata_query->fetchAndUpdateCachedData( $ebird_id );
+    $wikidataQuery = new WikidataQuery($locale ?? get_locale());
+    $fresh_data = $wikidataQuery->fetchAndUpdateCachedData( $ebird_id );
 
     if ( ! $fresh_data ) {
         wp_send_json_error( [ 'message' => __( 'Could not fetch bird data.', 'wp-whobird' ) ] );
@@ -42,7 +42,7 @@ function update_bird_data() {
     }
 
     // Render the HTML for the bird entry
-    $html = $bird_renderer->renderBirdData( $fresh_data, false );
+    $html = $bird_renderer->renderBirdData( $fresh_data );
 
     wp_send_json_success( [ 'html' => $html ] );
 }

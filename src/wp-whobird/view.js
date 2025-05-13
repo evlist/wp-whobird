@@ -168,7 +168,7 @@ function initializeAjaxQueue() {
             `.wpwbd-bird-entry[data-ebird-id="${ebirdId}"]`
           );
           if (birdEntry) {
-            birdEntry.innerHTML = data.html;
+            birdEntry.innerHTML = data.data.html;
           }
         }
       })

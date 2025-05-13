@@ -90,11 +90,12 @@ class WhoBirdRenderer
         $list = '';
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
             $listItemRenderer = new BirdListItemRenderer(
-                $row['SpeciesName'],
                 $row['BirdNET_ID'],
-                $this->getRecordingsUrls($row['timestamps'])
             );
-            $list .= $listItemRenderer->render();
+            $list .= $listItemRenderer->render(
+                $row['SpeciesName'],
+                $this->getRecordingsUrls($row['timestamps'])
+);
         }
 
         return $list;
