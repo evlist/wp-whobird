@@ -50,19 +50,19 @@ class WikidataQuery {
             return $cachedData['data'];
         }
 
-        $currentTime = microtime(true) * 1000; // Current time in milliseconds
+        $currentTime = microtime(true) / 1000; // Current time in milliseconds
         $timeSinceLastRequest = $currentTime - self::$lastRequestTime;
 
         if ($timeSinceLastRequest < self::$requestIntervalMs) {
             usleep((self::$requestIntervalMs - $timeSinceLastRequest) * 1000); // Convert ms to microseconds
         }
 
-        self::$lastRequestTime = microtime(true) * 1000; // Update the last request time to the current time in milliseconds
-
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($this->buildSparqlQuery($ebirdId));
         $sparqlHeaders = ["Accept: application/json"];
         $sparqlResponse = $this->executeCurl($sparqlUrl, $sparqlHeaders);
         $sparqlData = json_decode($sparqlResponse, true);
+
+        self::$lastRequestTime = microtime(true) / 1000; // Update the last request time to the current time in milliseconds
 
         return $this->processAndCacheData($ebirdId, $sparqlData);
     }
@@ -127,7 +127,7 @@ class WikidataQuery {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         // Ajouter l'en-tête User-Agent
         $defaultHeaders = [
-            "User-Agent: wp-whobird/0.1 (https://github.com/evlist/wp-whobird ; vdv@dyomede.com)"
+            "User-Agent: wp-whobird/0.1 (https://github.com/evlist/wp-whobird ; vdv@dyomedea.com)"
         ];
         curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($defaultHeaders, $headers));
 
