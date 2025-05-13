@@ -16,8 +16,8 @@ module.exports = {
         new CopyWebpackPlugin({
             patterns: [
                 {
-                    from: path.resolve(__dirname, 'assets/data'),
-                    to: path.resolve(__dirname, 'build/assets/data'),
+                    from: path.resolve(__dirname, 'assets'),
+                    to: path.resolve(__dirname, 'build/assets'),
                 },
                 {
                     from: path.resolve(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts'),

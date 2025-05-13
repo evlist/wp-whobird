@@ -45,10 +45,11 @@ class BirdListItemRenderer
     public function renderBirdData(array $birdData): string
     {
         // Prepare additional information from Wikidata
-        $description = $birdData['description'] ?? 'No description available';
-        $latinName = $birdData['latinName'] ?? 'Latin name not found';
-        $commonName = $birdData['commonName'] ?? 'Common name not found';
-        $image = $birdData['image'] ?? '';
+        $description = $birdData['description'] ?? '';
+        $latinName = $birdData['latinName'] ?? '';
+        $commonName = $birdData['commonName'] ?? '???';
+        $image = $birdData['image'] ?? plugins_url( '../assets/images/whoBIRD.svg', dirname(__FILE__) );
+        // $image = $birdData['image'] ?? plugins_url( 'build/assets/images/whoBIRD.svg' );
         $wikipedia = '';
 
         // Check if the Wikipedia URL is set
