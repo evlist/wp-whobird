@@ -27,7 +27,7 @@ class BirdListItemRenderer
 
         $needsRefresh = true;
         $birdData = [
-            'common-name' => $speciesName
+            'commonName' => $speciesName
         ];
         if ($cache) {
             $needsRefresh = !$cache['isFresh'];

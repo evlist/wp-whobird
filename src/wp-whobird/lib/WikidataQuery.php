@@ -9,8 +9,8 @@ require_once 'SparqlUtils.php';
 require_once 'ImageUtils.php';
 
 class WikidataQuery {
-    private static $lastRequestTime = 0; // Timestamp of the last request
-    private static $requestInterval = 1; // Minimum interval (in seconds) between requests
+    private static $lastRequestTime = 0; // Timestamp of the last request in microseconds
+    private static $requestIntervalMs = 10; // Minimum interval (in milliseconds) between requests
     private string $locale;
     private string $language;
 
@@ -46,17 +46,18 @@ class WikidataQuery {
 
     public function fetchAndUpdateCachedData(string $ebirdId): array {
         $cachedData = $this->getCachedData($ebirdId);
-        if ($cachedData && $cache['isFresh']) {
+        if ($cachedData && $cachedData['isFresh']) {
             return $cachedData['data'];
         }
 
-        $timeSinceLastRequest = time() - self::$lastRequestTime;
+        $currentTime = microtime(true) * 1000; // Current time in milliseconds
+        $timeSinceLastRequest = $currentTime - self::$lastRequestTime;
 
-        if ($timeSinceLastRequest < self::$requestInterval) {
-            sleep(self::$requestInterval - $timeSinceLastRequest);
+        if ($timeSinceLastRequest < self::$requestIntervalMs) {
+            usleep((self::$requestIntervalMs - $timeSinceLastRequest) * 1000); // Convert ms to microseconds
         }
 
-        self::$lastRequestTime = time();
+        self::$lastRequestTime = microtime(true) * 1000; // Update the last request time to the current time in milliseconds
 
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($this->buildSparqlQuery($ebirdId));
         $sparqlHeaders = ["Accept: application/json"];
