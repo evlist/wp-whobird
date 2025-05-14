@@ -31,7 +31,9 @@ class BirdListItemRenderer
         ];
         if ($cache) {
             $needsRefresh = !$cache['isFresh'];
-            $birdData = $cache['data'];
+            if ($cache['data']) {
+                $birdData = $cache['data'];
+            }
         }
         $dataEbirdId = $needsRefresh ? ' data-ebird-id="'.$this->ebirdId.'"' : '';
         return sprintf(

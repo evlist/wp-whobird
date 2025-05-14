@@ -10,7 +10,7 @@ require_once 'ImageUtils.php';
 require_once 'FileLockThrottle.php';
 
 class WikidataQuery {
-    private static $requestIntervalMs = 100; // Minimum interval (in milliseconds) between requests
+    private static $requestIntervalMs = 500; // Minimum interval (in milliseconds) between requests
     private string $locale;
     private string $language;
 
