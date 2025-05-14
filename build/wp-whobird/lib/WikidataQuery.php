@@ -7,10 +7,10 @@ use WPWhoBird\Config;
 
 require_once 'SparqlUtils.php';
 require_once 'ImageUtils.php';
+require_once 'FileLockThrottle.php';
 
 class WikidataQuery {
-    private static $lastRequestTime = 0; // Timestamp of the last request in microseconds
-    private static $requestIntervalMs = 10; // Minimum interval (in milliseconds) between requests
+    private static $requestIntervalMs = 100; // Minimum interval (in milliseconds) between requests
     private string $locale;
     private string $language;
 
@@ -50,17 +50,14 @@ class WikidataQuery {
             return $cachedData['data'];
         }
 
-        // Ensure the delay between requests is respected
-        while ((microtime(true) * 1000 - self::$lastRequestTime) < self::$requestIntervalMs) {
-            usleep(1000); // Sleep for 1 millisecond to avoid busy waiting
-        }
-
-        // Update the last request time to the current time in milliseconds
-        self::$lastRequestTime = microtime(true) * 1000;
+        $throttle = new FileLockThrottle("wikidata", self::$requestIntervalMs);
+        $throttle->waitUntilAllowed();
 
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($this->buildSparqlQuery($ebirdId));
         $sparqlHeaders = ["Accept: application/json"];
+        $startCurl = microtime(true);
         $sparqlResponse = $this->executeCurl($sparqlUrl, $sparqlHeaders);
+        error_log('cURL execution time: ' . (microtime(true) - $startCurl) . ' seconds');
         $sparqlData = json_decode($sparqlResponse, true);
 
         return $this->processAndCacheData($ebirdId, $sparqlData);
