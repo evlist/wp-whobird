@@ -45,13 +45,14 @@ class WikidataQuery {
     }
 
     public function fetchAndUpdateCachedData(string $ebirdId): array {
+
+        $throttle = new FileLockThrottle("wikidata", self::$requestIntervalMs);
+        $throttle->waitUntilAllowed();
+
         $cachedData = $this->getCachedData($ebirdId);
         if ($cachedData && $cachedData['isFresh']) {
             return $cachedData['data'];
         }
-
-        $throttle = new FileLockThrottle("wikidata", self::$requestIntervalMs);
-        $throttle->waitUntilAllowed();
 
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($this->buildSparqlQuery($ebirdId));
         $sparqlHeaders = ["Accept: application/json"];
