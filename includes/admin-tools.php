@@ -3,26 +3,31 @@
 
 if (!defined('ABSPATH')) exit;
 
-// Add submenu under whoBIRD or as a top-level menu if needed
+// Add a submenu under Tools (not a top-level menu)
 add_action('admin_menu', function() {
-    add_menu_page(
-        'whoBIRD Admin Tools',
-        'whoBIRD Tools',
+    add_management_page(
+        'whoBIRD tools',
+        'whoBIRD tools',
         'manage_options',
         'whobird-admin-tools',
-        'whobird_admin_tools_page',
-        'dashicons-admin-tools'
+        'whobird_admin_tools_page'
     );
 });
 
 function whobird_admin_tools_page() {
-    echo '<div class="wrap"><h1>whoBIRD Admin Tools</h1>';
+    ?>
+    <div class="wrap">
+        <h1 style="display:flex;align-items:center;gap:10px;">
+            <img src="<?php echo esc_url(plugins_url('../build/assets/images/whoBIRD.svg', __FILE__)); ?>" alt="whoBIRD" style="height:32px;width:auto;vertical-align:middle;">
+            <?php echo esc_html__('whoBIRD tools', 'wpwhobird'); ?>
+        </h1>
+        <?php
+        // Cache Tools Section
+        include_once __DIR__ . '/cache-tools.php';
 
-    // Cache Tools Section
-    include_once __DIR__ . '/cache-tools.php';
-
-    // Mapping Tools Section
-    include_once __DIR__ . '/bird-mappings.php';
-
-    echo '</div>';
+        // Mapping Tools Section
+        include_once __DIR__ . '/bird-mappings.php';
+        ?>
+    </div>
+    <?php
 }
