@@ -1,71 +1,28 @@
 <?php
-namespace WPWhoBird;
+// Main admin tools script for whoBIRD plugin
 
-use WPWhoBird\Config;
+if (!defined('ABSPATH')) exit;
 
-class WhoBirdAdminTools
-{
-    public function __construct()
-    {
-        // Add the tool page to the WordPress admin menu
-        add_action('admin_menu', [$this, 'addToolPage']);
-    }
+// Add submenu under whoBIRD or as a top-level menu if needed
+add_action('admin_menu', function() {
+    add_menu_page(
+        'whoBIRD Admin Tools',
+        'whoBIRD Tools',
+        'manage_options',
+        'whobird-admin-tools',
+        'whobird_admin_tools_page',
+        'dashicons-admin-tools'
+    );
+});
 
-    /**
-     * Add a new tool page under Tools menu in WordPress admin.
-     */
-    public function addToolPage()
-    {
-        add_management_page(
-            __('WhoBird Cache Tool', 'wpwhobird'), // Page title
-            __('WhoBird Cache Tool', 'wpwhobird'), // Menu title
-            'manage_options',                      // Capability
-            'wpwhobird-cache-tool',                // Slug
-            [$this, 'renderToolPage']              // Callback function
-        );
-    }
+function whobird_admin_tools_page() {
+    echo '<div class="wrap"><h1>whoBIRD Admin Tools</h1>';
 
-    /**
-     * Render the tool page content.
-     */
-    public function renderToolPage()
-    {
-        // Check if the user has clicked the clear cache button
-        if (isset($_POST['wpwhobird_clear_cache']) && check_admin_referer('wpwhobird_clear_cache_action', 'wpwhobird_clear_cache_nonce')) {
-            $this->clearCacheTable();
-        }
-        ?>
-        <div class="wrap">
-            <h1><?php echo esc_html__('WhoBird Cache Tool', 'wpwhobird'); ?></h1>
-            <form method="post" action="">
-                <?php wp_nonce_field('wpwhobird_clear_cache_action', 'wpwhobird_clear_cache_nonce'); ?>
-                <p><?php echo esc_html__('Click the button below to clear the WhoBird cache table.', 'wpwhobird'); ?></p>
-                <input type="submit" name="wpwhobird_clear_cache" class="button button-primary" value="<?php echo esc_attr__('Clear Cache', 'wpwhobird'); ?>">
-            </form>
-        </div>
-        <?php
-    }
+    // Cache Tools Section
+    include_once __DIR__ . '/cache-tools.php';
 
-    /**
-     * Clear the WhoBird cache table.
-     */
-    private function clearCacheTable()
-    {
-        global $wpdb;
+    // Mapping Tools Section
+    include_once __DIR__ . '/bird-mappings.php';
 
-        // Use the full table name from the configuration
-        $table_name = Config::getTableSparqlCache();
-
-        // Attempt to truncate the table and handle errors
-        $result = $wpdb->query("TRUNCATE TABLE $table_name");
-
-        if ($result === false) {
-            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Failed to clear the cache table. Please check the table configuration.', 'wpwhobird') . '</p></div>';
-        } else {
-            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Cache table has been cleared successfully!', 'wpwhobird') . '</p></div>';
-        }
-    }
+    echo '</div>';
 }
-
-// Initialize the admin tools
-new WhoBirdAdminTools();
