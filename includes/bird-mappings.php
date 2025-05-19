@@ -1,19 +1,8 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
-
 // ---- CONFIGURATION ----
 
-/**
- * Define your sources here.
- * Each must include:
- * - label: Visible name in UI
- * - description: Visible description in UI
- * - github_repo: owner/repo
- * - github_path: path in repo to file
- * - raw_url: direct download URL for the file
- */
 $WHOBIRD_MAPPING_SOURCES = [
     'taxo_code' => [
         'label' => 'whoBIRD taxo_code.txt',
@@ -24,45 +13,87 @@ $WHOBIRD_MAPPING_SOURCES = [
     ],
     'birdnet_species' => [
         'label' => 'BirdNET species file (GLOBAL 6K V2.4, en-uk)',
-        'description' => 'BirdNET species list (ID, scientific name, common name, etc.) from the official BirdNET-Analyzer repository.',
+        'description' => 'BirdNET species list (ID, scientific name, common name, etc.)',
         'github_repo' => 'birdnet-team/BirdNET-Analyzer',
         'github_path' => 'birdnet_analyzer/labels/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt',
         'raw_url' => 'https://raw.githubusercontent.com/birdnet-team/BirdNET-Analyzer/main/birdnet_analyzer/labels/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt',
+    ],
+    'wikidata_species' => [
+        'label' => 'Wikidata birds SPARQL export (English names, eBird IDs)',
+        'description' => 'Bird species exported from Wikidata via SPARQL. Includes Wikidata Q ID, English common name, scientific name, taxon rank, and eBird taxon ID.',
+        'sparql_url' => 'https://query.wikidata.org/sparql',
+        'query' => <<<SPARQL
+SELECT ?item ?itemLabel ?scientificName ?taxonRankLabel ?eBirdID WHERE {
+  ?item wdt:P105 wd:Q7432.  # Taxon (species or below)
+  ?item wdt:P225 ?scientificName.  # Scientific name
+  OPTIONAL { ?item wdt:P3444 ?eBirdID. }  # eBird ID
+  OPTIONAL { ?item wdt:P105 ?taxonRank. }  # Taxon rank
+  ?item wdt:P171* wd:Q5113.  # Descendant of Aves (birds)
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+ORDER BY ?scientificName
+SPARQL,
+        'format' => 'json',
     ],
 ];
 
 // ---- DATABASE TABLE ----
 
-// Table name (make sure it's created with the right schema)
 global $wpdb;
 $WHOBIRD_MAPPING_TABLE = $wpdb->prefix . 'whobird_remote_files';
-
-/**
- * Ensure the table exists. Run this once on plugin activation in your main plugin file:
- * 
- * CREATE TABLE wp_whobird_remote_files (
- *   id INT AUTO_INCREMENT PRIMARY KEY,
- *   source VARCHAR(50) NOT NULL UNIQUE,
- *   raw_content LONGTEXT NOT NULL,
- *   updated_at DATETIME NOT NULL,
- *   source_commit_sha VARCHAR(64) DEFAULT NULL,
- *   source_commit_date DATETIME DEFAULT NULL
- * );
- */
 
 // ---- SYNC LOGIC ----
 
 /**
- * Download file, get latest commit info, store in DB.
+ * Download file (GitHub or Wikidata), get metadata, and store in DB.
+ * For GitHub sources, gets latest commit info.
+ * For SPARQL sources, stores as raw JSON or CSV, with null for commit info.
  * Returns [success(bool), message(string)]
  */
 function whobird_sync_remote_source($source_key, $source_cfg, $table) {
     global $wpdb;
 
-    // 1. Get latest commit info from GitHub API
+    // Special handling for Wikidata SPARQL source
+    if ($source_key === 'wikidata_species') {
+        $sparql_url = $source_cfg['sparql_url'];
+        $query = $source_cfg['query'];
+        $format = $source_cfg['format'] ?? 'json';
+        $accept = ($format === 'csv') ? 'text/csv' : 'application/sparql-results+json';
+        $url = $sparql_url . '?query=' . urlencode($query);
+        if ($format === 'csv') $url .= '&format=text/csv';
+
+        $response = wp_remote_get($url, [
+            'headers' => [
+                'Accept' => $accept,
+                'User-Agent' => 'whoBIRD-plugin'
+            ],
+            'timeout' => 60
+        ]);
+        if (is_wp_error($response)) {
+            return [false, 'SPARQL query error: ' . $response->get_error_message()];
+        }
+        $content = wp_remote_retrieve_body($response);
+        if (!$content || strlen($content) < 10) {
+            return [false, 'No results from Wikidata.'];
+        }
+
+        $now = current_time('mysql');
+        $wpdb->replace(
+            $table,
+            [
+                'source' => $source_key,
+                'raw_content' => $content,
+                'updated_at' => $now,
+                'source_commit_sha' => null,
+                'source_commit_date' => null,
+            ]
+        );
+        return [true, 'Wikidata SPARQL result updated successfully.'];
+    }
+
+    // --- Default: GitHub file sources ---
     $repo = $source_cfg['github_repo'];
     $path = $source_cfg['github_path'];
-
     $api_url = "https://api.github.com/repos/$repo/commits?path=" . urlencode($path) . "&per_page=1";
     $response = wp_remote_get($api_url, [
         'headers' => [ 'User-Agent' => 'whoBIRD-plugin' ]
@@ -76,16 +107,13 @@ function whobird_sync_remote_source($source_key, $source_cfg, $table) {
     $latest_date = $body[0]['commit']['committer']['date'];
     $latest_date_sql = date('Y-m-d H:i:s', strtotime($latest_date));
 
-    // 2. Download the raw file
     $file_response = wp_remote_get($source_cfg['raw_url'], [
         'headers' => [ 'User-Agent' => 'whoBIRD-plugin' ]
     ]);
     if (is_wp_error($file_response)) return [false, 'File download error: ' . $file_response->get_error_message()];
     $content = wp_remote_retrieve_body($file_response);
 
-    // 3. Store in DB (upsert by source)
     $now = current_time('mysql');
-
     $wpdb->replace(
         $table,
         [
@@ -93,45 +121,10 @@ function whobird_sync_remote_source($source_key, $source_cfg, $table) {
             'raw_content' => $content,
             'updated_at' => $now,
             'source_commit_sha' => $latest_sha,
-            'source_commit_date' => $latest_date_sql
+            'source_commit_date' => $latest_date_sql,
         ]
     );
     return [true, 'File updated successfully.'];
-}
-
-/**
- * Get stored info for a source from DB.
- * Returns row or null.
- */
-function whobird_get_local_source_info($source, $table) {
-    global $wpdb;
-    return $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE source = %s", $source), ARRAY_A);
-}
-
-/**
- * Check if remote file is newer than local.
- * Returns ['is_new' => bool, 'remote_sha' => string, 'remote_date' => string]
- */
-function whobird_check_new_github_version($source_cfg, $local_sha) {
-    $repo = $source_cfg['github_repo'];
-    $path = $source_cfg['github_path'];
-    $api_url = "https://api.github.com/repos/$repo/commits?path=" . urlencode($path) . "&per_page=1";
-    $response = wp_remote_get($api_url, [
-        'headers' => [ 'User-Agent' => 'whoBIRD-plugin' ]
-    ]);
-    if (is_wp_error($response)) return null;
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-    if (!empty($body[0]['sha'])) {
-        $latest_sha = $body[0]['sha'];
-        $latest_date = $body[0]['commit']['committer']['date'];
-        $is_new = ($local_sha && $local_sha !== $latest_sha);
-        return [
-            'is_new' => $is_new,
-            'remote_sha' => $latest_sha,
-            'remote_date' => $latest_date,
-        ];
-    }
-    return null;
 }
 
 // ---- TABLE CLASS ----
@@ -186,8 +179,13 @@ class WhoBIRD_Mapping_Sources_Table extends WP_List_Table {
         }
     }
     function column_status($item) {
-        if (!$item['local_commit_sha']) {
+        if (!$item['local_commit_sha'] && $item['key'] !== 'wikidata_species') {
             return '<span style="color:#bbb;">Not downloaded</span>';
+        }
+        if ($item['key'] === 'wikidata_species') {
+            return $item['local_update']
+                ? '<span style="color:green;">Up to date</span>'
+                : '<span style="color:#bbb;">Not downloaded</span>';
         }
         if ($item['is_new']) {
             return '<span style="color:orange;font-weight:bold;">New version available!</span>';
@@ -204,7 +202,9 @@ class WhoBIRD_Mapping_Sources_Table extends WP_List_Table {
         // Build table rows for each source
         foreach ($this->sources_cfg as $key => $cfg) {
             $local = whobird_get_local_source_info($key, $this->table_name);
-            $remote = whobird_check_new_github_version($cfg, $local['source_commit_sha'] ?? null);
+            $remote = ($key === 'wikidata_species')
+                ? null
+                : whobird_check_new_github_version($cfg, $local['source_commit_sha'] ?? null);
             $this->items[] = [
                 'key' => $key,
                 'label' => $cfg['label'],
@@ -218,6 +218,35 @@ class WhoBIRD_Mapping_Sources_Table extends WP_List_Table {
             ];
         }
     }
+}
+
+// ---- DB HELPERS ----
+
+function whobird_get_local_source_info($source, $table) {
+    global $wpdb;
+    return $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE source = %s", $source), ARRAY_A);
+}
+
+function whobird_check_new_github_version($source_cfg, $local_sha) {
+    $repo = $source_cfg['github_repo'];
+    $path = $source_cfg['github_path'];
+    $api_url = "https://api.github.com/repos/$repo/commits?path=" . urlencode($path) . "&per_page=1";
+    $response = wp_remote_get($api_url, [
+        'headers' => [ 'User-Agent' => 'whoBIRD-plugin' ]
+    ]);
+    if (is_wp_error($response)) return null;
+    $body = json_decode(wp_remote_retrieve_body($response), true);
+    if (!empty($body[0]['sha'])) {
+        $latest_sha = $body[0]['sha'];
+        $latest_date = $body[0]['commit']['committer']['date'];
+        $is_new = ($local_sha && $local_sha !== $latest_sha);
+        return [
+            'is_new' => $is_new,
+            'remote_sha' => $latest_sha,
+            'remote_date' => $latest_date,
+        ];
+    }
+    return null;
 }
 
 // ---- HANDLE FORM ACTIONS ----
@@ -249,7 +278,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
             ?>
         </form>
         <p style="font-size:smaller;color:#888;margin-top:1em;">
-            Last commit = last change in the file’s GitHub repository. Last downloaded = when you last imported it.
+            Last commit = last change in the file’s GitHub repository. Last downloaded = when you last imported it.<br>
+            For Wikidata, only last downloaded/imported is shown.
         </p>
     </div>
 </div>
