@@ -3,92 +3,235 @@ if (!defined('ABSPATH')) exit;
 
 require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 
-class WhoBIRD_Mapping_Sources_Table extends WP_List_Table {
-    private $sources;
+// ---- CONFIGURATION ----
 
-    function __construct($sources) {
+/**
+ * Define your sources here.
+ * Each must include:
+ * - label: Visible name in UI
+ * - description: Visible description in UI
+ * - github_repo: owner/repo
+ * - github_path: path in repo to file
+ * - raw_url: direct download URL for the file
+ */
+$WHOBIRD_MAPPING_SOURCES = [
+    'taxo_code' => [
+        'label' => 'whoBIRD taxo_code.txt',
+        'description' => 'Maps BirdNET IDs to eBird IDs',
+        'github_repo' => 'woheller69/whoBIRD',
+        'github_path' => 'app/src/main/assets/taxo_code.txt',
+        'raw_url' => 'https://github.com/woheller69/whoBIRD/raw/master/app/src/main/assets/taxo_code.txt',
+    ],
+    'birdnet_species' => [
+        'label' => 'BirdNET species file (GLOBAL 6K V2.4, en-uk)',
+        'description' => 'BirdNET species list (ID, scientific name, common name, etc.) from the official BirdNET-Analyzer repository.',
+        'github_repo' => 'birdnet-team/BirdNET-Analyzer',
+        'github_path' => 'birdnet_analyzer/labels/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt',
+        'raw_url' => 'https://raw.githubusercontent.com/birdnet-team/BirdNET-Analyzer/main/birdnet_analyzer/labels/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt',
+    ],
+];
+
+// ---- DATABASE TABLE ----
+
+// Table name (make sure it's created with the right schema)
+global $wpdb;
+$WHOBIRD_MAPPING_TABLE = $wpdb->prefix . 'whobird_remote_files';
+
+/**
+ * Ensure the table exists. Run this once on plugin activation in your main plugin file:
+ * 
+ * CREATE TABLE wp_whobird_remote_files (
+ *   id INT AUTO_INCREMENT PRIMARY KEY,
+ *   source VARCHAR(50) NOT NULL UNIQUE,
+ *   raw_content LONGTEXT NOT NULL,
+ *   updated_at DATETIME NOT NULL,
+ *   source_commit_sha VARCHAR(64) DEFAULT NULL,
+ *   source_commit_date DATETIME DEFAULT NULL
+ * );
+ */
+
+// ---- SYNC LOGIC ----
+
+/**
+ * Download file, get latest commit info, store in DB.
+ * Returns [success(bool), message(string)]
+ */
+function whobird_sync_remote_source($source_key, $source_cfg, $table) {
+    global $wpdb;
+
+    // 1. Get latest commit info from GitHub API
+    $repo = $source_cfg['github_repo'];
+    $path = $source_cfg['github_path'];
+
+    $api_url = "https://api.github.com/repos/$repo/commits?path=" . urlencode($path) . "&per_page=1";
+    $response = wp_remote_get($api_url, [
+        'headers' => [ 'User-Agent' => 'whoBIRD-plugin' ]
+    ]);
+    if (is_wp_error($response)) return [false, 'GitHub API error: ' . $response->get_error_message()];
+    $body = json_decode(wp_remote_retrieve_body($response), true);
+    if (empty($body[0]['sha']) || empty($body[0]['commit']['committer']['date'])) {
+        return [false, 'Could not get commit info from GitHub.'];
+    }
+    $latest_sha = $body[0]['sha'];
+    $latest_date = $body[0]['commit']['committer']['date'];
+    $latest_date_sql = date('Y-m-d H:i:s', strtotime($latest_date));
+
+    // 2. Download the raw file
+    $file_response = wp_remote_get($source_cfg['raw_url'], [
+        'headers' => [ 'User-Agent' => 'whoBIRD-plugin' ]
+    ]);
+    if (is_wp_error($file_response)) return [false, 'File download error: ' . $file_response->get_error_message()];
+    $content = wp_remote_retrieve_body($file_response);
+
+    // 3. Store in DB (upsert by source)
+    $now = current_time('mysql');
+
+    $wpdb->replace(
+        $table,
+        [
+            'source' => $source_key,
+            'raw_content' => $content,
+            'updated_at' => $now,
+            'source_commit_sha' => $latest_sha,
+            'source_commit_date' => $latest_date_sql
+        ]
+    );
+    return [true, 'File updated successfully.'];
+}
+
+/**
+ * Get stored info for a source from DB.
+ * Returns row or null.
+ */
+function whobird_get_local_source_info($source, $table) {
+    global $wpdb;
+    return $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE source = %s", $source), ARRAY_A);
+}
+
+/**
+ * Check if remote file is newer than local.
+ * Returns ['is_new' => bool, 'remote_sha' => string, 'remote_date' => string]
+ */
+function whobird_check_new_github_version($source_cfg, $local_sha) {
+    $repo = $source_cfg['github_repo'];
+    $path = $source_cfg['github_path'];
+    $api_url = "https://api.github.com/repos/$repo/commits?path=" . urlencode($path) . "&per_page=1";
+    $response = wp_remote_get($api_url, [
+        'headers' => [ 'User-Agent' => 'whoBIRD-plugin' ]
+    ]);
+    if (is_wp_error($response)) return null;
+    $body = json_decode(wp_remote_retrieve_body($response), true);
+    if (!empty($body[0]['sha'])) {
+        $latest_sha = $body[0]['sha'];
+        $latest_date = $body[0]['commit']['committer']['date'];
+        $is_new = ($local_sha && $local_sha !== $latest_sha);
+        return [
+            'is_new' => $is_new,
+            'remote_sha' => $latest_sha,
+            'remote_date' => $latest_date,
+        ];
+    }
+    return null;
+}
+
+// ---- TABLE CLASS ----
+
+class WhoBIRD_Mapping_Sources_Table extends WP_List_Table {
+    private $sources_cfg;
+    private $table_name;
+
+    function __construct($sources_cfg, $table_name) {
         parent::__construct([
             'singular' => 'mapping_source',
             'plural'   => 'mapping_sources',
             'ajax'     => false
         ]);
-        $this->sources = $sources;
+        $this->sources_cfg = $sources_cfg;
+        $this->table_name = $table_name;
     }
 
     function get_columns() {
         return [
-            'cb'          => '<input type="checkbox" />',
             'name'        => 'Source Name',
             'description' => 'Description',
-            'last_update' => 'Last Update',
+            'local_commit' => 'Stored Commit',
+            'local_update' => 'Last Downloaded',
+            'remote_commit' => 'GitHub Commit',
+            'status'      => 'Status',
             'actions'     => 'Actions'
         ];
     }
 
-    function column_cb($item) {
-        return sprintf('<input type="checkbox" name="selected_sources[]" value="%s" />', esc_attr($item['id']));
-    }
-
     function column_name($item) {
-        return esc_html($item['name']);
+        return esc_html($item['label']);
     }
-
     function column_description($item) {
         return esc_html($item['description']);
     }
-
-    function column_last_update($item) {
-        return esc_html($item['last_update']);
+    function column_local_commit($item) {
+        if ($item['local_commit_sha']) {
+            return substr($item['local_commit_sha'], 0, 8) . '<br><small>' . esc_html($item['local_commit_date']) . '</small>';
+        } else {
+            return '<span style="color:#bbb;">(none)</span>';
+        }
     }
-
+    function column_local_update($item) {
+        return $item['local_update'] ? esc_html($item['local_update']) : '<span style="color:#bbb;">(never)</span>';
+    }
+    function column_remote_commit($item) {
+        if ($item['remote_commit_sha']) {
+            return substr($item['remote_commit_sha'], 0, 8) . '<br><small>' . esc_html($item['remote_commit_date']) . '</small>';
+        } else {
+            return '<span style="color:#bbb;">(unknown)</span>';
+        }
+    }
+    function column_status($item) {
+        if (!$item['local_commit_sha']) {
+            return '<span style="color:#bbb;">Not downloaded</span>';
+        }
+        if ($item['is_new']) {
+            return '<span style="color:orange;font-weight:bold;">New version available!</span>';
+        }
+        return '<span style="color:green;">Up to date</span>';
+    }
     function column_actions($item) {
-        return isset($item['actions']) ? $item['actions'] : '';
+        $btn = '<button type="submit" name="update_' . esc_attr($item['key']) . '" class="button">Update</button>';
+        return $btn;
     }
-
     function prepare_items() {
         $this->_column_headers = [$this->get_columns(), [], []];
-        $this->items = $this->sources;
+        $this->items = [];
+        // Build table rows for each source
+        foreach ($this->sources_cfg as $key => $cfg) {
+            $local = whobird_get_local_source_info($key, $this->table_name);
+            $remote = whobird_check_new_github_version($cfg, $local['source_commit_sha'] ?? null);
+            $this->items[] = [
+                'key' => $key,
+                'label' => $cfg['label'],
+                'description' => $cfg['description'],
+                'local_commit_sha' => $local['source_commit_sha'] ?? null,
+                'local_commit_date' => $local['source_commit_date'] ?? null,
+                'local_update' => $local['updated_at'] ?? null,
+                'remote_commit_sha' => $remote['remote_sha'] ?? null,
+                'remote_commit_date' => $remote['remote_date'] ?? null,
+                'is_new' => $remote['is_new'] ?? false,
+            ];
+        }
     }
 }
 
-// Dummy data for now; replace with dynamic logic as needed
-$sources = [
-    [
-        'id' => 'taxo_code',
-        'name' => 'whoBIRD taxo_code.txt',
-        'description' => 'Maps BirdNET IDs to eBird IDs',
-        'last_update' => get_option('whobird_mapping_taxo_code_last_update', 'Never'),
-        'actions' => '<button type="submit" name="update_taxo_code" class="button">Update</button>',
-    ],
-    [
-        'id' => 'wikidata_sparql',
-        'name' => 'Wikidata SPARQL',
-        'description' => 'Wikidata Q-ID, eBird ID, taxonomic rank, scientific and English names, picture',
-        'last_update' => get_option('whobird_mapping_wikidata_last_update', 'Never'),
-        'actions' => '<button type="submit" name="update_wikidata" class="button">Update</button>',
-    ],
-    [
-        'id' => 'birdnet_species',
-        'name' => 'BirdNET species file',
-        'description' => 'BirdNET species list (ID, scientific name, common name, etc.)',
-        'last_update' => get_option('whobird_mapping_birdnet_species_last_update', 'Never'),
-        'actions' => '<button type="submit" name="update_birdnet_species" class="button">Update</button>',
-    ],
-];
+// ---- HANDLE FORM ACTIONS ----
 
-// Handle POST actions (replace with actual update logic as you implement sources)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options')) {
-    if (isset($_POST['update_taxo_code'])) {
-        update_option('whobird_mapping_taxo_code_last_update', date('Y-m-d H:i:s'));
-        echo '<div class="updated notice"><p>whoBIRD taxo_code.txt updated.</p></div>';
-    }
-    if (isset($_POST['update_wikidata'])) {
-        update_option('whobird_mapping_wikidata_last_update', date('Y-m-d H:i:s'));
-        echo '<div class="updated notice"><p>Wikidata SPARQL updated.</p></div>';
-    }
-    if (isset($_POST['update_birdnet_species'])) {
-        update_option('whobird_mapping_birdnet_species_last_update', date('Y-m-d H:i:s'));
-        echo '<div class="updated notice"><p>BirdNET species file updated.</p></div>';
+    foreach ($WHOBIRD_MAPPING_SOURCES as $key => $cfg) {
+        if (isset($_POST['update_' . $key])) {
+            list($ok, $msg) = whobird_sync_remote_source($key, $cfg, $WHOBIRD_MAPPING_TABLE);
+            if ($ok) {
+                echo '<div class="updated notice"><p>' . esc_html($cfg['label'] . ': ' . $msg) . '</p></div>';
+            } else {
+                echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($cfg['label'] . ': ' . $msg) . '</p></div>';
+            }
+        }
     }
 }
 
@@ -100,11 +243,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
         <h2>Mapping Sources</h2>
         <form method="POST">
             <?php
-                $mapping_table = new WhoBIRD_Mapping_Sources_Table($sources);
+                $mapping_table = new WhoBIRD_Mapping_Sources_Table($WHOBIRD_MAPPING_SOURCES, $WHOBIRD_MAPPING_TABLE);
                 $mapping_table->prepare_items();
                 $mapping_table->display();
             ?>
         </form>
+        <p style="font-size:smaller;color:#888;margin-top:1em;">
+            Last commit = last change in the file’s GitHub repository. Last downloaded = when you last imported it.
+        </p>
     </div>
 </div>
 <script>
