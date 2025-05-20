@@ -2,8 +2,6 @@
 if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/bird-mappings.php';
 
-// ---- TABLE CLASS (UI only, uses getStatus from source instances) ----
-
 if (!class_exists('WP_List_Table')) {
     require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 }
@@ -32,7 +30,8 @@ class WhoBIRD_Mapping_Sources_Table extends WP_List_Table {
             'local_update' => 'Last Downloaded',
             'remote_commit' => 'GitHub Commit',
             'status'      => 'Status',
-            'actions'     => 'Actions'
+            'actions'     => 'Actions',
+            'update_table' => 'Update Table',
         ];
     }
 
@@ -77,6 +76,10 @@ class WhoBIRD_Mapping_Sources_Table extends WP_List_Table {
         $btn = '<button type="submit" name="update_' . esc_attr($item['key']) . '" class="button">Update</button>';
         return $btn;
     }
+    function column_update_table($item) {
+        // All sources should get this button as per next steps
+        return '<button type="submit" name="update_table_' . esc_attr($item['key']) . '" class="button">Update Table</button>';
+    }
     function prepare_items() {
         $this->_column_headers = [$this->get_columns(), [], []];
         $this->items = [];
@@ -103,9 +106,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
                 echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($WHOBIRD_MAPPING_SOURCES[$key]['label'] . ': ' . $msg) . '</p></div>';
             }
         }
+        if (isset($_POST['update_table_' . $key])) {
+            list($ok, $msg) = $srcObj->uploadToTable();
+            if ($ok) {
+                echo '<div class="updated notice"><p>Update table (' . esc_html($WHOBIRD_MAPPING_SOURCES[$key]['label']) . '): ' . esc_html($msg) . '</p></div>';
+            } else {
+                echo '<div class="notice notice-error is-dismissible"><p>Update table (' . esc_html($WHOBIRD_MAPPING_SOURCES[$key]['label']) . '): ' . esc_html($msg) . '</p></div>';
+            }
+        }
     }
 }
-
 ?>
 
 <div id="mapping-tool-wrapper" style="margin-top:2em;">

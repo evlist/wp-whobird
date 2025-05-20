@@ -121,10 +121,44 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
     }
 }
 
+class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
+    public function uploadToTable() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'whobird_taxocode';
+
+        // Drop and recreate table
+        $wpdb->query("DROP TABLE IF EXISTS `$table_name`");
+        $sql = "CREATE TABLE `$table_name` (
+            birdnet_id INT UNSIGNED NOT NULL PRIMARY KEY,
+            ebird_id VARCHAR(24) NOT NULL
+        ) DEFAULT CHARSET=utf8mb4";
+        $wpdb->query($sql);
+
+        // Get raw content
+        $row = $this->getDBRow();
+        if (!$row || !isset($row['raw_content']) || $row['raw_content'] === '') {
+            return [false, 'No raw content available for import.'];
+        }
+
+        // Insert each line (line number = birdnet_id, line content = ebird_id)
+        $lines = preg_split('/\r\n|\r|\n/', trim($row['raw_content']));
+        $inserted = 0;
+        foreach ($lines as $i => $ebird_id) {
+            $ebird_id = trim($ebird_id);
+            if ($ebird_id === '') continue;
+            $wpdb->insert($table_name, [
+                'birdnet_id' => $i,
+                'ebird_id' => $ebird_id
+            ]);
+            $inserted++;
+        }
+        return [true, "Imported $inserted lines to $table_name."];
+    }
+}
+
 /**
  * TaxoCode and BirdnetSpecies sources (just direct subclasses unless you want custom logic).
  */
-class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {}
 class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {}
 
 /**
