@@ -156,10 +156,46 @@ class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
     }
 }
 
-/**
- * TaxoCode and BirdnetSpecies sources (just direct subclasses unless you want custom logic).
- */
-class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {}
+class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
+    public function uploadToTable() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'whobird_birdnet_species';
+
+        // Drop and recreate table
+        $wpdb->query("DROP TABLE IF EXISTS `$table_name`");
+        $sql = "CREATE TABLE `$table_name` (
+            birdnet_id INT UNSIGNED NOT NULL PRIMARY KEY,
+            scientific_name VARCHAR(128) NOT NULL,
+            english_name VARCHAR(128) NOT NULL
+        ) DEFAULT CHARSET=utf8mb4";
+        $wpdb->query($sql);
+
+        // Get raw content
+        $row = $this->getDBRow();
+        if (!$row || !isset($row['raw_content']) || $row['raw_content'] === '') {
+            return [false, 'No raw content available for import.'];
+        }
+
+        // Insert each line (line number = birdnet_id, content split by "_")
+        $lines = preg_split('/\r\n|\r|\n/', trim($row['raw_content']));
+        $inserted = 0;
+        foreach ($lines as $i => $line) {
+            $line = trim($line);
+            if ($line === '' || strpos($line, '_') === false) continue;
+            // Split at first two underscores only
+            $parts = explode('_', $line, 3);
+            $scientific = trim($parts[0]);
+            $english = isset($parts[1]) ? trim($parts[1]) : '';
+            $wpdb->insert($table_name, [
+                'birdnet_id' => $i,
+                'scientific_name' => $scientific,
+                'english_name' => $english
+            ]);
+            $inserted++;
+        }
+        return [true, "Imported $inserted lines to $table_name."];
+    }
+}
 
 /**
  * Wikidata/SPARQL source (JSON only).
