@@ -26,7 +26,7 @@ function whobird_admin_tools_page() {
         include_once __DIR__ . '/cache-tools.php';
 
         // Mapping Tools Section
-        include_once __DIR__ . '/bird-mappings.php';
+        include_once __DIR__ . '/bird-mappings-ui.php';
         ?>
     </div>
     <?php
