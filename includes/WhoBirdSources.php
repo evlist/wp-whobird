@@ -30,7 +30,7 @@ abstract class WhoBirdAbstractSource {
      */
     public function uploadToTable() {
         // Implement in subclasses as needed
-        return false;
+        return [false, 'Not implemented for this source.'];
     }
 
     /**
@@ -121,6 +121,9 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
     }
 }
 
+/**
+ * TaxoCode source with table import.
+ */
 class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
     public function uploadToTable() {
         global $wpdb;
@@ -143,19 +146,31 @@ class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
         // Insert each line (line number = birdnet_id, line content = ebird_id)
         $lines = preg_split('/\r\n|\r|\n/', trim($row['raw_content']));
         $inserted = 0;
+        $errors = [];
         foreach ($lines as $i => $ebird_id) {
             $ebird_id = trim($ebird_id);
             if ($ebird_id === '') continue;
-            $wpdb->insert($table_name, [
+            $result = $wpdb->insert($table_name, [
                 'birdnet_id' => $i,
                 'ebird_id' => $ebird_id
             ]);
-            $inserted++;
+            if ($result === false) {
+                $errors[] = "Insert error for birdnet_id=$i : " . $wpdb->last_error;
+            } else {
+                $inserted++;
+            }
         }
-        return [true, "Imported $inserted lines to $table_name."];
+        $msg = "Imported $inserted rows to $table_name.";
+        if ($errors) {
+            $msg .= " " . count($errors) . " insert errors occurred. First error: " . $errors[0];
+        }
+        return [empty($errors), $msg];
     }
 }
 
+/**
+ * BirdnetSpecies source with table import.
+ */
 class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
     public function uploadToTable() {
         global $wpdb;
@@ -179,26 +194,34 @@ class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
         // Insert each line (line number = birdnet_id, content split by "_")
         $lines = preg_split('/\r\n|\r|\n/', trim($row['raw_content']));
         $inserted = 0;
+        $errors = [];
         foreach ($lines as $i => $line) {
             $line = trim($line);
             if ($line === '' || strpos($line, '_') === false) continue;
-            // Split at first two underscores only
             $parts = explode('_', $line, 3);
             $scientific = trim($parts[0]);
             $english = isset($parts[1]) ? trim($parts[1]) : '';
-            $wpdb->insert($table_name, [
+            $result = $wpdb->insert($table_name, [
                 'birdnet_id' => $i,
                 'scientific_name' => $scientific,
                 'english_name' => $english
             ]);
-            $inserted++;
+            if ($result === false) {
+                $errors[] = "Insert error for birdnet_id=$i : " . $wpdb->last_error;
+            } else {
+                $inserted++;
+            }
         }
-        return [true, "Imported $inserted lines to $table_name."];
+        $msg = "Imported $inserted rows to $table_name.";
+        if ($errors) {
+            $msg .= " " . count($errors) . " insert errors occurred. First error: " . $errors[0];
+        }
+        return [empty($errors), $msg];
     }
 }
 
 /**
- * Wikidata/SPARQL source (JSON only).
+ * Wikidata/SPARQL source with JSON import to table.
  */
 class WhoBirdWikidataSource extends WhoBirdAbstractSource {
     public function update() {
@@ -252,6 +275,68 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
             'is_new' => false,
         ];
     }
+
+    /**
+     * Import SPARQL JSON results into a structured table.
+     * The table is named {$wpdb->prefix}whobird_wikidata_species.
+     * Columns: one for each property in the SPARQL result (item, itemLabel, scientificName, taxonRankLabel, eBirdID).
+     */
+    public function uploadToTable() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'whobird_wikidata_species';
+
+        // Get raw content
+        $row = $this->getDBRow();
+        if (!$row || !isset($row['raw_content']) || $row['raw_content'] === '') {
+            return [false, 'No raw content available for import.'];
+        }
+
+        $json = json_decode($row['raw_content'], true);
+        if (!$json || !isset($json['head']['vars']) || !isset($json['results']['bindings'])) {
+            return [false, 'Invalid or unexpected Wikidata SPARQL result.'];
+        }
+
+        $vars = $json['head']['vars']; // e.g. ['item', 'itemLabel', ...]
+        $bindings = $json['results']['bindings'];
+
+        // Compose SQL for columns
+        // We'll use VARCHAR(255) for all columns, including 'item'
+        $columns_sql = [];
+        foreach ($vars as $var) {
+            $columns_sql[] = "`$var` VARCHAR(255) DEFAULT NULL";
+        }
+        $columns_str = implode(",\n", $columns_sql);
+
+        // Drop and recreate table
+        $wpdb->query("DROP TABLE IF EXISTS `$table_name`");
+        $sql = "CREATE TABLE `$table_name` (
+            $columns_str
+        ) DEFAULT CHARSET=utf8mb4";
+        $wpdb->query($sql);
+
+        // Prepare and insert rows
+        $inserted = 0;
+        $errors = [];
+        foreach ($bindings as $row) {
+            $row_data = [];
+            foreach ($vars as $var) {
+                $row_data[$var] = isset($row[$var]['value']) ? $row[$var]['value'] : null;
+            }
+            if (!empty($row_data['item'])) {
+                $result = $wpdb->insert($table_name, $row_data);
+                if ($result === false) {
+                    $errors[] = "Insert error for item=" . esc_html($row_data['item']) . ": " . $wpdb->last_error;
+                } else {
+                    $inserted++;
+                }
+            }
+        }
+        $msg = "Imported $inserted rows to $table_name.";
+        if ($errors) {
+            $msg .= " " . count($errors) . " insert errors occurred. First error: " . $errors[0];
+        }
+        return [empty($errors), $msg];
+    }
 }
 
 /**
@@ -269,3 +354,4 @@ function whobird_get_source_instance($key, $cfg, $table) {
             throw new Exception("Unknown mapping source key: $key");
     }
 }
+?>

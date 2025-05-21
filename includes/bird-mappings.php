@@ -13,11 +13,11 @@ $WHOBIRD_MAPPING_SOURCES = [
         'raw_url' => 'https://github.com/woheller69/whoBIRD/raw/master/app/src/main/assets/taxo_code.txt',
     ],
     'birdnet_species' => [
-        'label' => 'BirdNET species file (GLOBAL 6K V2.4, en-uk)',
-        'description' => 'BirdNET species list (ID, scientific name, common name, etc.) from the official BirdNET-Analyzer repository.',
-        'github_repo' => 'birdnet-team/BirdNET-Analyzer',
-        'github_path' => 'birdnet_analyzer/labels/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt',
-        'raw_url' => 'https://raw.githubusercontent.com/birdnet-team/BirdNET-Analyzer/main/birdnet_analyzer/labels/V2.4/BirdNET_GLOBAL_6K_V2.4_Labels_en_uk.txt',
+        'label' => 'whoBIRD BirdNET species file (labels_en.txt)',
+        'description' => 'BirdNET species list (ID, scientific name, common name, etc.) from whoBIRD, kept in sync with taxo_code.txt.',
+        'github_repo' => 'woheller69/whoBIRD',
+        'github_path' => 'app/src/main/assets/labels_en.txt',
+        'raw_url' => 'https://github.com/woheller69/whoBIRD/raw/master/app/src/main/assets/labels_en.txt',
     ],
     'wikidata_species' => [
         'label' => 'Wikidata birds SPARQL export (English names, eBird IDs)',
