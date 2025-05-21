@@ -117,7 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
     }
 }
 ?>
-
 <div id="mapping-tool-wrapper" style="margin-top:2em;">
     <button type="button" class="collapsible">For maintainers: Mapping Sources</button>
     <div class="content" style="display:none;">
@@ -128,6 +127,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
                 $mapping_table->prepare_items();
                 $mapping_table->display();
             ?>
+        </form>
+        <form method="post" action="" style="margin-top:2em;">
+            <?php wp_nonce_field('whobird-generate-mapping'); ?>
+            <button type="submit" name="whobird_generate_mapping_table" class="button button-primary">
+                <?php esc_html_e('Generate/Update Mapping Table', 'wp-whobird'); ?>
+            </button>
         </form>
         <p style="font-size:smaller;color:#888;margin-top:1em;">
             Last commit = last change in the file’s GitHub repository. Last downloaded = when you last imported it.<br>
@@ -149,3 +154,11 @@ document.querySelectorAll('.collapsible').forEach(btn => {
 .collapsible {background: #f5f5f5; border:1px solid #ccc; padding: 8px 16px; cursor: pointer;}
 .collapsible.active, .collapsible:focus {background: #e2eaff;}
 </style>
+<?php
+// Handle the new mapping table generation form POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['whobird_generate_mapping_table']) && current_user_can('manage_options')) {
+    check_admin_referer('whobird-generate-mapping');
+    whobird_generate_mapping_table();
+    echo '<div class="updated notice"><p>' . esc_html__('Mapping table has been (re)generated successfully.', 'wp-whobird') . '</p></div>';
+}
+?>

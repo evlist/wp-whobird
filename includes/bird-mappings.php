@@ -1,5 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
+
 require_once __DIR__ . '/WhoBirdSources.php';
 
 // ---- CONFIGURATION ----
@@ -41,3 +42,55 @@ SPARQL,
 
 global $wpdb;
 $WHOBIRD_MAPPING_TABLE = $wpdb->prefix . 'whobird_remote_files';
+
+/**
+ * Generate or update the main mapping table for BirdNET species and Wikidata IDs.
+ */
+function whobird_generate_mapping_table() {
+    global $wpdb;
+
+    $mapping_table = $wpdb->prefix . 'whobird_mapping';
+
+    // Drop and recreate the mapping table
+    $wpdb->query("DROP TABLE IF EXISTS {$mapping_table}");
+    $wpdb->query("
+        CREATE TABLE {$mapping_table} (
+            birdnet_id INT(10) UNSIGNED PRIMARY KEY,
+            scientific_name VARCHAR(128),
+            wikidata_id VARCHAR(64)
+        )
+    ");
+
+    // Step 1: Insert birdnet_id and scientific_name from birdnet_species
+    $wpdb->query("
+        INSERT INTO {$mapping_table} (birdnet_id, scientific_name)
+        SELECT birdnet_id, scientific_name FROM {$wpdb->prefix}whobird_birdnet_species
+    ");
+
+    // Step 2: Update wikidata_id via scientific name
+    $wpdb->query("
+        UPDATE {$mapping_table} m
+        JOIN {$wpdb->prefix}whobird_wikidata_species w ON m.scientific_name = w.scientificName
+        SET m.wikidata_id = w.item
+    ");
+
+    // Step 3: Update wikidata_id via eBird ID for remaining rows
+    $wpdb->query("
+        UPDATE {$mapping_table} m
+        JOIN {$wpdb->prefix}whobird_taxocode t ON m.birdnet_id = t.birdnet_id
+        JOIN {$wpdb->prefix}whobird_wikidata_species w ON t.ebird_id = w.eBirdID
+        SET m.wikidata_id = w.item
+        WHERE m.wikidata_id IS NULL
+    ");
+}
+
+// Register the action handler for admin-post
+add_action('admin_post_whobird_generate_mapping_table', function() {
+    check_admin_referer('whobird-generate-mapping');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized');
+    }
+    whobird_generate_mapping_table();
+    wp_redirect(add_query_arg('mapping_updated', '1', wp_get_referer()));
+    exit;
+});
