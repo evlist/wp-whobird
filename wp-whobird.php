@@ -97,6 +97,29 @@ add_action('wp_enqueue_scripts', function () {
     ), 'before');
 });
 */
+
+add_action('admin_enqueue_scripts', function($hook) {
+    // You can restrict to your page using $hook here if you want
+   if ($hook === 'tools_page_whobird-admin-tools') {
+        // error_log($hook);
+        wp_enqueue_script(
+            'wpwhobird-admin-mapping',
+            plugins_url('build/wp-whobird/admin-mapping.js', __FILE__),
+            [],
+            filemtime(plugin_dir_path(__FILE__) . 'build/wp-whobird/admin-mapping.js'),
+            true
+        );
+        wp_localize_script(
+            'wpwhobird-admin-mapping',
+            'wpwhobirdMappingVars',
+            [
+                'nonce' => wp_create_nonce('whobird-generate-mapping'),
+                'ajaxurl' => admin_url('admin-ajax.php'),
+            ]
+        );
+    }
+});
+
 /**
  * Load the plugin text domain for translations.
  */
@@ -113,3 +136,4 @@ require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/AjaxBirdListIte
 register_activation_hook( __FILE__, [ 'WhoBirdActivator', 'activate' ] );
 require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/TaxoCodeTableManager.php';
 register_activation_hook( __FILE__, 'taxoCodeTableInit' );
+require_once __DIR__ . '/includes/ajax-generate-mapping.php';

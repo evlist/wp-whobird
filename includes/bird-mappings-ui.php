@@ -128,12 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
                 $mapping_table->display();
             ?>
         </form>
-        <form method="post" action="" style="margin-top:2em;">
-            <?php wp_nonce_field('whobird-generate-mapping'); ?>
-            <button type="submit" name="whobird_generate_mapping_table" class="button button-primary">
-                <?php esc_html_e('Generate/Update Mapping Table', 'wp-whobird'); ?>
-            </button>
-        </form>
+<!-- AJAX-powered mapping table generation button and progress -->
+<button id="whobird-generate-mapping-btn" class="button button-primary">Generate/Update mapping table</button>
+<ul id="whobird-mapping-steps-status" style="margin-top:1em"></ul>
         <p style="font-size:smaller;color:#888;margin-top:1em;">
             Last commit = last change in the file’s GitHub repository. Last downloaded = when you last imported it.<br>
             For Wikidata, only last downloaded/imported is shown.

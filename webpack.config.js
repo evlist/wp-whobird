@@ -1,18 +1,24 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
+const wpConfig = require('@wordpress/scripts/config/webpack.config');
+
+const originalEntry =
+    typeof wpConfig.entry === 'function'
+        ? wpConfig.entry()
+        : wpConfig.entry;
 
 module.exports = {
-    // Utiliser la configuration par défaut de wp-scripts
-    ...require('@wordpress/scripts/config/webpack.config'),
-
-    optimization: {
-        ...require('@wordpress/scripts/config/webpack.config').optimization,
-        minimize: false, // Disable minification
+    ...wpConfig,
+    entry: {
+        ...originalEntry,
+        'wp-whobird/admin-mapping': './src/wp-whobird/admin-mapping.js',
     },
-
+    optimization: {
+        ...wpConfig.optimization,
+        minimize: false,
+    },
     plugins: [
-        // Copier le contenu du répertoire assets/data dans build/assets/data
-        ...require('@wordpress/scripts/config/webpack.config').plugins,
+        ...(wpConfig.plugins || []),
         new CopyWebpackPlugin({
             patterns: [
                 {
