@@ -4,6 +4,7 @@ add_action('wp_ajax_whobird_generate_mapping', 'whobird_ajax_generate_mapping_ha
 
 require_once __DIR__ . '/bird-mappings.php';
 
+
 function whobird_ajax_generate_mapping_handler() {
     check_ajax_referer('whobird-generate-mapping');
 

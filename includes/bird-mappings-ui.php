@@ -1,5 +1,7 @@
 <?php
 if (!defined('ABSPATH')) exit;
+global $WHOBIRD_MAPPING_SOURCES;
+global $WHOBIRD_MAPPING_TABLE;
 require_once __DIR__ . '/bird-mappings.php';
 
 if (!class_exists('WP_List_Table')) {
