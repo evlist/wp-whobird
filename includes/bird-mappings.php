@@ -117,20 +117,25 @@ function whobird_get_mapping_steps() {
             )",
             'msg' => 'Created mapping table.',
         ],
-        // Step 3: Insert birdnet_id and scientific_name
+        // Step 3: Create index to speed up next steps
+        'add_wikidata_scientific_name_index' => [
+            'sql' => "ALTER TABLE {$wikidata_species} ADD INDEX idx_scientificName (scientificName(64))",
+            'msg' => 'Added index on scientificName in wikidata_species table (if not already present).',
+        ],
+        // Step 4: Insert birdnet_id and scientific_name
         'insert_birdnet_species' => [
             'sql' => "INSERT INTO {$mapping_table} (birdnet_id, scientific_name)
                       SELECT birdnet_id, scientific_name FROM {$birdnet_species}",
             'msg' => 'Inserted BirdNET species into mapping table.',
         ],
-        // Step 4: Update wikidata_id by scientific name
+        // Step 5: Update wikidata_id by scientific name
         'update_wikidata_by_scientific_name' => [
             'sql' => "UPDATE {$mapping_table} m
                       JOIN {$wikidata_species} w ON m.scientific_name = w.scientificName
                       SET m.wikidata_id = w.item",
             'msg' => 'Updated Wikidata IDs using scientific names.',
         ],
-        // Step 5: Update wikidata_id by eBird ID for unmapped rows
+        // Step 6: Update wikidata_id by eBird ID for unmapped rows
         'update_wikidata_by_ebird_id' => [
             'sql' => "UPDATE {$mapping_table} m
                       JOIN {$taxocode} t ON m.birdnet_id = t.birdnet_id
