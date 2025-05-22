@@ -3,6 +3,12 @@ if (!defined('ABSPATH')) exit;
 
 require_once __DIR__ . '/WhoBirdSources.php';
 
+add_action('admin_post_whobird_export_mapping_json', function() {
+    require_once __DIR__ . '/bird-mappings-export.php';
+    exit;
+});
+
+
 // ---- CONFIGURATION ----
 
 $WHOBIRD_MAPPING_SOURCES = [

@@ -133,6 +133,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
 <!-- AJAX-powered mapping table generation button and progress -->
 <button id="whobird-generate-mapping-btn" class="button button-primary">Generate/Update mapping table</button>
 <ul id="whobird-mapping-steps-status" style="margin-top:1em"></ul>
+<?php
+$export_url = admin_url('admin-post.php?action=whobird_export_mapping_json');
+?>
+<p>
+    <a href="<?php echo esc_url($export_url); ?>" class="button button-primary">
+        Download Mapping Table (JSON)
+    </a>
+</p>
         <p style="font-size:smaller;color:#888;margin-top:1em;">
             Last commit = last change in the file’s GitHub repository. Last downloaded = when you last imported it.<br>
             For Wikidata, only last downloaded/imported is shown.
