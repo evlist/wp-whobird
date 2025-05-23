@@ -5,25 +5,32 @@ use WPWhoBird\Config;
 class WhoBirdActivator
 {
     /**
-     * Activation hook to create required plugin tables.
+     * Activation hook to create or update required plugin tables.
      */
     public static function activate()
     {
         global $wpdb;
 
-        // Table 1: SPARQL Cache
-        $tableName1 = Config::getTableSparqlCache();
         $charsetCollate = $wpdb->get_charset_collate();
 
-        $sql1 = "CREATE TABLE $tableName1 (
-            ebird_id VARCHAR(255) NOT NULL UNIQUE,
-            result LONGTEXT NOT NULL,
-            expiration DATETIME NOT NULL
-        ) $charsetCollate;";
+        // Table 1: SPARQL Cache (keyed by birdnet_id INT)
+        $sparqlCacheTable = Config::getTableSparqlCache();
 
-        // Table 2: Remote Files Table
-        $tableName2 = $wpdb->prefix . 'whobird_remote_files';
-        $sql2 = "CREATE TABLE $tableName2 (
+        // Drop the old cache table if it exists (safe for cache tables)
+        $wpdb->query("DROP TABLE IF EXISTS $sparqlCacheTable");
+
+        // Now create the new cache table
+        $sparqlCacheSQL = "CREATE TABLE $sparqlCacheTable (
+            birdnet_id INT NOT NULL UNIQUE,
+            result LONGTEXT NOT NULL,
+            expiration DATETIME NOT NULL,
+            PRIMARY KEY (birdnet_id)
+        ) $charsetCollate;";
+        $wpdb->query($sparqlCacheSQL);
+
+        // Table 2: Remote Files Table (use dbDelta in case you want to preserve or migrate data)
+        $remoteFilesTable = Config::getTableRemoteFiles();
+        $remoteFilesSQL = "CREATE TABLE $remoteFilesTable (
             id INT AUTO_INCREMENT PRIMARY KEY,
             source VARCHAR(50) NOT NULL UNIQUE,
             raw_content LONGTEXT NOT NULL,
@@ -31,11 +38,17 @@ class WhoBirdActivator
             source_commit_sha VARCHAR(64) DEFAULT NULL,
             source_commit_date DATETIME DEFAULT NULL
         ) $charsetCollate;";
-
-        // Include WordPress file for dbDelta function
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($remoteFilesSQL);
 
-        dbDelta($sql1);
-        dbDelta($sql2);
+        // Table 3: Bird Mapping Table (use dbDelta for data safety)
+        $mappingTable = Config::getTableMapping();
+        $mappingSQL = "CREATE TABLE $mappingTable (
+            birdnet_id INT NOT NULL UNIQUE,
+            wikidata_id VARCHAR(32) NOT NULL,
+            scientific_name VARCHAR(255) NOT NULL,
+            PRIMARY KEY (birdnet_id)
+        ) $charsetCollate;";
+        dbDelta($mappingSQL);
     }
 }

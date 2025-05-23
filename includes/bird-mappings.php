@@ -8,6 +8,8 @@ add_action('admin_post_whobird_export_mapping_json', function() {
     exit;
 });
 
+use WPWhoBird\Config;
+
 
 // ---- CONFIGURATION ----
 
@@ -55,17 +57,10 @@ $WHOBIRD_MAPPING_TABLE = $wpdb->prefix . 'whobird_remote_files';
 function whobird_generate_mapping_table() {
     global $wpdb;
 
-    $mapping_table = $wpdb->prefix . 'whobird_mapping';
+    $mapping_table = Config::getTableMapping();
 
-    // Drop and recreate the mapping table
-    $wpdb->query("DROP TABLE IF EXISTS {$mapping_table}");
-    $wpdb->query("
-            CREATE TABLE {$mapping_table} (
-                birdnet_id INT(10) UNSIGNED PRIMARY KEY,
-                scientific_name VARCHAR(128),
-                wikidata_id VARCHAR(64)
-                )
-            ");
+    // Truncate the mapping table to remove all data, but keep the structure
+    $wpdb->query("TRUNCATE TABLE $mapping_table;");
 
     // Step 1: Insert birdnet_id and scientific_name from birdnet_species
     $wpdb->query("

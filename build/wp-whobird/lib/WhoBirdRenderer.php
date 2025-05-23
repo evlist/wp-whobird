@@ -90,7 +90,7 @@ class WhoBirdRenderer
         $list = '';
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
             $listItemRenderer = new BirdListItemRenderer(
-                $row['BirdNET_ID'],
+                (int)$row['BirdNET_ID'],
             );
             $list .= $listItemRenderer->render(
                 $row['SpeciesName'],

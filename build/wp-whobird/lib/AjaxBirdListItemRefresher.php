@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles the Ajax request to update bird data based on eBird ID.
+ * Handles the Ajax request to update bird data based on BirdNET ID.
  */
 
 namespace WPWhoBird;
@@ -8,7 +8,7 @@ namespace WPWhoBird;
 require_once plugin_dir_path( __FILE__ ) . '/WikidataQuery.php';
 require_once plugin_dir_path( __FILE__ ) . '/BirdListItemRenderer.php';
 
-
+use WPWhoBird\Config;
 use WPWhoBird\WikidataQuery;
 use WPWhoBird\BirdListItemRenderer;
 
@@ -22,23 +22,40 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function update_bird_data() {
     $startTime = microtime(true);
-    // Check if eBird ID is provided
-    if ( ! isset( $_POST['ebird_id'] ) || empty( $_POST['ebird_id'] ) ) {
-        wp_send_json_error( [ 'message' => __( 'Missing eBird ID.', 'wp-whobird' ) ] );
+
+    // Check if BirdNET ID is provided
+    if ( ! isset( $_POST['birdnet_id'] ) || empty( $_POST['birdnet_id'] ) ) {
+        wp_send_json_error( [ 'message' => __( 'Missing BirdNET ID.', 'wp-whobird' ) ] );
         return;
     }
 
-    $ebird_id = sanitize_text_field( $_POST['ebird_id'] );
+    $birdnet_id = (int) $_POST['birdnet_id'];
+
+    // Optional: Handle locale if passed
+    $locale = isset($_POST['locale']) ? sanitize_text_field($_POST['locale']) : get_locale();
+
+    // Look up the Wikidata ID (Q-id) for this BirdNET ID
+    global $wpdb;
+    $mapping_table = Config::getTableMapping();
+    $wikidata_id = $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT wikidata_id FROM $mapping_table WHERE birdnet_id = %d",
+            $birdnet_id
+        )
+    );
+
+    if (empty($wikidata_id)) {
+        wp_send_json_error( [ 'message' => __( 'Could not find Wikidata ID for this BirdNET ID.', 'wp-whobird' ) ] );
+        return;
+    }
 
     // Initialize the classes
-    $bird_renderer  = new BirdListItemRenderer( $ebird_id );
-
-    // Fetch the bird data
-    $wikidataQuery = new WikidataQuery($locale ?? get_locale());
+    $bird_renderer  = new BirdListItemRenderer( $birdnet_id, $locale );
+    $wikidataQuery = new WikidataQuery($locale);
 
     error_log('Step 1 - Initializations: ' . (microtime(true) - $startTime) . ' seconds');
 
-    $fresh_data = $wikidataQuery->fetchAndUpdateCachedData( $ebird_id );
+    $fresh_data = $wikidataQuery->fetchAndUpdateCachedData( $birdnet_id, $wikidata_id );
 
     error_log('Step 2 - Data fetched: ' . (microtime(true) - $startTime) . ' seconds');
 
@@ -55,7 +72,8 @@ function update_bird_data() {
     wp_send_json_success( [ 'html' => $html ] );
 
     error_log('Total execution time: ' . (microtime(true) - $startTime) . ' seconds');
-
 }
+
 add_action( 'wp_ajax_update_bird_data', __NAMESPACE__ . '\\update_bird_data' );
 add_action( 'wp_ajax_nopriv_update_bird_data', __NAMESPACE__ . '\\update_bird_data' );
+

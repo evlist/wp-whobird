@@ -134,6 +134,6 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/admin-tools.php';
 require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/WhoBirdActivator.php';
 require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/AjaxBirdListItemRefresher.php';
 register_activation_hook( __FILE__, [ 'WhoBirdActivator', 'activate' ] );
-require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/TaxoCodeTableManager.php';
-register_activation_hook( __FILE__, 'taxoCodeTableInit' );
+require_once plugin_dir_path( __FILE__ ) . 'build/wp-whobird/lib/WhobirdMappingTableManager.php';
+register_activation_hook( __FILE__, 'whobirdMappingTableInit' );
 require_once __DIR__ . '/includes/ajax-generate-mapping.php';

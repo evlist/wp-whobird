@@ -9,21 +9,20 @@ require_once 'ImageUtils.php';
 
 class BirdListItemRenderer
 {
-    private string $ebirdId;
+    private int $birdnetId;
+    private ?string $locale;
 
-    public function __construct(string $birdnetId, ?string $locale = null)
+    public function __construct(int $birdnetId, ?string $locale = null)
     {
-        // Convert birdnetId to ebirdId using TaxoCodeTableManager
-        $this->ebirdId = getEbirdIdByBirdnetId((int) $birdnetId);
+        $this->birdnetId = $birdnetId;
+        $this->locale = $locale ?? get_locale();
     }
-
-
 
     public function render(string $speciesName, string $recordingsUrls): string
     {
-
-        $wikidataQuery = new WikidataQuery($locale ?? get_locale());
-        $cache = $wikidataQuery->getCachedData($this->ebirdId);
+        $wikidataQuery = new WikidataQuery($this->locale);
+        // Use birdnet_id for cache and queries
+        $cache = $wikidataQuery->getCachedData($this->birdnetId);
 
         $needsRefresh = true;
         $birdData = [
@@ -35,11 +34,11 @@ class BirdListItemRenderer
                 $birdData = $cache['data'];
             }
         }
-        $dataEbirdId = $needsRefresh ? ' data-ebird-id="'.$this->ebirdId.'"' : '';
+        $dataBirdnetId = $needsRefresh ? ' data-birdnet-id="' . $this->birdnetId . '"' : '';
         return sprintf(
             '<li class="wpwbd-bird-entry" data-recordings="%s"%s>%s</li>',
             esc_attr($recordingsUrls),
-            $dataEbirdId,
+            $dataBirdnetId,
             $this->renderBirdData($birdData)
         );
     }
@@ -50,8 +49,7 @@ class BirdListItemRenderer
         $description = $birdData['description'] ?? '';
         $latinName = $birdData['latinName'] ?? '';
         $commonName = $birdData['commonName'] ?? '???';
-        $image = $birdData['image'] ?? plugins_url( '../assets/images/whoBIRD.svg', dirname(__FILE__) );
-        // $image = $birdData['image'] ?? plugins_url( 'build/assets/images/whoBIRD.svg' );
+        $image = $birdData['image'] ?? plugins_url('../assets/images/whoBIRD.svg', dirname(__FILE__));
         $wikipedia = '';
 
         // Check if the Wikipedia URL is set
@@ -83,5 +81,4 @@ class BirdListItemRenderer
             $wikipedia
         );
     }
-
 }

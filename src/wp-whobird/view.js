@@ -127,11 +127,11 @@ function initializeAjaxQueue() {
   let isProcessing = false;
 
   /**
-   * Add a bird ID to the queue for updating.
-   * @param {string} ebirdId - The eBird ID of the bird.
+   * Add a birdnet ID to the queue for updating.
+   * @param {string|number} birdnetId - The BirdNET ID of the bird.
    */
-  function queueBirdForUpdate(ebirdId) {
-    birdQueue.push(ebirdId);
+  function queueBirdForUpdate(birdnetId) {
+    birdQueue.push(Number(birdnetId));
     processBirdQueue();
   }
 
@@ -142,9 +142,8 @@ function initializeAjaxQueue() {
     if (isProcessing || birdQueue.length === 0) return;
 
     isProcessing = true;
-    const ebirdId = birdQueue.shift();
+    const birdnetId = birdQueue.shift();
 
-    console.log(ajaxurl);
     // Send Ajax request using fetch
     fetch(ajaxurl, {
       method: "POST",
@@ -153,7 +152,7 @@ function initializeAjaxQueue() {
       },
       body: new URLSearchParams({
         action: "update_bird_data",
-        ebird_id: ebirdId,
+        birdnet_id: birdnetId,
       }),
     })
       .then((response) => {
@@ -165,7 +164,7 @@ function initializeAjaxQueue() {
       .then((data) => {
         if (data.success) {
           const birdEntry = document.querySelector(
-            `.wpwbd-bird-entry[data-ebird-id="${ebirdId}"]`
+            `.wpwbd-bird-entry[data-birdnet-id="${birdnetId}"]`
           );
           if (birdEntry) {
             birdEntry.innerHTML = data.data.html;
@@ -173,7 +172,7 @@ function initializeAjaxQueue() {
         }
       })
       .catch(() => {
-        console.error(`Error updating bird data for ${ebirdId}.`);
+        console.error(`Error updating bird data for ${birdnetId}.`);
       })
       .finally(() => {
         isProcessing = false;
@@ -181,12 +180,13 @@ function initializeAjaxQueue() {
       });
   }
 
-  // Find all bird entries with data-ebird-id and add them to the queue
+  // Find all bird entries with data-birdnet-id and add them to the queue
   const birdEntries = document.querySelectorAll(
-    ".wpwbd-bird-entry[data-ebird-id]"
+    ".wpwbd-bird-entry[data-birdnet-id]"
   );
   birdEntries.forEach((entry) => {
-    const ebirdId = entry.getAttribute("data-ebird-id");
-    queueBirdForUpdate(ebirdId);
+    const birdnetId = entry.getAttribute("data-birdnet-id");
+    queueBirdForUpdate(birdnetId);
   });
 }
+

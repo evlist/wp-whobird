@@ -20,17 +20,22 @@ class WikidataQuery {
         $this->language = substr($locale, 0, 2); // Extract the language code (e.g., 'fr', 'es')
     }
 
-    public function getCachedData(string $ebirdId): ?array {
+    /**
+     * Get cached Wikidata info for a bird given its BirdNET integer ID.
+     * @param int $birdnetId
+     * @return array|null
+     */
+    public function getCachedData(int $birdnetId): ?array {
         global $wpdb;
         $tableName = Config::getTableSparqlCache();
 
         $cachedResult = $wpdb->get_row(
-                $wpdb->prepare(
-                    "SELECT result, expiration FROM $tableName WHERE ebird_id = %s",
-                    $ebirdId
-                    ),
-                ARRAY_A
-                );
+            $wpdb->prepare(
+                "SELECT result, expiration FROM $tableName WHERE birdnet_id = %d",
+                $birdnetId
+            ),
+            ARRAY_A
+        );
 
         if (!$cachedResult) {
             return null;
@@ -44,44 +49,62 @@ class WikidataQuery {
         ];
     }
 
-    public function fetchAndUpdateCachedData(string $ebirdId): array {
+    /**
+     * Fetch data from Wikidata and update the cache. Requires birdnet_id and wikidata_id.
+     * @param int $birdnetId
+     * @param string $wikidataId
+     * @return array
+     */
+    public function fetchAndUpdateCachedData(int $birdnetId, string $wikidataId): array {
 
         $throttle = new FileLockThrottle("wikidata", self::$requestIntervalMs);
         $throttle->waitUntilAllowed();
 
-        $cachedData = $this->getCachedData($ebirdId);
+        $cachedData = $this->getCachedData($birdnetId);
         if ($cachedData && $cachedData['isFresh']) {
             return $cachedData['data'];
         }
 
-        $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($this->buildSparqlQuery($ebirdId));
+        $sparqlQuery = $this->buildSparqlQuery($wikidataId);
+        error_log('sparqlQuery: ' . $sparqlQuery);
+        $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($sparqlQuery);
         $sparqlHeaders = ["Accept: application/json"];
         $startCurl = microtime(true);
         $sparqlResponse = $this->executeCurl($sparqlUrl, $sparqlHeaders);
         error_log('cURL execution time: ' . (microtime(true) - $startCurl) . ' seconds');
         $sparqlData = json_decode($sparqlResponse, true);
 
-        return $this->processAndCacheData($ebirdId, $sparqlData);
+        return $this->processAndCacheData($birdnetId, $sparqlData);
     }
 
-    private function buildSparqlQuery(string $ebirdId): string {
+    /**
+     * Build a minimal SPARQL query using the Wikidata Q-id.
+     * @param string $wikidataId e.g. "Q5113"
+     * @return string
+     */
+    private function buildSparqlQuery(string $wikidataId): string {
         return <<<SPARQL
-            SELECT ?item ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
-                ?item wdt:P3444 "$ebirdId".
-                    ?item wdt:P171*/wdt:P279* wd:Q5113.
-                    OPTIONAL { ?item wdt:P225 ?latinName. }
-                OPTIONAL { ?item wdt:P18 ?image. }
-                OPTIONAL {
-                    ?wikipedia schema:about ?item;
-                    schema:isPartOf <https://fr.wikipedia.org/>.
-                }
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "$this->language,en". }
-            }
-            LIMIT 1
-            SPARQL;
+SELECT ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
+  BIND(wd:$wikidataId AS ?item)
+  OPTIONAL { ?item wdt:P225 ?latinName. }
+  OPTIONAL { ?item wdt:P18 ?image. }
+  OPTIONAL {
+    ?wikipedia schema:about ?item;
+      schema:isPartOf <https://{$this->language}.wikipedia.org/>.
+  }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "{$this->language},en". }
+}
+LIMIT 1
+SPARQL;
     }
 
-    private function processAndCacheData(string $ebirdId, array $sparqlData): array {
+    /**
+     * Store the fetched data in the cache.
+     * @param int $birdnetId
+     * @param array $sparqlData
+     * @return array
+     */
+    private function processAndCacheData(int $birdnetId, array $sparqlData): array {
         global $wpdb;
 
         $result = null;
@@ -99,13 +122,13 @@ class WikidataQuery {
 
         $tableName = Config::getTableSparqlCache();
         $wpdb->replace(
-                $tableName,
-                [
-                'ebird_id' => $ebirdId,
+            $tableName,
+            [
+                'birdnet_id' => $birdnetId,
                 'result' => json_encode($result),
                 'expiration' => date('Y-m-d H:i:s', strtotime('+10 days')),
-                ]
-                );
+            ]
+        );
 
         return $result;
     }
@@ -122,7 +145,7 @@ class WikidataQuery {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        // Ajouter l'en-tête User-Agent
+        // User-Agent header
         $defaultHeaders = [
             "User-Agent: wp-whobird/0.1 (https://github.com/evlist/wp-whobird ; vdv@dyomedea.com)"
         ];
@@ -133,5 +156,4 @@ class WikidataQuery {
 
         return $response;
     }
-
 }
