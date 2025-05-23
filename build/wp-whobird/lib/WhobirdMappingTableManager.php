@@ -39,7 +39,7 @@ function whobirdMappingTableInit() {
     $sql = "CREATE TABLE $table_name (
         birdnet_id INT NOT NULL PRIMARY KEY,
         scientific_name VARCHAR(128),
-        wikidata_id VARCHAR(128)
+        wikidata_qid VARCHAR(128)
     ) $charset_collate;";
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
@@ -51,7 +51,7 @@ function whobirdMappingTableInit() {
             [
                 'birdnet_id'      => intval($row['birdnet_id']),
                 'scientific_name' => $row['scientific_name'],
-                'wikidata_id'     => $row['wikidata_id'] ?? null,
+                'wikidata_qid'     => $row['wikidata_qid'] ?? null,
             ],
             [ '%d', '%s', '%s' ]
         );
@@ -63,14 +63,14 @@ function whobirdMappingTableInit() {
  * Retrieves the mapping information for a given birdnet_id.
  *
  * @param int $birdnetId The BirdNET species ID.
- * @return array|null An associative array with keys 'scientific_name' and 'wikidata_id',
+ * @return array|null An associative array with keys 'scientific_name' and 'wikidata_qid',
  *                    or null if no record is found.
  */
 function getMappingByBirdnetId(int $birdnetId): ?array {
     global $wpdb;
     $table_name = $wpdb->prefix . 'whobird_mapping';
     $query = $wpdb->prepare(
-        "SELECT scientific_name, wikidata_id FROM $table_name WHERE birdnet_id = %d",
+        "SELECT scientific_name, wikidata_qid FROM $table_name WHERE birdnet_id = %d",
         $birdnetId
     );
     $result = $wpdb->get_row($query, ARRAY_A);

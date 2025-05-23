@@ -59,7 +59,7 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
         $path = $this->cfg['github_path'];
         $api_url = "https://api.github.com/repos/$repo/commits?path=" . urlencode($path) . "&per_page=1";
         $response = wp_remote_get($api_url, [
-            'headers' => ['User-Agent' => 'whoBIRD-plugin']
+                'headers' => ['User-Agent' => 'whoBIRD-plugin']
         ]);
         if (is_wp_error($response)) return [null, null];
         $body = json_decode(wp_remote_retrieve_body($response), true);
@@ -72,7 +72,7 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
     protected function fetchRawFile() {
         $url = $this->cfg['raw_url'];
         $response = wp_remote_get($url, [
-            'headers' => ['User-Agent' => 'whoBIRD-plugin']
+                'headers' => ['User-Agent' => 'whoBIRD-plugin']
         ]);
         if (is_wp_error($response)) return null;
         return wp_remote_retrieve_body($response);
@@ -91,15 +91,15 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
         $now = current_time('mysql');
         $latest_date_sql = date('Y-m-d H:i:s', strtotime($latest_date));
         $wpdb->replace(
-            $this->table,
-            [
+                $this->table,
+                [
                 'source' => $this->key,
                 'raw_content' => $content,
                 'updated_at' => $now,
                 'source_commit_sha' => $latest_sha,
                 'source_commit_date' => $latest_date_sql,
-            ]
-        );
+                ]
+                );
         return [true, 'File updated successfully.'];
     }
 
@@ -132,9 +132,9 @@ class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
         // Drop and recreate table
         $wpdb->query("DROP TABLE IF EXISTS `$table_name`");
         $sql = "CREATE TABLE `$table_name` (
-            birdnet_id INT UNSIGNED NOT NULL PRIMARY KEY,
-            ebird_id VARCHAR(24) NOT NULL
-        ) DEFAULT CHARSET=utf8mb4";
+                birdnet_id INT UNSIGNED NOT NULL PRIMARY KEY,
+                ebird_id VARCHAR(24) NOT NULL
+                ) DEFAULT CHARSET=utf8mb4";
         $wpdb->query($sql);
 
         // Get raw content
@@ -151,8 +151,8 @@ class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
             $ebird_id = trim($ebird_id);
             if ($ebird_id === '') continue;
             $result = $wpdb->insert($table_name, [
-                'birdnet_id' => $i,
-                'ebird_id' => $ebird_id
+                    'birdnet_id' => $i,
+                    'ebird_id' => $ebird_id
             ]);
             if ($result === false) {
                 $errors[] = "Insert error for birdnet_id=$i : " . $wpdb->last_error;
@@ -179,10 +179,10 @@ class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
         // Drop and recreate table
         $wpdb->query("DROP TABLE IF EXISTS `$table_name`");
         $sql = "CREATE TABLE `$table_name` (
-            birdnet_id INT UNSIGNED NOT NULL PRIMARY KEY,
-            scientific_name VARCHAR(128) NOT NULL,
-            english_name VARCHAR(128) NOT NULL
-        ) DEFAULT CHARSET=utf8mb4";
+                birdnet_id INT UNSIGNED NOT NULL PRIMARY KEY,
+                scientific_name VARCHAR(128) NOT NULL,
+                english_name VARCHAR(128) NOT NULL
+                ) DEFAULT CHARSET=utf8mb4";
         $wpdb->query($sql);
 
         // Get raw content
@@ -202,9 +202,9 @@ class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
             $scientific = trim($parts[0]);
             $english = isset($parts[1]) ? trim($parts[1]) : '';
             $result = $wpdb->insert($table_name, [
-                'birdnet_id' => $i,
-                'scientific_name' => $scientific,
-                'english_name' => $english
+                    'birdnet_id' => $i,
+                    'scientific_name' => $scientific,
+                    'english_name' => $english
             ]);
             if ($result === false) {
                 $errors[] = "Insert error for birdnet_id=$i : " . $wpdb->last_error;
@@ -234,11 +234,11 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
         $accept = 'application/sparql-results+json';
 
         $response = wp_remote_get($url, [
-            'headers' => [
+                'headers' => [
                 'Accept' => $accept,
                 'User-Agent' => 'whoBIRD-plugin'
-            ],
-            'timeout' => 60
+                ],
+                'timeout' => 60
         ]);
         if (is_wp_error($response)) {
             return [false, 'SPARQL query error: ' . $response->get_error_message()];
@@ -249,15 +249,15 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
         }
         $now = current_time('mysql');
         $wpdb->replace(
-            $this->table,
-            [
+                $this->table,
+                [
                 'source' => $this->key,
                 'raw_content' => $content,
                 'updated_at' => $now,
                 'source_commit_sha' => null,
                 'source_commit_date' => null,
-            ]
-        );
+                ]
+                );
         return [true, 'Wikidata SPARQL result updated successfully.'];
     }
 
@@ -277,9 +277,18 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
     }
 
     /**
+    /**
      * Import SPARQL JSON results into a structured table.
      * The table is named {$wpdb->prefix}whobird_wikidata_species.
-     * Columns: one for each property in the SPARQL result (item, itemLabel, scientificName, taxonRankLabel, eBirdID).
+     * Columns:
+     *   - wikidata_qid: Wikidata Q-id (e.g. "Q12345"), primary key
+     *   - itemLabel: English label from Wikidata
+     *   - scientificName: Scientific name
+     *   - taxonRankLabel: Taxon rank label
+     *   - eBirdID: eBird taxon ID
+     *
+     * Assumes the SPARQL query returns a ?wikidata_qid variable for each row.
+     * Does NOT store the full Wikidata entity URL.
      */
     public function uploadToTable() {
         global $wpdb;
@@ -296,36 +305,34 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
             return [false, 'Invalid or unexpected Wikidata SPARQL result.'];
         }
 
-        $vars = $json['head']['vars']; // e.g. ['item', 'itemLabel', ...]
-        $bindings = $json['results']['bindings'];
-
-        // Compose SQL for columns
-        // We'll use VARCHAR(255) for all columns, including 'item'
-        $columns_sql = [];
-        foreach ($vars as $var) {
-            $columns_sql[] = "`$var` VARCHAR(255) DEFAULT NULL";
-        }
-        $columns_str = implode(",\n", $columns_sql);
-
         // Drop and recreate table
         $wpdb->query("DROP TABLE IF EXISTS `$table_name`");
         $sql = "CREATE TABLE `$table_name` (
-            $columns_str
-        ) DEFAULT CHARSET=utf8mb4";
+                `wikidata_qid` VARCHAR(32),
+                `itemLabel` VARCHAR(255) DEFAULT NULL,
+                `scientificName` VARCHAR(255) DEFAULT NULL,
+                `taxonRankLabel` VARCHAR(255) DEFAULT NULL,
+                `eBirdID` VARCHAR(255) DEFAULT NULL
+                ) DEFAULT CHARSET=utf8mb4";
         $wpdb->query($sql);
 
         // Prepare and insert rows
         $inserted = 0;
         $errors = [];
-        foreach ($bindings as $row) {
-            $row_data = [];
-            foreach ($vars as $var) {
-                $row_data[$var] = isset($row[$var]['value']) ? $row[$var]['value'] : null;
-            }
-            if (!empty($row_data['item'])) {
+        foreach ($json['results']['bindings'] as $row) {
+            $itemUrl = $row['item']['value']; // e.g., "http://www.wikidata.org/entity/Q12345"
+            $wikidata_qid = substr($itemUrl, strrpos($itemUrl, '/') + 1);
+            $row_data = [
+                'wikidata_qid' => $wikidata_qid,
+                'itemLabel' => isset($row['itemLabel']['value']) ? $row['itemLabel']['value'] : null,
+                'scientificName' => isset($row['scientificName']['value']) ? $row['scientificName']['value'] : null,
+                'taxonRankLabel' => isset($row['taxonRankLabel']['value']) ? $row['taxonRankLabel']['value'] : null,
+                'eBirdID' => isset($row['eBirdID']['value']) ? $row['eBirdID']['value'] : null,
+            ];
+            if (!empty($row_data['wikidata_qid'])) {
                 $result = $wpdb->insert($table_name, $row_data);
                 if ($result === false) {
-                    $errors[] = "Insert error for item=" . esc_html($row_data['item']) . ": " . $wpdb->last_error;
+                    $errors[] = "Insert error for wikidata_qid=" . esc_html($row_data['wikidata_qid']) . ": " . $wpdb->last_error;
                 } else {
                     $inserted++;
                 }

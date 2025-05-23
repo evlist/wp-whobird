@@ -161,11 +161,3 @@ document.querySelectorAll('.collapsible').forEach(btn => {
 .collapsible {background: #f5f5f5; border:1px solid #ccc; padding: 8px 16px; cursor: pointer;}
 .collapsible.active, .collapsible:focus {background: #e2eaff;}
 </style>
-<?php
-// Handle the new mapping table generation form POST
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['whobird_generate_mapping_table']) && current_user_can('manage_options')) {
-    check_admin_referer('whobird-generate-mapping');
-    whobird_generate_mapping_table();
-    echo '<div class="updated notice"><p>' . esc_html__('Mapping table has been (re)generated successfully.', 'wp-whobird') . '</p></div>';
-}
-?>

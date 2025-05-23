@@ -50,7 +50,7 @@ class WikidataQuery {
     }
 
     /**
-     * Fetch data from Wikidata and update the cache. Requires birdnet_id and wikidata_id.
+     * Fetch data from Wikidata and update the cache. Requires birdnet_id and wikidata_qid.
      * @param int $birdnetId
      * @param string $wikidataId
      * @return array

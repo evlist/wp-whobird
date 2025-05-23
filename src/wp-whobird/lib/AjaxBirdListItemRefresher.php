@@ -37,14 +37,14 @@ function update_bird_data() {
     // Look up the Wikidata ID (Q-id) for this BirdNET ID
     global $wpdb;
     $mapping_table = Config::getTableMapping();
-    $wikidata_id = $wpdb->get_var(
+    $wikidata_qid = $wpdb->get_var(
         $wpdb->prepare(
-            "SELECT wikidata_id FROM $mapping_table WHERE birdnet_id = %d",
+            "SELECT wikidata_qid FROM $mapping_table WHERE birdnet_id = %d",
             $birdnet_id
         )
     );
 
-    if (empty($wikidata_id)) {
+    if (empty($wikidata_qid)) {
         wp_send_json_error( [ 'message' => __( 'Could not find Wikidata ID for this BirdNET ID.', 'wp-whobird' ) ] );
         return;
     }
@@ -55,7 +55,7 @@ function update_bird_data() {
 
     error_log('Step 1 - Initializations: ' . (microtime(true) - $startTime) . ' seconds');
 
-    $fresh_data = $wikidataQuery->fetchAndUpdateCachedData( $birdnet_id, $wikidata_id );
+    $fresh_data = $wikidataQuery->fetchAndUpdateCachedData( $birdnet_id, $wikidata_qid );
 
     error_log('Step 2 - Data fetched: ' . (microtime(true) - $startTime) . ' seconds');
 

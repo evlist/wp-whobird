@@ -10,7 +10,7 @@ require_once __DIR__ . '/bird-mappings.php';
 $mapping_table = $wpdb->prefix . 'whobird_mapping';
 
 // 1. Export mapping table data
-$data = $wpdb->get_results("SELECT birdnet_id, scientific_name, wikidata_id FROM {$mapping_table} ORDER BY birdnet_id", ARRAY_A);
+$data = $wpdb->get_results("SELECT birdnet_id, scientific_name, wikidata_qid FROM {$mapping_table} ORDER BY birdnet_id", ARRAY_A);
 
 // 2. Gather source metadata
 $sources_cfg = $WHOBIRD_MAPPING_SOURCES;

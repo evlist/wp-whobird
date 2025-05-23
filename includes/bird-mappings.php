@@ -4,9 +4,9 @@ if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/WhoBirdSources.php';
 
 add_action('admin_post_whobird_export_mapping_json', function() {
-    require_once __DIR__ . '/bird-mappings-export.php';
-    exit;
-});
+        require_once __DIR__ . '/bird-mappings-export.php';
+        exit;
+        });
 
 use WPWhoBird\Config;
 
@@ -34,14 +34,13 @@ $WHOBIRD_MAPPING_SOURCES = [
         'sparql_url' => 'https://query.wikidata.org/sparql',
         'query' => <<<SPARQL
         SELECT ?item ?itemLabel ?scientificName ?taxonRankLabel ?eBirdID WHERE {
-            ?item wdt:P105 wd:Q7432.  # Taxon (species or below)
-                ?item wdt:P225 ?scientificName.  # Scientific name
-                OPTIONAL { ?item wdt:P3444 ?eBirdID. }  # eBird ID
-                OPTIONAL { ?item wdt:P105 ?taxonRank. }  # Taxon rank
-                ?item wdt:P171* wd:Q5113.  # Descendant of Aves (birds)
+            ?item wdt:P105 wd:Q7432.  # Taxon (species)
+                ?item wdt:P225 ?scientificName.
+                OPTIONAL { ?item wdt:P3444 ?eBirdID. }
+            OPTIONAL { ?item wdt:P105 ?taxonRank. }
+            ?item wdt:P171* wd:Q5113.  # Descendant of Aves (birds)
                 SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
         }
-ORDER BY ?scientificName
 SPARQL,
     ],
     ];
@@ -51,50 +50,6 @@ SPARQL,
 global $wpdb;
 $WHOBIRD_MAPPING_TABLE = $wpdb->prefix . 'whobird_remote_files';
 
-/**
- * Generate or update the main mapping table for BirdNET species and Wikidata IDs.
- */
-function whobird_generate_mapping_table() {
-    global $wpdb;
-
-    $mapping_table = Config::getTableMapping();
-
-    // Truncate the mapping table to remove all data, but keep the structure
-    $wpdb->query("TRUNCATE TABLE $mapping_table;");
-
-    // Step 1: Insert birdnet_id and scientific_name from birdnet_species
-    $wpdb->query("
-            INSERT INTO {$mapping_table} (birdnet_id, scientific_name)
-            SELECT birdnet_id, scientific_name FROM {$wpdb->prefix}whobird_birdnet_species
-            ");
-
-    // Step 2: Update wikidata_id via scientific name
-    $wpdb->query("
-            UPDATE {$mapping_table} m
-            JOIN {$wpdb->prefix}whobird_wikidata_species w ON m.scientific_name = w.scientificName
-            SET m.wikidata_id = w.item
-            ");
-
-    // Step 3: Update wikidata_id via eBird ID for remaining rows
-    $wpdb->query("
-            UPDATE {$mapping_table} m
-            JOIN {$wpdb->prefix}whobird_taxocode t ON m.birdnet_id = t.birdnet_id
-            JOIN {$wpdb->prefix}whobird_wikidata_species w ON t.ebird_id = w.eBirdID
-            SET m.wikidata_id = w.item
-            WHERE m.wikidata_id IS NULL
-            ");
-}
-
-// Register the action handler for admin-post
-add_action('admin_post_whobird_generate_mapping_table', function() {
-        check_admin_referer('whobird-generate-mapping');
-        if (!current_user_can('manage_options')) {
-        wp_die('Unauthorized');
-        }
-        whobird_generate_mapping_table();
-        wp_redirect(add_query_arg('mapping_updated', '1', wp_get_referer()));
-        exit;
-        });
 
 function whobird_get_mapping_steps() {
     global $wpdb;
@@ -114,7 +69,7 @@ function whobird_get_mapping_steps() {
             'sql' => "CREATE TABLE {$mapping_table} (
                     birdnet_id INT(10) UNSIGNED PRIMARY KEY,
                     scientific_name VARCHAR(128),
-                    wikidata_id VARCHAR(64)
+                    wikidata_qid VARCHAR(64)
                     )",
         'msg' => 'Created mapping table.',
         ],
@@ -123,26 +78,31 @@ function whobird_get_mapping_steps() {
             'sql' => '', // handled in PHP
         'msg' => 'Added index on scientificName in wikidata_species table (if not already present).',
         ],
+        // Step 4: Create index to speed up next steps
+        'add_wikidata_ebirdid_index' => [
+            'sql' => '', // handled in PHP
+        'msg' => 'Added index on eBird id in wikidata_species table (if not already present).',
+        ],
         // Step 4: Insert birdnet_id and scientific_name
         'insert_birdnet_species' => [
             'sql' => "INSERT INTO {$mapping_table} (birdnet_id, scientific_name)
                 SELECT birdnet_id, scientific_name FROM {$birdnet_species}",
         'msg' => 'Inserted BirdNET species into mapping table.',
         ],
-        // Step 5: Update wikidata_id by scientific name
+        // Step 5: Update wikidata_qid by scientific name
         'update_wikidata_by_scientific_name' => [
             'sql' => "UPDATE {$mapping_table} m
                 JOIN {$wikidata_species} w ON m.scientific_name = w.scientificName
-                SET m.wikidata_id = w.item",
+                SET m.wikidata_qid = w.wikidata_qid",
         'msg' => 'Updated Wikidata IDs using scientific names.',
         ],
-        // Step 6: Update wikidata_id by eBird ID for unmapped rows
+        // Step 6: Update wikidata_qid by eBird ID for unmapped rows
         'update_wikidata_by_ebird_id' => [
             'sql' => "UPDATE {$mapping_table} m
                 JOIN {$taxocode} t ON m.birdnet_id = t.birdnet_id
                 JOIN {$wikidata_species} w ON t.ebird_id = w.eBirdID
-                SET m.wikidata_id = w.item
-                WHERE m.wikidata_id IS NULL",
+                SET m.wikidata_qid = w.wikidata_qid
+                WHERE m.wikidata_qid IS NULL",
         'msg' => 'Updated Wikidata IDs using eBird IDs for unmatched rows.',
         ],
         'update_mapping_from_wikidata_truthy' => [
@@ -184,7 +144,31 @@ function whobird_execute_mapping_step($step) {
         if (!$exists) {
             $result = $wpdb->query("ALTER TABLE {$wikidata_species} ADD INDEX {$index_name} (scientificName(64))");
             if ($result === false) {
-                return [ 'success' => false, 'msg' => 'SQL error: ' . $wpdb->last_error ];
+                return [ 'success' => false, 'msg' => 'SQL error creating index on scientific name: ' . $wpdb->last_error ];
+            }
+            return [ 'success' => true, 'msg' => $steps[$step]['msg'] . " (created)" ];
+        } else {
+            return [ 'success' => true, 'msg' => $steps[$step]['msg'] . " (already present)" ];
+        }
+    }
+
+    if ($step === 'add_wikidata_ebirdid_index') {
+        $wikidata_species = $wpdb->prefix . 'whobird_wikidata_species';
+        $index_name = 'idx_ebirdid';
+
+        // Check if the index exists
+        $exists = $wpdb->get_var(
+                $wpdb->prepare(
+                    "SHOW INDEX FROM {$wikidata_species} WHERE Key_name = %s",
+                    $index_name
+                    )
+                );
+        if (!$exists) {
+            $result = $wpdb->query("ALTER TABLE {$wikidata_species} ADD INDEX {$index_name} (eBirdID)");
+            if ($result === false) {
+                $error = $wpdb->last_error;
+                error_log("SQL error in bird-mapping index creation: $error");
+                return [ 'success' => false, 'msg' => 'SQL error, see error in the log '];
             }
             return [ 'success' => true, 'msg' => $steps[$step]['msg'] . " (created)" ];
         } else {
@@ -195,23 +179,24 @@ function whobird_execute_mapping_step($step) {
 
     // Step: update_mapping_with_fetched_ids
     if ($step === 'update_mapping_with_fetched_ids') {
-        $results = get_option('whobird_fetched_wikidata_ids', []);
+        $results = get_option('whobird_fetched_wikidata_qids', []);
         if (!$results) {
             return [ 'success' => true, 'msg' => $steps[$step]['msg'] . ' (none to update)' ];
         }
         $updated = 0;
         foreach ($results as $sci => $qid) {
-            $wpdb->update($mapping_table, ['wikidata_id' => $qid], ['scientific_name' => $sci]);
+            $wpdb->update($mapping_table, ['wikidata_qid' => $qid], ['scientific_name' => $sci]);
             $updated++;
         }
-        delete_option('whobird_fetched_wikidata_ids');
+        delete_option('whobird_fetched_wikidata_qids');
         return [ 'success' => true, 'msg' => $steps[$step]['msg'] . " ($updated updated)" ];
     }
 
     if ($step === 'update_mapping_from_wikidata_truthy' || $step === 'update_mapping_from_wikidata_all') {
         $p225_mode = $step === 'update_mapping_from_wikidata_truthy' ? 'wdt' : 'ps';
 
-        $missing = $wpdb->get_col("SELECT scientific_name FROM {$mapping_table} WHERE wikidata_id IS NULL AND scientific_name IS NOT NULL");
+        $missing = $wpdb->get_col("SELECT scientific_name FROM {$mapping_table} WHERE wikidata_qid IS NULL AND scientific_name IS NOT NULL");
+        error_log("Step $step, missing from $mapping_table: $missing");
         if (!$missing) {
             return [ 'success' => true, 'msg' => $steps[$step]['msg'] . ' (none missing)' ];
         }
@@ -225,6 +210,7 @@ function whobird_execute_mapping_step($step) {
                 $values .= ' "' . addcslashes($name, '"\\') . '"';
             }
             if ($p225_mode === 'wdt') {
+                // Direct property (fastest, returns entity URL in ?item)
                 $sparql = <<<SPARQL
                     SELECT ?item ?scientificName WHERE {
                         ?item wdt:P225 ?scientificName .
@@ -232,6 +218,7 @@ function whobird_execute_mapping_step($step) {
                     }
                 SPARQL;
             } else { // ps
+                     // Statement property (also returns entity URL in ?item)
                 $sparql = <<<SPARQL
                     SELECT ?item ?scientificName WHERE {
                         ?item p:P225/ps:P225 ?scientificName .
@@ -239,6 +226,7 @@ function whobird_execute_mapping_step($step) {
                     }
                 SPARQL;
             }
+            error_log("Step $step, sparql: $sparql");
             $response = wp_remote_post($sparql_url, [
                     'timeout' => 30,
                     'headers' => [
@@ -253,7 +241,9 @@ function whobird_execute_mapping_step($step) {
             foreach ($data['results']['bindings'] as $row) {
                 $sci = $row['scientificName']['value'];
                 $qurl = $row['item']['value'];
-                $result = $wpdb->update($mapping_table, ['wikidata_id' => $qurl], ['scientific_name' => $sci]);
+                // Extract Q-id from URL
+                $qid = substr($qurl, strrpos($qurl, '/') + 1);
+                $result = $wpdb->update($mapping_table, ['wikidata_qid' => $qid], ['scientific_name' => $sci]);
                 if ($result !== false && $wpdb->rows_affected > 0) {
                     $updated++;
                 }
@@ -272,7 +262,9 @@ function whobird_execute_mapping_step($step) {
     } else {
         $result = $wpdb->query($sql);
         if ($result === false) {
-            return [ 'success' => false, 'msg' => 'SQL error: ' . $wpdb->last_error ];
+            $error = $wpdb->last_error;
+            error_log("SQL error in step $step: $error");
+            return [ 'success' => false, 'msg' => 'SQL error, see error in the log '];
         }
         return [ 'success' => true, 'msg' => $steps[$step]['msg'] ];
     }

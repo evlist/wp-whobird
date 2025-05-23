@@ -45,7 +45,7 @@ class WhoBirdActivator
         $mappingTable = Config::getTableMapping();
         $mappingSQL = "CREATE TABLE $mappingTable (
             birdnet_id INT NOT NULL UNIQUE,
-            wikidata_id VARCHAR(32) NOT NULL,
+            wikidata_qid VARCHAR(32) NOT NULL,
             scientific_name VARCHAR(255) NOT NULL,
             PRIMARY KEY (birdnet_id)
         ) $charsetCollate;";
