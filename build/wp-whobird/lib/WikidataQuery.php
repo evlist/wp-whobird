@@ -30,12 +30,12 @@ class WikidataQuery {
         $tableName = Config::getTableSparqlCache();
 
         $cachedResult = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT result, expiration FROM $tableName WHERE birdnet_id = %d",
-                $birdnetId
-            ),
-            ARRAY_A
-        );
+                $wpdb->prepare(
+                    "SELECT result, expiration FROM $tableName WHERE birdnet_id = %d",
+                    $birdnetId
+                    ),
+                ARRAY_A
+                );
 
         if (!$cachedResult) {
             return null;
@@ -84,18 +84,18 @@ class WikidataQuery {
      */
     private function buildSparqlQuery(string $wikidataId): string {
         return <<<SPARQL
-SELECT ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
-  BIND(wd:$wikidataId AS ?item)
-  OPTIONAL { ?item wdt:P225 ?latinName. }
-  OPTIONAL { ?item wdt:P18 ?image. }
-  OPTIONAL {
-    ?wikipedia schema:about ?item;
-      schema:isPartOf <https://{$this->language}.wikipedia.org/>.
-  }
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "{$this->language},en". }
-}
-LIMIT 1
-SPARQL;
+            SELECT ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
+                BIND(wd:$wikidataId AS ?item)
+                    OPTIONAL { ?item wdt:P225 ?latinName. }
+                OPTIONAL { ?item wdt:P18 ?image. }
+                OPTIONAL {
+                    ?wikipedia schema:about ?item;
+                    schema:isPartOf <https://{$this->language}.wikipedia.org/>.
+                }
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "{$this->language},en". }
+            }
+            LIMIT 1
+            SPARQL;
     }
 
     /**
@@ -121,14 +121,19 @@ SPARQL;
         }
 
         $tableName = Config::getTableSparqlCache();
+
+        $min = 7 * 24 * 60 * 60;   // 7 days in seconds
+        $max = 14 * 24 * 60 * 60;  // 14 days in seconds
+        $randSeconds = rand($min, $max);
+
         $wpdb->replace(
-            $tableName,
-            [
+                $tableName,
+                [
                 'birdnet_id' => $birdnetId,
                 'result' => json_encode($result),
-                'expiration' => date('Y-m-d H:i:s', strtotime('+10 days')),
-            ]
-        );
+                'expiration' => date('Y-m-d H:i:s', time() + $randSeconds),
+                ]
+                );
 
         return $result;
     }

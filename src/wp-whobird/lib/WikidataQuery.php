@@ -90,11 +90,11 @@ class WikidataQuery {
                 OPTIONAL { ?item wdt:P18 ?image. }
                 OPTIONAL {
                     ?wikipedia schema:about ?item;
-schema:isPartOf <https://{$this->language}.wikipedia.org/>.
+                    schema:isPartOf <https://{$this->language}.wikipedia.org/>.
                 }
                 SERVICE wikibase:label { bd:serviceParam wikibase:language "{$this->language},en". }
             }
-        LIMIT 1
+            LIMIT 1
             SPARQL;
     }
 
