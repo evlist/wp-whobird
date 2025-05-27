@@ -90,7 +90,7 @@
 .wpwbd_list .bird-info .latin-name {
     font-size: 14px;
     font-style: italic; /* Italicize Latin names */
-    color: #555; /* Subtle color for differentiation */
+    color: var(--wp--preset--color--neutral, #555); // fallback #555 if not defined
 }
 
 /* Wikipedia link styling */
@@ -100,7 +100,7 @@
 
 .bird-wikipedia-link {
     text-decoration: none;
-    color: inherit;
+    color: var(--wp--preset--color--neutral, #888); // fallback #888 if not defined
     display: inline-flex;
     align-items: baseline; /* Align icons relative to text baseline */
     gap: 0.5em; /* Space between icons */
