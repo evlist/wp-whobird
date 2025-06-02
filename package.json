@@ -26,6 +26,7 @@
         "lint:js": "wp-scripts lint-js",
         "packages-update": "wp-scripts packages-update",
         "plugin-zip": "wp-scripts plugin-zip",
+        "postplugin-zip": "mkdir -p wp-whobird; cp LICENSE COPYING wp-whobird; zip wp-whobird.zip wp-whobird/* ; rm -rf wp-whobird/",
         "start": "wp-scripts start --webpack-copy-php --blocks-manifest"
     },
     "devDependencies": {
