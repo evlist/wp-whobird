@@ -1,24 +1,38 @@
 {
-	"name": "wp-whobird",
-	"version": "1.0.0",
-	"description": "Display whoBIRD identifications",
-	"author": "Eric van der Vlist <vdv@dyomedea.com> (https://e.vli.st)",
-	"license": "GPL-3.0-or-later",
-	"main": "build/index.js",
-	"scripts": {
-		"build": "wp-scripts build --webpack-copy-php --blocks-manifest",
-		"format": "wp-scripts format",
-		"lint:css": "wp-scripts lint-style",
-		"lint:js": "wp-scripts lint-js",
-		"packages-update": "wp-scripts packages-update",
-		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start --webpack-copy-php --blocks-manifest"
-	},
-	"devDependencies": {
-		"@wordpress/scripts": "^30.15.0",
-		"copy-webpack-plugin": "^13.0.0"
-	},
-	"dependencies": {
-		"@fortawesome/fontawesome-free": "^6.7.2"
-	}
+    "name": "wp-whobird",
+    "version": "1.0.0",
+    "description": "Display whoBIRD identifications",
+    "author": "Eric van der Vlist <vdv@dyomedea.com> (https://e.vli.st)",
+    "license": "GPL-3.0-or-later",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/evlist/wp-whobird.git"
+    },
+    "bugs": {
+        "url": "https://github.com/evlist/wp-whobird/issues"
+    },
+    "homepage": "https://github.com/evlist/wp-whobird#readme",
+    "keywords": [
+        "wordpress",
+        "plugin",
+        "gutenberg",
+        "whoBIRD"
+    ],
+    "main": "build/index.js",
+    "scripts": {
+        "build": "wp-scripts build --webpack-copy-php --blocks-manifest",
+        "format": "wp-scripts format",
+        "lint:css": "wp-scripts lint-style",
+        "lint:js": "wp-scripts lint-js",
+        "packages-update": "wp-scripts packages-update",
+        "plugin-zip": "wp-scripts plugin-zip",
+        "start": "wp-scripts start --webpack-copy-php --blocks-manifest"
+    },
+    "devDependencies": {
+        "@wordpress/scripts": "^30.15.0",
+        "copy-webpack-plugin": "^13.0.0"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^6.7.2"
+    }
 }
