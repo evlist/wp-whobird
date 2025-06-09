@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Use this file for JavaScript code that you want to run in the front-end
  * on posts/pages that contain this block.

@@ -1,4 +1,9 @@
 <?php
+
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // Ensure this file is loaded in your main plugin file.
 add_action('wp_ajax_whobird_generate_mapping', 'whobird_ajax_generate_mapping_handler');
 

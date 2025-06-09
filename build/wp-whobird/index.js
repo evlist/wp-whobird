@@ -17,6 +17,10 @@ const external_wp_components_namespaceObject = window["wp"]["components"];
 ;// external "ReactJSXRuntime"
 const external_ReactJSXRuntime_namespaceObject = window["ReactJSXRuntime"];
 ;// ./src/wp-whobird/edit.js
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Retrieves the translation of text.
  *
@@ -91,6 +95,10 @@ function Edit(props) {
 ;// ./src/wp-whobird/block.json
 const block_namespaceObject = /*#__PURE__*/JSON.parse('{"UU":"wpwbd/wp-whobird"}');
 ;// ./src/wp-whobird/index.js
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Registers a new block provided a unique name and an object defining its behavior.
  *

@@ -1,4 +1,9 @@
 <?php
+
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 if (!defined('ABSPATH')) exit;
 global $WHOBIRD_MAPPING_SOURCES;
 global $WHOBIRD_MAPPING_TABLE;

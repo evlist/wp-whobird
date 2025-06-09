@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const wpConfig = require('@wordpress/scripts/config/webpack.config');

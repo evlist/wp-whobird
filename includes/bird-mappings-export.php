@@ -1,4 +1,9 @@
 <?php
+
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // Assumes this runs in a WP context (e.g., custom admin page or AJAX handler)
 if (!defined('ABSPATH')) exit;
 

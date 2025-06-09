@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Registers a new block provided a unique name and an object defining its behavior.
  *

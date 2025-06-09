@@ -1,4 +1,9 @@
 <?php
+
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * Plugin Name:       WhoBIRD observations
  * Description:       Display your WhoBIRD observations.
@@ -7,7 +12,7 @@
  * Requires PHP:      7.4
  * Author:            The WordPress Contributors
  * License:           GPL-3.0-or-later
- * License File:      LICENSE
+ * License File:      LICENSES/GPL-3.0-or-later.txt
  * Text Domain:       wp-whobird
  *
  * @package Wpwbd

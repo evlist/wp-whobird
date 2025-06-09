@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 document.addEventListener('DOMContentLoaded', function () {
     const btn = document.getElementById('whobird-generate-mapping-btn');
     const statusList = document.getElementById('whobird-mapping-steps-status');

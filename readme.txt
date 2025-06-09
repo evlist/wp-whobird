@@ -4,7 +4,7 @@ Tags:              block
 Tested up to:      6.7
 Stable tag:        1.0.0
 License:           GPL-3.0-or-later
-License File:      LICENSE
+License File:      LICENSES/GPL-3.0-or-later.txt
 
 Display your WhoBIRD observations
 
