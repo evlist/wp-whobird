@@ -39,3 +39,7 @@ sandbox/
 # backups
 
 *~
+
+# Build directory
+
+build/
