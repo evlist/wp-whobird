@@ -23,7 +23,7 @@ function whobird_admin_tools_page() {
     ?>
     <div class="wrap">
         <h1 style="display:flex;align-items:center;gap:10px;">
-            <img src="<?php echo esc_url(plugins_url('../build/assets/images/whoBIRD.svg', __FILE__)); ?>" alt="whoBIRD" style="height:32px;width:auto;vertical-align:middle;">
+            <img src="<?php echo esc_url(plugins_url('../resources/images/whoBIRD.svg', __FILE__)); ?>" alt="whoBIRD" style="height:32px;width:auto;vertical-align:middle;">
             <?php echo esc_html__('whoBIRD tools', 'wpwhobird'); ?>
         </h1>
         <?php

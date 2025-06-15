@@ -23,7 +23,7 @@ function whobirdMappingTableInit() {
 
     $table_name = $wpdb->prefix . 'whobird_mapping';
 
-    $file_path = plugin_dir_path( __FILE__ ) . '../../assets/data/whobird_mapping.json';
+    $file_path = plugin_dir_path( __FILE__ ) . '../../../resources/data/whobird_mapping.json';
 
     if ( ! file_exists( $file_path ) ) {
         error_log( "The file $file_path was not found. The table $table_name was not modified." );

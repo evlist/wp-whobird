@@ -54,7 +54,7 @@ class BirdListItemRenderer
         $description = $birdData['description'] ?? '';
         $latinName = $birdData['latinName'] ?? '';
         $commonName = $birdData['commonName'] ?? '???';
-        $image = $birdData['image'] ?? plugins_url('../assets/images/whoBIRD.svg', dirname(__FILE__));
+        $image = $birdData['image'] ?? plugins_url('../../resources/images/whoBIRD.svg', dirname(__FILE__));
         $wikipedia = '';
 
         // Check if the Wikipedia URL is set
