@@ -61,8 +61,10 @@ Yes ! This is the way I use the plugin on my blog.
 
 == Screenshots ==
 
-1. Example of a bird observation block in the editor.
-2. Example of observations displayed on the frontend.
+1. Example of bird observations displayed in a blog.
+2. Example of the bird observation block in the editor.
+3. Settings page.
+4. Tools page.
 
 == Changelog ==
 
