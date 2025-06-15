@@ -1,62 +1,81 @@
-=== WhoBIRD observations ===
+=== whoBIRD observations ===
 Contributors:      Eric van der Vlist
-Tags:              block
-Tested up to:      6.7
+Tags:              block, birds, observations, gutenberg, taxonomy
+Requires at least: 6.0
+Tested up to:      6.8.1
 Stable tag:        1.0.0
 License:           GPL-3.0-or-later
+License URI:       https://www.gnu.org/licenses/gpl-3.0.html
 License File:      LICENSES/GPL-3.0-or-later.txt
 
-Display your WhoBIRD observations
+Display your whoBIRD observations in WordPress posts and pages using a custom Gutenberg block.
 
 == Description ==
 
-This is the long description. No limit, and you can use Markdown (as well as in the following sections).
+This plugin, whoBIRD observations, lets you easily showcase your birdwatching records from the whoBIRD mobile app. Insert the whoBIRD block anywhere in your site to display your taxonomy-based bird data, with seamless integration into the WordPress block editor.
 
-For backwards compatibility, if this section is missing, the full length of the short description will be used, and
-Markdown parsed.
+- **Not so easy to setup and update daily**: the current versions of both the whoBIRD app and this plugin do **not** provide any automatic mechanism to upload whoBIRD app SQLite exports and sound recordings and you'll need to take care of these uploads.
+- **Easy to use (after you've managed the setup and update)**: Just add the whoBIRD block.
+- **Modern**: Built for the latest versions of WordPress and Gutenberg and can be used in templates.
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
-
-e.g.
-
 1. Upload the plugin files to the `/wp-content/plugins/wp-whobird` directory, or install the plugin through the WordPress plugins screen directly.
-1. Activate the plugin through the 'Plugins' screen in WordPress
-
+2. Run `npm install && npm run build` if you’re installing from source (GitHub).
+3. Activate the plugin through the 'Plugins' screen in WordPress.
+4. Upload the SQLite whoBIRD export and (optional) the sound .wav recordings.
+5. Go to the plugin admin page to set the paths for the SQLite exports and (optional) the directory with the sound recordings.
+6. Use the whoBIRD block from the editor to embed your observations.
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= Do I need the whoBIRD mobile app? =
+Yes, the plugin is designed to display data exported from the whoBIRD app.
 
-An answer to that question.
+= Does this plugin work with classic editor? =
+Right now, no, this plugin is intended for the block editor (Gutenberg) only.
 
-= What about foo bar? =
+If there was a need, it would be easy, though, to implement a shortcode to display whoBIRD observations when using the classic editor, feel free to ask if you need it!
 
-Answer to foo bar dilemma.
+= How do I export and upload the whoBIRD SQLite database? =
+
+In the whoBIRD app, click on the "eye" icom to get the list of observations and then on the save (disket) icon to export your observations. This will save the database in a zip file. You'll need to unzip this file and upload the BirdDatabase.db somewhere on your WordPress server.
+
+= How do I upload the whoBIRD sound recordings (optional)  =
+
+whoBIRD has an option to save .wav files into the Music/whoBIRD directory. If you find a way to upload these files on your WordPress server, visitors will be able to hear these recordings when they select a bird.
+
+= How do I select the period to display? =
+
+When inserting the block you can choose if you want to display the observation for the day, week or month of the current post or page publish date.
+
+= Can I select arbitrary date ranges? =
+
+Right now, no, if you need it feel free to ask.
+
+= Can I insert this block in templates? =
+
+Yes ! This is the way I use the plugin on my blog.
+
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+1. Example of a bird observation block in the editor.
+2. Example of observations displayed on the frontend.
 
 == Changelog ==
 
-= 0.1.0 =
-* Release
+= 1.0.0 =
+* Initial release.
 
-== Arbitrary section ==
+== Credits ==
 
-You may provide arbitrary sections, in the same format as the ones above. This may be of use for extremely complicated
-plugins where more information needs to be conveyed that doesn't fit into the categories of "description" or
-"installation." Arbitrary sections will be shown below the built-in sections outlined above.
-
-== Acknowledgments ==
-
+This plugin was created by Eric van der Vlist.  
 Special thanks to:
+* [The whoBIRD app](https://github.com/woheller69/whoBIRD) for their data and inspiration.
+* [GitHub Copilot](https://github.com/features/copilot) for AI-powered coding assistance.
 
-* [The WhoBIRD app](https://github.com/woheller69/whoBIRD) for their help and of course for the application without which there would be no bird observations to display.
-* [GitHub Copilot](https://github.com/features/copilot) for assisting in the development of this project.
+== License ==
+
+This plugin is licensed under the GPL-3.0-or-later. See `LICENSES/GPL-3.0-or-later.txt` for full license text.
+
