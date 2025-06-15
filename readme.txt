@@ -1,8 +1,9 @@
 === whoBIRD observations ===
-Contributors:      Eric van der Vlist
+Contributors:      @evlist
 Tags:              block, birds, observations, gutenberg, taxonomy
 Requires at least: 6.0
 Tested up to:      6.8.1
+Requires PHP: 7.4
 Stable tag:        1.0.0
 License:           GPL-3.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-3.0.html
@@ -14,9 +15,9 @@ Display your whoBIRD observations in WordPress posts and pages using a custom Gu
 
 This plugin, whoBIRD observations, lets you easily showcase your birdwatching records from the whoBIRD mobile app. Insert the whoBIRD block anywhere in your site to display your taxonomy-based bird data, with seamless integration into the WordPress block editor.
 
-- **Not so easy to setup and update daily**: the current versions of both the whoBIRD app and this plugin do **not** provide any automatic mechanism to upload whoBIRD app SQLite exports and sound recordings and you'll need to take care of these uploads.
-- **Easy to use (after you've managed the setup and update)**: Just add the whoBIRD block.
-- **Modern**: Built for the latest versions of WordPress and Gutenberg and can be used in templates.
+– **Not so easy to setup and update daily**: the current versions of both the whoBIRD app and this plugin do **not** provide any automatic mechanism to upload whoBIRD app SQLite exports and sound recordings and you'll need to take care of these uploads.
+– **Easy to use (after you've managed the setup and update)**: Just add the whoBIRD block.
+– **Modern**: Built for the latest versions of WordPress and Gutenberg and can be used in templates.
 
 == Installation ==
 
@@ -68,6 +69,11 @@ Yes ! This is the way I use the plugin on my blog.
 = 1.0.0 =
 * Initial release.
 
+== Upgrade Notice ==
+
+= 1.0.0 =
+Initial release. No upgrade actions are necessary.
+
 == Credits ==
 
 This plugin was created by Eric van der Vlist.  
@@ -78,4 +84,5 @@ Special thanks to:
 == License ==
 
 This plugin is licensed under the GPL-3.0-or-later. See `LICENSES/GPL-3.0-or-later.txt` for full license text.
+
 
