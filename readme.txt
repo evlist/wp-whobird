@@ -8,8 +8,7 @@ Stable tag:        1.0.0
 License:           GPL-3.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-3.0.html
 License File:      LICENSES/GPL-3.0-or-later.txt
-
-Display your whoBIRD observations in WordPress posts and pages using a custom Gutenberg block.
+Description: Display your whoBIRD observations in WordPress posts and pages using a custom Gutenberg block.
 
 == Description ==
 

@@ -51,13 +51,13 @@ function parseReadmeHeader(readme) {
 
 function generatePhpHeader(header) {
   const lines = [];
-  lines.push('/*');
+  lines.push('/**');
   HEADER_FIELDS.forEach(key => {
     if (header[key]) {
-      lines.push(`${toPhpHeaderKey(key)}: ${header[key]}`);
+      lines.push(` * ${toPhpHeaderKey(key)}: ${header[key]}`);
     }
   });
-  lines.push('*/');
+  lines.push(' */');
   return lines.join('\n');
 }
 
@@ -72,3 +72,4 @@ const header = parseReadmeHeader(readme);
 const phpHeader = generatePhpHeader(header);
 
 console.log(phpHeader);
+
