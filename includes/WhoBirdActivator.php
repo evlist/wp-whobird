@@ -58,7 +58,7 @@ class WhoBirdActivator
         dbDelta($sql_mapping);
 
         // --- 3. Populate mapping table from JSON ---
-        $json_path = plugin_dir_path(__DIR__) . '../../resources/data/whobird_mapping.json';
+        $json_path = plugin_dir_path(__DIR__) . 'resources/data/whobird_mapping.json';
         if (!file_exists($json_path)) {
             error_log("whobird: Mapping JSON not found at $json_path");
             return;
