@@ -10,6 +10,7 @@ License URI:       https://www.gnu.org/licenses/gpl-3.0.html
 License File:      LICENSES/GPL-3.0-or-later.txt
 Description: Display your whoBIRD observations in WordPress posts and pages using a custom Gutenberg block.
 
+Display your whoBIRD observations in WordPress posts and pages using a custom Gutenberg block.
 == Description ==
 
 This plugin, whoBIRD observations, lets you easily showcase your birdwatching records from the whoBIRD mobile app. Insert the whoBIRD block anywhere in your site to display your taxonomy-based bird data, with seamless integration into the WordPress block editor.
@@ -17,6 +18,7 @@ This plugin, whoBIRD observations, lets you easily showcase your birdwatching re
 – **Not so easy to setup and update daily**: the current versions of both the whoBIRD app and this plugin do **not** provide any automatic mechanism to upload whoBIRD app SQLite exports and sound recordings and you'll need to take care of these uploads.
 – **Easy to use (after you've managed the setup and update)**: Just add the whoBIRD block.
 – **Modern**: Built for the latest versions of WordPress and Gutenberg and can be used in templates.
+- **Wikimedia friendly**: gets information from Wikidata, displays pictures from Wikimedia and links to Wikipedia.
 
 == Installation ==
 
@@ -81,6 +83,7 @@ This plugin was created by Eric van der Vlist.
 Special thanks to:
 * [The whoBIRD app](https://github.com/woheller69/whoBIRD) for their data and inspiration.
 * [GitHub Copilot](https://github.com/features/copilot) for AI-powered coding assistance.
+* [The Wikimedia foundation](https://wikimediafoundation.org/) for their data (Wikidata), pictures (Wikimedia) and descriptions (Wikipedia).
 
 == License ==
 
