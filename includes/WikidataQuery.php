@@ -71,7 +71,7 @@ class WikidataQuery {
         }
 
         $sparqlQuery = $this->buildSparqlQuery($wikidataId);
-        error_log('sparqlQuery: ' . $sparqlQuery);
+#        error_log('sparqlQuery: ' . $sparqlQuery);
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($sparqlQuery);
         $sparqlHeaders = ["Accept: application/json"];
         $startCurl = microtime(true);
@@ -79,19 +79,33 @@ class WikidataQuery {
         error_log('cURL execution time: ' . (microtime(true) - $startCurl) . ' seconds');
         $sparqlData = json_decode($sparqlResponse, true);
 
+#        error_log('sparqlData: ' . print_r($sparqlData, true));
         return $this->processAndCacheData($birdnetId, $sparqlData);
     }
 
     /**
-     * Build a minimal SPARQL query using the Wikidata Q-id.
-     * @param string $wikidataId e.g. "Q5113"
-     * @return string
+     * Build a SPARQL query to fetch the label, description, latin name, main alias (in user's language, not latin name),
+     * image, and Wikipedia link for a Wikidata entity. Prefers label as the common name if different from the latin name,
+     * otherwise falls back to an alias, then the latin name.
+     *
+     * @param string $wikidataId The Wikidata Q-id (e.g., "Q5113")
+     * @return string SPARQL query string
      */
     private function buildSparqlQuery(string $wikidataId): string {
         return <<<SPARQL
-            SELECT ?itemLabel ?itemDescription ?latinName ?image ?wikipedia WHERE {
+            SELECT ?itemLabel ?itemDescription ?latinName ?alias ?image ?wikipedia WHERE {
                 BIND(wd:$wikidataId AS ?item)
                     OPTIONAL { ?item wdt:P225 ?latinName. }
+                    # Subquery: Get the first alias in the desired language that is not the latin name
+                OPTIONAL {
+                    SELECT ?alias WHERE {
+                    wd:$wikidataId skos:altLabel ?alias .
+                    FILTER(LANG(?alias) = "{$this->language}")
+                    OPTIONAL { wd:$wikidataId wdt:P225 ?latinName. }
+                    FILTER(?alias != ?latinName)
+                    }
+                    LIMIT 1
+                }
                 OPTIONAL { ?item wdt:P18 ?image. }
                 OPTIONAL {
                     ?wikipedia schema:about ?item;
@@ -104,10 +118,12 @@ class WikidataQuery {
     }
 
     /**
-     * Store the fetched data in the cache.
-     * @param int $birdnetId
-     * @param array $sparqlData
-     * @return array
+     * Process SPARQL results and cache them in the database.
+     * Prefers the label as the common name (if not the latin name), falls back to alias, then latin name.
+     *
+     * @param int $birdnetId BirdNET integer ID
+     * @param array $sparqlData Decoded SPARQL JSON result
+     * @return array Result array with keys: commonName, description, latinName, originalImage, image, wikipedia
      */
     private function processAndCacheData(int $birdnetId, array $sparqlData): array {
         global $wpdb;
@@ -115,13 +131,28 @@ class WikidataQuery {
         $result = null;
         if (!empty($sparqlData['results']['bindings'])) {
             $binding = $sparqlData['results']['bindings'][0];
+            $latinName = $binding['latinName']['value'] ?? null;
+            $itemLabel = $binding['itemLabel']['value'] ?? null;
+            $alias = $binding['alias']['value'] ?? null;
+
+            // Use the label as the common name if it's different from the latin name.
+            // If the label is missing or is the latin name, use the first alias (if available).
+            // Otherwise, fall back to the latin name.
+            if ($itemLabel && (!$latinName || $itemLabel !== $latinName)) {
+                $commonName = $itemLabel;
+            } elseif ($alias) {
+                $commonName = $alias;
+            } else {
+                $commonName = $latinName;
+            }
+
             $result = [
-                'commonName' => $binding['itemLabel']['value'] ?? null,
-                'description' => $binding['itemDescription']['value'] ?? null,
-                'latinName' => $binding['latinName']['value'] ?? null,
-                'originalImage' => $binding['image']['value'] ?? null,
-                'image' => $binding['image']['value'] ? resolveSpecialFilePathUrl($binding['image']['value']) : null,
-                'wikipedia' => $binding['wikipedia']['value'] ?? null,
+                'commonName' => $commonName, // Common name in user's language, using the best available source
+                'description' => $binding['itemDescription']['value'] ?? null, // Short descriptor
+                'latinName' => $latinName, // Scientific name (P225)
+                'originalImage' => $binding['image']['value'] ?? null, // Original image URL, if any
+                'image' => $binding['image']['value'] ? resolveSpecialFilePathUrl($binding['image']['value']) : null, // Resolved image URL for display
+                'wikipedia' => $binding['wikipedia']['value'] ?? null, // Wikipedia page in the user's language, if available
             ];
         }
 
@@ -131,6 +162,7 @@ class WikidataQuery {
         $max = 14 * 24 * 60 * 60;  // 14 days in seconds
         $randSeconds = rand($min, $max);
 
+        // Cache the result in the database with random expiration to avoid thundering herd
         $wpdb->replace(
                 $tableName,
                 [
@@ -142,7 +174,6 @@ class WikidataQuery {
 
         return $result;
     }
-
     /**
      * Execute a cURL request and return the response.
      *
