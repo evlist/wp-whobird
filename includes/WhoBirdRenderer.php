@@ -11,6 +11,7 @@ namespace WPWhoBird;
 
 use DateTime;
 use SQLite3;
+use WPWhoBird\Config;
 
 class WhoBirdRenderer
 {
@@ -95,12 +96,12 @@ class WhoBirdRenderer
         $list = '';
         while ($row = $results->fetchArray(SQLITE3_ASSOC)) {
             $listItemRenderer = new BirdListItemRenderer(
-                (int)$row['BirdNET_ID'],
-            );
+                    (int)$row['BirdNET_ID'],
+                    );
             $list .= $listItemRenderer->render(
-                $row['SpeciesName'],
-                $this->getRecordingsUrls($row['timestamps'])
-);
+                    $row['SpeciesName'],
+                    $this->getRecordingsUrls($row['timestamps'])
+                    );
         }
 
         return $list;
@@ -122,17 +123,21 @@ class WhoBirdRenderer
         $list = $this->getObservationsList($startTime, $endTime);
 
         if (empty($list)) {
-            return '<div class="wpwbd_observations wpwbd_empty_observations">' .
-                   '<p>' . __('We did not identify any birds with the whoBIRD application.', 'wp-whobird') . '</p>' .
-                   '</div>';
+            if (Config::shouldGenerateTextWhenNoObservations()) {
+                return '<div class="wpwbd_observations wpwbd_empty_observations">' .
+                    '<p>' . __('We did not identify any birds with the whoBIRD application.', 'wp-whobird') . '</p>' .
+                    '</div>';
+            } else {
+                return '';
+            }
         } else {
             return '<div class="wpwbd_observations">' .
-                   '<p>' . __('We heard and identified the following birds with the whoBIRD application:', 'wp-whobird') . '</p>' .
-                   '<ul class="wpwbd_list">' .
-                   $list .
-                   '</ul>' .
-                   $this->playerDisplay() .
-                   '</div>';
+                '<p>' . __('We heard and identified the following birds with the whoBIRD application:', 'wp-whobird') . '</p>' .
+                '<ul class="wpwbd_list">' .
+                $list .
+                '</ul>' .
+                $this->playerDisplay() .
+                '</div>';
         }
     }
 }

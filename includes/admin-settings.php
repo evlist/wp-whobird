@@ -70,6 +70,12 @@ class WhoBirdAdminSettings
             },
         ]);
 
+        // Register new setting for generating a message when there are no observations for the selected period
+        register_setting('wpwhobird_settings', 'wpwhobird_should_generate_text_when_no_observations', [
+            'type' => 'boolean',
+            'default' => false,
+        ]);
+
         // Add settings section
         add_settings_section(
             'wpwhobird_main_settings',
@@ -86,6 +92,12 @@ class WhoBirdAdminSettings
             'wpwhobird_fallback_languages',
             __('Fallback Languages', 'wpwhobird'),
             __('Enter fallback languages as a comma-separated list (e.g., "en,fr,de"). Leave empty to disable fallback.', 'wpwhobird')
+        );
+        $this->addCheckboxField(
+            'wpwhobird_should_generate_text_when_no_observations',
+            __('Generate text if there are no observations for the selected period', 'wpwhobird'),
+            __('If checked, a message will be generated when there are no observations for the selected period.', 'wpwhobird'),
+            true
         );
     }
 
@@ -124,6 +136,30 @@ class WhoBirdAdminSettings
                        min="<?php echo esc_attr($min); ?>"
                        max="<?php echo esc_attr($max); ?>"
                        step="<?php echo esc_attr($step); ?>" class="small-text">
+                <?php
+            },
+            'wpwhobird-settings',
+            'wpwhobird_main_settings'
+        );
+    }
+
+    /**
+     * Add a checkbox option to the settings page.
+     */
+    private function addCheckboxField($optionName, $label, $description = '', $default=true)
+    {
+        add_settings_field(
+            $optionName,
+            $label,
+            function () use ($optionName, $description, $default) {
+                $value = get_option($optionName, $default);
+                ?>
+                <input type="checkbox" id="<?php echo esc_attr($optionName); ?>"
+                       name="<?php echo esc_attr($optionName); ?>"
+                       value="1" <?php checked($value); ?>>
+                <?php if ($description): ?>
+                    <p class="description"><?php echo esc_html($description); ?></p>
+                <?php endif; ?>
                 <?php
             },
             'wpwhobird-settings',

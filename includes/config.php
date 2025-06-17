@@ -42,4 +42,13 @@ class Config
         global $wpdb;
         return $wpdb->prefix . 'whobird_mapping';
     }
+    /**
+     * Should a text be generated when there are no observations for the selected period?
+     *
+     * @return bool
+     */
+    public static function shouldGenerateTextWhenNoObservations()
+    {
+        return (bool) get_option('wpwhobird_should_generate_text_when_no_observations', true);
+    }
 }
