@@ -93,6 +93,10 @@
     font-weight: bold;
 }
 
+.wpwbd_list .bird-info .common-name::first-letter {
+    text-transform: uppercase;
+}
+
 .wpwbd_list .bird-info .latin-name {
     font-size: 14px;
     font-style: italic; /* Italicize Latin names */
