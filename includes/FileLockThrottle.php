@@ -9,17 +9,32 @@ namespace WPWhoBird;
 require_once 'Throttle.php';
 
 /**
- * A file-based implementation of the Throttle class.
+ * FileLockThrottle
+ *
+ * A file-based implementation of the Throttle class. This class uses a lock file
+ * in a configurable directory to enforce a minimum delay between actions, 
+ * allowing safe rate-limiting across multiple PHP processes or requests.
+ * Useful for limiting access to shared resources (like APIs) in environments where
+ * inter-process communication is limited.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
  */
 class FileLockThrottle extends Throttle {
-    private string $throttleDirectory; // Directory to store the throttle files
+    /**
+     * @var string Directory to store the throttle files.
+     */
+    private string $throttleDirectory;
 
     /**
      * Constructor for the FileLockThrottle class.
      *
-     * @param string $namespace A unique namespace for this throttle instance.
-     * @param int $minimalDelayMs The minimal delay between actions in milliseconds.
+     * @param string $namespace        A unique namespace for this throttle instance.
+     * @param int $minimalDelayMs      The minimal delay between actions in milliseconds.
      * @param string|null $throttleDirectory Directory to store throttle files (defaults to system temp directory).
+     * @throws \RuntimeException If the throttle directory does not exist.
      */
     public function __construct(string $namespace, int $minimalDelayMs, ?string $throttleDirectory = null) {
         parent::__construct($namespace, $minimalDelayMs);
@@ -63,6 +78,12 @@ class FileLockThrottle extends Throttle {
 
     /**
      * Wait until the minimal delay has passed before proceeding.
+     *
+     * This method blocks until it is allowed to proceed, enforcing the throttle.
+     * It dynamically recalculates the time left and updates the throttle file's timestamp
+     * once the operation is allowed.
+     *
+     * @return void
      */
     public function waitUntilAllowed(): void {
         // Use a for loop to dynamically recalculate the time left
@@ -74,3 +95,4 @@ class FileLockThrottle extends Throttle {
         touch($this->getThrottleFile());
     }
 }
+
