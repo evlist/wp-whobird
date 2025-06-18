@@ -92,6 +92,9 @@ class WikidataQuery {
      * @return string SPARQL query string
      */
     private function buildSparqlQuery(string $wikidataId): string {
+        if (!preg_match('/^Q\d+$/', $wikidataId)) {
+            throw new \InvalidArgumentException("Invalid Wikidata Q-id: $wikidataId");
+        }
         return <<<SPARQL
             SELECT ?itemLabel ?itemDescription ?latinName ?alias ?image ?wikipedia WHERE {
                 BIND(wd:$wikidataId AS ?item)
