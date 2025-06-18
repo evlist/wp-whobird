@@ -60,16 +60,6 @@ class WhoBirdAdminSettings
             },
         ]);
 
-        // Register new setting for fallback languages without enforcing "en" by default
-        register_setting('wpwhobird_settings', 'wpwhobird_fallback_languages', [
-            'sanitize_callback' => function ($value) {
-                // Ensure the value is a valid comma-separated list of two-letter language codes
-                return implode(',', array_filter(array_map('trim', explode(',', $value)), function ($lang) {
-                    return preg_match('/^[a-z]{2}$/', $lang); // Validate two-letter language codes
-                }));
-            },
-        ]);
-
         // Register new setting for generating a message when there are no observations for the selected period
         register_setting('wpwhobird_settings', 'wpwhobird_should_generate_text_when_no_observations', [
             'type' => 'boolean',
@@ -88,11 +78,6 @@ class WhoBirdAdminSettings
         $this->addTextField('wpwhobird_recordings_path', __('Recordings Path', 'wpwhobird'));
         $this->addTextField('wpwhobird_database_path', __('Database Path', 'wpwhobird'));
         $this->addNumberField('wpwhobird_threshold', __('Threshold', 'wpwhobird'), 0, 1, 0.01);
-        $this->addTextField(
-            'wpwhobird_fallback_languages',
-            __('Fallback Languages', 'wpwhobird'),
-            __('Enter fallback languages as a comma-separated list (e.g., "en,fr,de"). Leave empty to disable fallback.', 'wpwhobird')
-        );
         $this->addCheckboxField(
             'wpwhobird_should_generate_text_when_no_observations',
             __('Generate text if there are no observations for the selected period', 'wpwhobird'),
