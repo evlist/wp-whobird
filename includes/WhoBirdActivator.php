@@ -6,10 +6,28 @@
 
 use WPWhoBird\Config;
 
+/**
+ * Handles the activation routine for the WPWhoBird plugin.
+ *
+ * Responsible for creating or updating required plugin tables on activation.
+ * This includes the SPARQL cache, remote files, and bird mapping tables.
+ * Also populates the mapping table from a JSON resource file.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
+ */
 class WhoBirdActivator
 {
     /**
      * Activation hook to create or update required plugin tables.
+     *
+     * Drops and recreates the SPARQL cache and mapping tables.
+     * Uses dbDelta for the remote files and mapping tables for safe updates.
+     * Populates the mapping table from a JSON mapping file.
+     *
+     * @return void
      */
     public static function activate()
     {
@@ -91,3 +109,4 @@ class WhoBirdActivator
 
     }
 }
+
