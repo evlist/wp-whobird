@@ -5,41 +5,79 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
- * vim: set ai sw=4 smarttab expandtab: tabstop=8 softtabstop=0
+ * BirdListItemRenderer
+ *
+ * Responsible for rendering a single bird list item, enriched with data from Wikidata and BirdNET,
+ * including names, thumbnail, and a Wikipedia link when available.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
  */
+
 namespace WPWhoBird;
 
 require_once 'WikidataQuery.php';
 require_once 'ImageUtils.php';
 
+/**
+ * Class BirdListItemRenderer
+ *
+ * Generates HTML for displaying a bird entry in the list, including
+ * fetching cached Wikidata data, rendering the bird's names, thumbnail, and Wikipedia link.
+ */
 class BirdListItemRenderer
 {
+    /** @var int BirdNET integer ID */
     private int $birdnetId;
+
+    /** @var string|null Locale/language code */
     private ?string $locale;
 
+    /**
+     * BirdListItemRenderer constructor.
+     *
+     * @param int $birdnetId BirdNET integer ID
+     * @param string|null $locale Optional locale/language code (defaults to current site locale)
+     */
     public function __construct(int $birdnetId, ?string $locale = null)
     {
         $this->birdnetId = $birdnetId;
         $this->locale = $locale ?? get_locale();
     }
 
+    /**
+     * Render the full <li> element for a bird, including HTML attributes and content.
+     *
+     * @param string $speciesName      The species' common name (used as fallback if no Wikidata)
+     * @param string $recordingsUrls   Comma-separated URLs for audio recordings
+     * @return string                  HTML <li> element as a string
+     */
     public function render(string $speciesName, string $recordingsUrls): string
     {
+        // Fetch cached Wikidata data for this BirdNET ID
         $wikidataQuery = new WikidataQuery($this->locale);
-        // Use birdnet_id for cache and queries
         $cache = $wikidataQuery->getCachedData($this->birdnetId);
 
+        // Prepare initial/default bird data
         $needsRefresh = true;
         $birdData = [
             'commonName' => $speciesName
         ];
+
+        // Use cached data if available
         if ($cache) {
             $needsRefresh = !$cache['isFresh'];
             if ($cache['data']) {
                 $birdData = $cache['data'];
             }
         }
+
+        // Add data-birdnet-id attribute if data is not fresh (for AJAX refresh)
         $dataBirdnetId = $needsRefresh ? ' data-birdnet-id="' . $this->birdnetId . '"' : '';
+
+        // Render the <li> element with all details
         return sprintf(
             '<li class="wpwbd-bird-entry" data-recordings="%s"%s>%s</li>',
             esc_attr($recordingsUrls),
@@ -48,16 +86,22 @@ class BirdListItemRenderer
         );
     }
 
+    /**
+     * Render the inner contents of a bird entry (names, thumbnail, Wikipedia link).
+     *
+     * @param array $birdData Data array with keys like commonName, latinName, image, wikipedia
+     * @return string         HTML content for inside the <li>
+     */
     public function renderBirdData(array $birdData): string
     {
-        // Prepare additional information from Wikidata
+        // Prepare display fields from Wikidata or defaults
         $description = $birdData['description'] ?? '';
         $latinName = $birdData['latinName'] ?? '';
         $commonName = $birdData['commonName'] ?? '???';
         $image = $birdData['image'] ?? plugins_url('resources/images/whoBIRD.svg', dirname(__FILE__));
         $wikipedia = '';
 
-        // Check if the Wikipedia URL is set
+        // If a Wikipedia URL is present, create a link with icons
         if (!empty($birdData['wikipedia'])) {
             $wikipedia .= '<a href="' . esc_url($birdData['wikipedia']) . '" target="_blank" rel="noopener noreferrer" class="bird-wikipedia-link">';
             $wikipedia .= '<i class="fab fa-wikipedia-w normal"></i>'; // FontAwesome Wikipedia logo
@@ -65,10 +109,10 @@ class BirdListItemRenderer
             $wikipedia .= '</a>';
         }
 
-        // Transform the image URL to fetch the thumbnail (200px wide)
+        // Generate a 200px-wide thumbnail from the image URL
         $thumbnailUrl = $image ? getThumbnailUrl($image, '200px') : '';
 
-        // Render the <li> element content with enriched structure
+        // Compose the HTML for the entry
         return sprintf(
             '<div class="bird-thumbnail">
                 %s
@@ -87,3 +131,4 @@ class BirdListItemRenderer
         );
     }
 }
+
