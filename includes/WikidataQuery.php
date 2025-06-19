@@ -1,10 +1,20 @@
 <?php
-
 // SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
-//
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// vim: set ai sw=4 smarttab expandtab: tabstop=8 softtabstop=0
+/**
+ * Wikidata Query
+ *
+ * Provides a class for querying and caching Wikidata information for bird species
+ * using BirdNET integer IDs and Wikidata Q-ids.
+ * Handles SPARQL query building, cURL execution, caching, and data formatting
+ * for the whoBIRD WordPress plugin.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
+ */
 
 namespace WPWhoBird;
 
@@ -14,11 +24,24 @@ require_once 'SparqlUtils.php';
 require_once 'ImageUtils.php';
 require_once 'FileLockThrottle.php';
 
+/**
+ * Class WikidataQuery
+ *
+ * Handles querying Wikidata for species data, caching results, and providing
+ * formatted output for the plugin.
+ */
 class WikidataQuery {
-    private static $requestIntervalMs = 50; // Minimum interval (in milliseconds) between requests
+    /** @var int Minimum interval (in milliseconds) between requests */
+    private static $requestIntervalMs = 50;
+    /** @var string User locale (e.g., 'en_US') */
     private string $locale;
+    /** @var string User language code (e.g., 'en') */
     private string $language;
 
+    /**
+     * Constructor.
+     * @param string $locale The user locale string (e.g., 'fr_FR').
+     */
     public function __construct($locale)
     {
         $this->locale = $locale;
@@ -27,8 +50,9 @@ class WikidataQuery {
 
     /**
      * Get cached Wikidata info for a bird given its BirdNET integer ID.
+     *
      * @param int $birdnetId
-     * @return array|null
+     * @return array|null Returns ['isFresh' => bool, 'data' => array|null] or null if not cached
      */
     public function getCachedData(int $birdnetId): ?array {
         global $wpdb;
@@ -56,9 +80,10 @@ class WikidataQuery {
 
     /**
      * Fetch data from Wikidata and update the cache. Requires birdnet_id and wikidata_qid.
+     *
      * @param int $birdnetId
      * @param string $wikidataId
-     * @return array
+     * @return array Result array with keys: commonName, description, latinName, originalImage, image, wikipedia
      */
     public function fetchAndUpdateCachedData(int $birdnetId, string $wikidataId): array {
 
@@ -85,11 +110,13 @@ class WikidataQuery {
 
     /**
      * Build a SPARQL query to fetch the label, description, latin name, main alias (in user's language, not latin name),
-     * image, and Wikipedia link for a Wikidata entity. Prefers label as the common name if different from the latin name,
+     * image, and Wikipedia link for a Wikidata entity.
+     * Prefers label as the common name if different from the latin name,
      * otherwise falls back to an alias, then the latin name.
      *
      * @param string $wikidataId The Wikidata Q-id (e.g., "Q5113")
      * @return string SPARQL query string
+     * @throws \InvalidArgumentException
      */
     private function buildSparqlQuery(string $wikidataId): string {
         if (!preg_match('/^Q\d+$/', $wikidataId)) {
@@ -177,6 +204,7 @@ class WikidataQuery {
 
         return $result;
     }
+
     /**
      * Execute a cURL request and return the response.
      *
@@ -201,3 +229,4 @@ class WikidataQuery {
         return $response;
     }
 }
+

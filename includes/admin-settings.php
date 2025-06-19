@@ -1,14 +1,26 @@
 <?php
-
 // SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
-//
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// vi: set ft=php ts=4 sw=4 expandtab:
+/**
+ * WhoBird Admin Settings
+ *
+ * Defines the WordPress admin settings page and option registration for the whoBIRD plugin.
+ * Provides UI and logic for updating plugin settings such as paths, thresholds, and feature toggles.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
+ */
+
 namespace WPWhoBird;
 
 class WhoBirdAdminSettings
 {
+    /**
+     * Register admin menu, settings, and set default fallback on activation.
+     */
     public function __construct()
     {
         add_action('admin_menu', [$this, 'addSettingsPage']);
@@ -16,6 +28,9 @@ class WhoBirdAdminSettings
         register_activation_hook(__FILE__, [$this, 'setDefaultFallback']); // Hook for default value
     }
 
+    /**
+     * Register the WhoBird settings page with WordPress.
+     */
     public function addSettingsPage()
     {
         add_options_page(
@@ -27,6 +42,9 @@ class WhoBirdAdminSettings
         );
     }
 
+    /**
+     * Render the settings page HTML.
+     */
     public function renderSettingsPage()
     {
         ?>
@@ -43,6 +61,9 @@ class WhoBirdAdminSettings
         <?php
     }
 
+    /**
+     * Register plugin settings, fields, and sections.
+     */
     public function registerSettings()
     {
         // Register existing settings
@@ -86,6 +107,13 @@ class WhoBirdAdminSettings
         );
     }
 
+    /**
+     * Add a text input field to the settings page.
+     *
+     * @param string $optionName
+     * @param string $label
+     * @param string $description
+     */
     private function addTextField($optionName, $label, $description = '')
     {
         add_settings_field(
@@ -107,6 +135,15 @@ class WhoBirdAdminSettings
         );
     }
 
+    /**
+     * Add a number input field to the settings page.
+     *
+     * @param string $optionName
+     * @param string $label
+     * @param float $min
+     * @param float $max
+     * @param float $step
+     */
     private function addNumberField($optionName, $label, $min, $max, $step)
     {
         add_settings_field(
@@ -130,6 +167,11 @@ class WhoBirdAdminSettings
 
     /**
      * Add a checkbox option to the settings page.
+     *
+     * @param string $optionName
+     * @param string $label
+     * @param string $description
+     * @param bool $default
      */
     private function addCheckboxField($optionName, $label, $description = '', $default=true)
     {
@@ -152,6 +194,10 @@ class WhoBirdAdminSettings
         );
     }
 
+    /**
+     * Set default fallback language to "en" if not already set.
+     * Called on plugin activation.
+     */
     public function setDefaultFallback()
     {
         // Set default fallback language to "en" only if the option is not already set

@@ -3,32 +3,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
- * Use this file for JavaScript code that you want to run in the front-end
- * on posts/pages that contain this block.
- *
- * When this file is defined as the value of the `viewScript` property
- * in `block.json` it will be enqueued on the front end of the site.
- *
- * Example:
- *
- * ```js
- * {
- *   "viewScript": "file:./view.js"
- * }
- * ```
- *
- * If you're not making any changes to this file because your project doesn't need any
- * JavaScript running in the front-end, then you should delete this file and remove
- * the `viewScript` property from `block.json`.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-metadata/#view-script
- */
-/**
- * Refactored view.js for modularity.
- *
- * This script now separates the player logic and the Ajax queue logic
- * into two distinct functions, `initializePlayer` and `initializeAjaxQueue`,
- * which are both invoked when the DOM content is loaded.
+ * JavaScript for the WhoBird block front-end view.
+ * 
+ * Handles interactive features such as audio player controls and Ajax-based bird entry updates.
+ * This file is enqueued on the front end via the block.json "viewScript" property.
  */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -37,7 +15,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /**
- * Initializes the player logic for handling audio playback.
+ * Initializes the player logic for handling audio playback of bird recordings.
+ * Sets up event listeners for play/pause, previous/next controls, and track selection.
  */
 function initializePlayer() {
   const listItems = document.querySelectorAll(".wpwbd_list li");
@@ -53,23 +32,27 @@ function initializePlayer() {
 
   const audio = new Audio();
 
+  // Updates the UI with the current track information.
   const updateTrackInfo = () => {
     const trackText = "Track";
     currentTrackInfo.textContent = `${trackText} ${currentIndex + 1} / ${recordings.length} (${currentListItem.textContent})`;
   };
 
+  // Plays the current audio track.
   const playAudio = () => {
     audio.play();
     isPlaying = true;
     playPauseButton.textContent = "⏸";
   };
 
+  // Pauses the current audio track.
   const pauseAudio = () => {
     audio.pause();
     isPlaying = false;
     playPauseButton.textContent = "▶️";
   };
 
+  // Loads recordings from the clicked list item.
   const loadRecordings = (listItem) => {
     currentListItem = listItem;
     recordings = listItem.getAttribute("data-recordings").split(",");
@@ -118,20 +101,22 @@ function initializePlayer() {
     });
   });
 
+  // Load the first track by default if available.
   if (listItems.length > 0) {
     loadRecordings(listItems[0]);
   }
 }
 
 /**
- * Initializes the Ajax queue logic for updating bird entries.
+ * Initializes the Ajax queue logic for updating bird entries asynchronously.
+ * Ensures only one Ajax request is processed at a time to avoid race conditions.
  */
 function initializeAjaxQueue() {
   let birdQueue = [];
   let isProcessing = false;
 
   /**
-   * Add a birdnet ID to the queue for updating.
+   * Adds a BirdNET ID to the update queue.
    * @param {string|number} birdnetId - The BirdNET ID of the bird.
    */
   function queueBirdForUpdate(birdnetId) {
@@ -140,7 +125,7 @@ function initializeAjaxQueue() {
   }
 
   /**
-   * Process the queue by sending one request at a time.
+   * Processes the update queue by sending one Ajax request at a time.
    */
   function processBirdQueue() {
     if (isProcessing || birdQueue.length === 0) return;
@@ -148,7 +133,7 @@ function initializeAjaxQueue() {
     isProcessing = true;
     const birdnetId = birdQueue.shift();
 
-    // Send Ajax request using fetch
+    // Send Ajax request using fetch to update bird data.
     fetch(ajaxurl, {
       method: "POST",
       headers: {
@@ -180,11 +165,11 @@ function initializeAjaxQueue() {
       })
       .finally(() => {
         isProcessing = false;
-        processBirdQueue(); // Process the next item in the queue
+        processBirdQueue(); // Continue with the next item in the queue
       });
   }
 
-  // Find all bird entries with data-birdnet-id and add them to the queue
+  // Find all bird entries with a BirdNET ID and queue them for update.
   const birdEntries = document.querySelectorAll(
     ".wpwbd-bird-entry[data-birdnet-id]"
   );
@@ -193,4 +178,3 @@ function initializeAjaxQueue() {
     queueBirdForUpdate(birdnetId);
   });
 }
-

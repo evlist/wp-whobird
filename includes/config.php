@@ -8,6 +8,12 @@ namespace WPWhoBird;
 
 global $wpdb;
 
+/**
+ * Configuration utility class for WhoBird plugin.
+ *
+ * Provides static methods to retrieve key database table names (using current WP prefix)
+ * and to fetch certain plugin options.
+ */
 class Config
 {
     /**
@@ -42,10 +48,11 @@ class Config
         global $wpdb;
         return $wpdb->prefix . 'whobird_mapping';
     }
+
     /**
-     * Should a text be generated when there are no observations for the selected period?
+     * Determine whether text should be generated if there are no observations for the selected period.
      *
-     * @return bool
+     * @return bool True if text should be generated when there are no observations, false otherwise.
      */
     public static function shouldGenerateTextWhenNoObservations()
     {

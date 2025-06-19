@@ -1,19 +1,42 @@
 <?php
-
 // SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
-//
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+/**
+ * WhoBird Sources
+ *
+ * Abstract and concrete classes for handling mapping sources
+ * (GitHub, Wikidata/SPARQL, etc.) for the whoBIRD WordPress plugin.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
+ */
 
 if (!defined('ABSPATH')) exit;
 
 /**
  * Abstract base class for all mapping sources.
+ *
+ * Provides the interface and shared logic for handling data sources
+ * such as GitHub or Wikidata. Subclasses must implement source-specific
+ * update and status logic.
  */
 abstract class WhoBirdAbstractSource {
+    /** @var string Unique key for the source */
     protected $key;
+    /** @var array Configuration for the source */
     protected $cfg;
+    /** @var string Database table name for storing raw content */
     protected $table;
 
+    /**
+     * Constructor.
+     * @param string $key  Source key
+     * @param array  $cfg  Source configuration
+     * @param string $table Database table name
+     */
     public function __construct($key, $cfg, $table) {
         $this->key = $key;
         $this->cfg = $cfg;
@@ -22,16 +45,22 @@ abstract class WhoBirdAbstractSource {
 
     /**
      * Get status array for UI table row.
+     * Must be implemented by subclasses.
+     * @return array
      */
     abstract public function getStatus();
 
     /**
      * Update the source (download latest and store in DB).
+     * Must be implemented by subclasses.
+     * @return array [bool success, string message]
      */
     abstract public function update();
 
     /**
      * Store content in a queryable DB table (not just raw storage).
+     * Should be implemented in subclasses where table import is required.
+     * @return array [bool success, string message]
      */
     public function uploadToTable() {
         // Implement in subclasses as needed
@@ -40,6 +69,8 @@ abstract class WhoBirdAbstractSource {
 
     /**
      * Download content as a file.
+     * Should be implemented in subclasses if direct file download is needed.
+     * @return bool
      */
     public function download() {
         // Implement in subclasses as needed
@@ -48,6 +79,7 @@ abstract class WhoBirdAbstractSource {
 
     /**
      * Get the raw content row from DB.
+     * @return array|null
      */
     public function getDBRow() {
         global $wpdb;
@@ -57,8 +89,14 @@ abstract class WhoBirdAbstractSource {
 
 /**
  * Abstract class for GitHub file-based sources.
+ *
+ * Implements logic for fetching files and commit metadata from GitHub.
  */
 abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
+    /**
+     * Fetch the latest commit SHA and date from GitHub.
+     * @return array [sha, date] or [null, null] on failure
+     */
     protected function fetchLatestCommit() {
         $repo = $this->cfg['github_repo'];
         $path = $this->cfg['github_path'];
@@ -74,6 +112,10 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
         return [null, null];
     }
 
+    /**
+     * Fetch the raw file contents from GitHub.
+     * @return string|null
+     */
     protected function fetchRawFile() {
         $url = $this->cfg['raw_url'];
         $response = wp_remote_get($url, [
@@ -83,6 +125,10 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
         return wp_remote_retrieve_body($response);
     }
 
+    /**
+     * Update the local DB with the latest file from GitHub.
+     * @return array [bool success, string message]
+     */
     public function update() {
         global $wpdb;
         list($latest_sha, $latest_date) = $this->fetchLatestCommit();
@@ -108,6 +154,10 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
         return [true, 'File updated successfully.'];
     }
 
+    /**
+     * Get the status for this source.
+     * @return array
+     */
     public function getStatus() {
         $row = $this->getDBRow();
         list($remote_sha, $remote_date) = $this->fetchLatestCommit();
@@ -128,8 +178,15 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
 
 /**
  * TaxoCode source with table import.
+ *
+ * Downloads and imports the birdnet_id to ebird_id mapping from GitHub.
  */
 class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
+    /**
+     * Import the raw content into a structured table.
+     * Drops and recreates the target table with imported data.
+     * @return array [bool success, string message]
+     */
     public function uploadToTable() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'whobird_taxocode';
@@ -175,8 +232,15 @@ class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
 
 /**
  * BirdnetSpecies source with table import.
+ *
+ * Downloads and imports the birdnet_id to scientific and English names mapping from GitHub.
  */
 class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
+    /**
+     * Import the raw content into a structured table.
+     * Drops and recreates the target table with imported data.
+     * @return array [bool success, string message]
+     */
     public function uploadToTable() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'whobird_birdnet_species';
@@ -227,8 +291,14 @@ class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
 
 /**
  * Wikidata/SPARQL source with JSON import to table.
+ *
+ * Handles downloading and importing species data via SPARQL from Wikidata.
  */
 class WhoBirdWikidataSource extends WhoBirdAbstractSource {
+    /**
+     * Update the local DB with the latest SPARQL results from Wikidata.
+     * @return array [bool success, string message]
+     */
     public function update() {
         global $wpdb;
         $sparql_url = $this->cfg['sparql_url'];
@@ -266,6 +336,10 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
         return [true, 'Wikidata SPARQL result updated successfully.'];
     }
 
+    /**
+     * Get the status for this source.
+     * @return array
+     */
     public function getStatus() {
         $row = $this->getDBRow();
         return [
@@ -282,8 +356,8 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
     }
 
     /**
-    /**
      * Import SPARQL JSON results into a structured table.
+     *
      * The table is named {$wpdb->prefix}whobird_wikidata_species.
      * Columns:
      *   - wikidata_qid: Wikidata Q-id (e.g. "Q12345"), primary key
@@ -294,6 +368,8 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
      *
      * Assumes the SPARQL query returns a ?wikidata_qid variable for each row.
      * Does NOT store the full Wikidata entity URL.
+     *
+     * @return array [bool success, string message]
      */
     public function uploadToTable() {
         global $wpdb;
@@ -353,6 +429,14 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
 
 /**
  * Factory for WhoBird sources.
+ *
+ * Returns an instance of the appropriate source class based on $key.
+ *
+ * @param string $key
+ * @param array $cfg
+ * @param string $table
+ * @return WhoBirdAbstractSource
+ * @throws Exception
  */
 function whobird_get_source_instance($key, $cfg, $table) {
     switch ($key) {

@@ -1,11 +1,18 @@
 <?php
-
 // SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
-//
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
- * Handles the management of the custom table for storing data from the taxo_code.txt file.
+ * WhoBird Mapping Table Manager
+ *
+ * Handles the creation, initialization, and querying of the custom mapping table
+ * (whobird_mapping) used by the whoBIRD WordPress plugin.
+ * Data is loaded from the whobird_mapping.json resource file.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,10 +20,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Function triggered during plugin activation.
- */
-/**
- * Creates or recreates the whobird_mapping table and populates it from the whobird_mapping.json file.
+ * Initializes or recreates the whobird_mapping table and populates it from the whobird_mapping.json file.
+ * Should be called during plugin activation.
+ *
+ * Reads whobird_mapping.json and creates a table with columns:
+ *   - birdnet_id (int, primary key)
+ *   - scientific_name (varchar)
+ *   - wikidata_qid (varchar)
+ * Populates the table with the parsed data.
+ *
+ * Logs errors if the resource file is missing or cannot be parsed.
  */
 function whobirdMappingTableInit() {
     global $wpdb;
@@ -62,7 +75,6 @@ function whobirdMappingTableInit() {
         );
     }
 }
-
 
 /**
  * Retrieves the mapping information for a given birdnet_id.

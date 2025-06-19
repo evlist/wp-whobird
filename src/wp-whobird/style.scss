@@ -5,58 +5,54 @@
  */
 
 /**
- * The following styles get applied both on the front of your site
- * and in the editor.
+ * Shared styles for the WhoBird block.
+ * 
+ * These rules apply both in the WordPress editor and on the front end.
+ * They control the overall bird list layout, entry display, and print formatting.
  */
 
-/* Bird list overall layout */
+/* Bird list layout using CSS Grid for responsive columns */
 .wpwbd_list {
     list-style: none;
     padding: 0;
-    display: grid; /* Use CSS Grid for layout */
-    grid-template-columns: 1fr; /* Default to a single column */
-    gap: 10px; /* Add spacing between rows/columns */
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
 }
 
-@media (min-width: 768px) { /* Apply two-column layout for wider viewports */
+@media (min-width: 768px) {
     .wpwbd_list {
-        grid-template-columns: repeat(2, 1fr); /* Two equal-width columns */
+        grid-template-columns: repeat(2, 1fr); // Two columns for wider screens
     }
 }
 
 @media print {
     .wpwbd_list {
-        grid-template-columns: repeat(2, 1fr); /* Two equal-width columns for print */
+        grid-template-columns: repeat(2, 1fr);
     }
     #audio-player-container,
-    .bird-wikipedia-container 
-    {
-        display: none;
+    .bird-wikipedia-container {
+        display: none; // Hide these elements when printing
     }
-    .wpwbd-bird-entry
-    {
-        page-break-before: auto; /* 'always,' 'avoid,' 'left,' 'inherit,' or 'right' */
-        page-break-after: auto; /* 'always,' 'avoid,' 'left,' 'inherit,' or 'right' */
-        page-break-inside: avoid; /* or 'auto' */
+    .wpwbd-bird-entry {
+        page-break-before: auto;
+        page-break-after: auto;
+        page-break-inside: avoid;
     }
     .wpwbd_list .bird-info {
         padding-right: 4px;
     }
-
-    .wpwbd_list .bird-info .common-name {
-        text-align: right;
-    }
-
+    .wpwbd_list .bird-info .common-name,
     .wpwbd_list .bird-info .latin-name {
         text-align: right;
     }
 }
 
-/* Bird entry styling */
+/* Bird entry container styles */
 .wpwbd_list .wpwbd-bird-entry {
-    display: flex; /* Keep Flexbox for alignment within each entry */
-    align-items: center; /* Vertically center elements */
-    justify-content: space-between; /* Space out child elements */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 2px;
     background: #f9f9f9;
     border: 1px solid #ddd;
@@ -68,63 +64,58 @@
     background: #efefef;
 }
 
-/* Thumbnail styling */
+/* Bird thumbnail styles */
 .wpwbd_list .bird-thumbnail {
-    flex-shrink: 0; /* Prevent the image from shrinking */
-    margin-right: 16px; /* Space between image and text */
+    flex-shrink: 0;
+    margin-right: 16px;
 }
 
 .wpwbd_list .bird-thumbnail img {
-    width: 80px; /* Fixed image width */
-    height: 80px; /* Fixed image height */
-    object-fit: cover; /* Maintain aspect ratio */
-    border-radius: 4px; /* Optional: Rounded corners */
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
     vertical-align: middle;
 }
 
-/* Bird info styling */
+/* Bird info text styles */
 .wpwbd_list .bird-info {
     display: flex;
-    flex-direction: column; /* Stack text vertically */
+    flex-direction: column;
 }
 
 .wpwbd_list .bird-info .common-name {
     font-size: 16px;
     font-weight: bold;
 }
-
 .wpwbd_list .bird-info .common-name::first-letter {
     text-transform: uppercase;
 }
-
 .wpwbd_list .bird-info .latin-name {
     font-size: 14px;
-    font-style: italic; /* Italicize Latin names */
-    color: var(--wp--preset--color--neutral, #555); // fallback #555 if not defined
+    font-style: italic;
+    color: var(--wp--preset--color--neutral, #555);
 }
 
-/* Wikipedia link styling */
+/* Wikipedia link and icon styles */
 .bird-wikipedia-container {
-    margin-left: auto; /* Push the link to the far right */
+    margin-left: auto;
 }
-
 .bird-wikipedia-link {
     text-decoration: none;
-    color: var(--wp--preset--color--neutral, #888); // fallback #888 if not defined
+    color: var(--wp--preset--color--neutral, #888);
     display: inline-flex;
-    align-items: baseline; /* Align icons relative to text baseline */
-    gap: 0.5em; /* Space between icons */
-    position: relative; /* Enable precise positioning */
+    align-items: baseline;
+    gap: 0.5em;
+    position: relative;
 }
-
 .bird-wikipedia-link i.normal {
-    font-size: 1.5em; /* Adjust size for the main icon */
+    font-size: 1.5em;
     vertical-align: middle;
 }
-
 .bird-wikipedia-link i.exponent {
-    font-size: 0.75em; /* Smaller size for the exponent icon */
-    position: absolute; /* Use absolute positioning for precise placement */
-    top: 0; /* Move it to the top of the parent container */
-    right: -0.5em; /* Slightly offset to the right */
+    font-size: 0.75em;
+    position: absolute;
+    top: 0;
+    right: -0.5em;
 }

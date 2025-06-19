@@ -5,11 +5,12 @@
  */
 
 /**
- * The following styles get applied inside the editor only.
- *
- * Replace them with your own styles or remove the file completely.
+ * Editor-only styles for the WhoBird block.
+ * 
+ * These styles are applied in the WordPress block editor (not on the front end)
+ * to help visually distinguish the block during editing.
  */
 
 .wp-block-wpwbd-wp-whobird {
-	border: 1px dotted #f00;
+	border: 1px dotted #f00; // Highlight the block in the editor
 }

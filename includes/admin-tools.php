@@ -1,8 +1,18 @@
 <?php
-
 // SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
-//
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+/**
+ * WhoBird Admin Tools
+ *
+ * Registers and renders the admin tools submenu page for the whoBIRD plugin,
+ * providing access to cache and mapping management tools from the WordPress admin.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
+ */
 
 // Main admin tools script for whoBIRD plugin
 
@@ -19,6 +29,9 @@ add_action('admin_menu', function() {
     );
 });
 
+/**
+ * Renders the whoBIRD admin tools page, including cache and mapping tools.
+ */
 function whobird_admin_tools_page() {
     ?>
     <div class="wrap">
@@ -36,3 +49,4 @@ function whobird_admin_tools_page() {
     </div>
     <?php
 }
+

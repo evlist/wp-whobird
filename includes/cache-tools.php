@@ -8,9 +8,15 @@ namespace WPWhoBird;
 
 use WPWhoBird\Config;
 
-// Inline cache tool for modular admin page
+/**
+ * Renders the cache tools section for the WhoBird admin page.
+ *
+ * - Handles cache clearing form submission.
+ * - Provides user feedback on cache table clearance.
+ * - Outputs a form/button to trigger cache clearing.
+ */
 function whobird_render_cache_tools_section() {
-    // Handle form submission
+    // Handle cache clearing form submission with nonce verification.
     if (
         isset($_POST['wpwhobird_clear_cache']) &&
         check_admin_referer('wpwhobird_clear_cache_action', 'wpwhobird_clear_cache_nonce')
@@ -19,8 +25,10 @@ function whobird_render_cache_tools_section() {
         $table_name = Config::getTableSparqlCache();
         $result = $wpdb->query("TRUNCATE TABLE $table_name");
         if ($result === false) {
+            // Display error notice if cache clearing fails.
             echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Failed to clear the cache table. Please check the table configuration.', 'wpwhobird') . '</p></div>';
         } else {
+            // Display success notice if cache clearance is successful.
             echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Cache table has been cleared successfully!', 'wpwhobird') . '</p></div>';
         }
     }
@@ -36,4 +44,5 @@ function whobird_render_cache_tools_section() {
     <?php
 }
 
+// Render the cache tools section immediately.
 whobird_render_cache_tools_section();

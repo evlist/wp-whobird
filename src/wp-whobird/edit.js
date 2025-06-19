@@ -3,58 +3,42 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
- * Retrieves the translation of text.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/
+ * Block editor code for the WhoBird block editor interface.
+ * 
+ * Provides the UI controls for selecting the observation period and unit
+ * when editing the block in the WordPress editor.
  */
+
 import { __ } from '@wordpress/i18n';
-
-/**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
- */
 import { useBlockProps } from '@wordpress/block-editor';
-
 import { TextControl, SelectControl } from '@wordpress/components';
-/**
- * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
- * Those files can contain any CSS code that gets applied to the editor.
- *
- * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
- */
 import './editor.scss';
 
 /**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @return {Element} Element to render.
+ * Edit component for the WhoBird block.
+ * 
+ * Renders the block's controls and preview in the WordPress block editor.
+ * 
+ * @param {Object} props - Block props from the editor.
+ * @return {Element} Element to render in the editor.
  */
-
 export default function Edit(props) {
     const { attributes, setAttributes } = props;
 
     return (
         <div {...useBlockProps()}>
             <p>
-            <i className="fas fa-crow"></i> {/* Example FontAwesome icon */}
-            { __(
-                    'WhoBIRD observations',
-                    'wp-whobird'
-                ) }
+                <i className="fas fa-crow"></i>
+                { __('WhoBIRD observations', 'wp-whobird') }
             </p>
             <TextControl
-                label={__('Observation Period', 'wp-whobird')} // Wrap label text with __()
+                label={__('Observation Period', 'wp-whobird')}
                 value={attributes.periodNumber || 1}
                 onChange={(value) => setAttributes({ periodNumber: value })}
                 type="number"
             />
             <SelectControl
-                label={__('Period Unit', 'wp-whobird')} // Wrap label text with __()
+                label={__('Period Unit', 'wp-whobird')}
                 value={attributes.periodUnit || 'day'}
                 options={[
                     { label: __('Day(s)', 'wp-whobird'), value: 'day' },

@@ -5,7 +5,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
- * vim: set ai sw=4 smarttab expandtab: tabstop=8 softtabstop=0
+ * Provides methods for rendering bird observation data for the WPWhoBird plugin.
+ *
+ * Handles database access, filtering, and formatting of bird observation results,
+ * as well as rendering playback controls and outputting HTML markup for display.
+ * Integrates with WordPress options and configuration for dynamic settings.
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @copyright 2025 Eric van der Vlist
+ * @license   GPL-3.0-or-later
+ *
  */
 namespace WPWhoBird;
 
@@ -15,9 +25,22 @@ use WPWhoBird\Config;
 
 class WhoBirdRenderer
 {
+    /**
+     * @var string Path to recordings directory relative to uploads base directory.
+     */
     private string $recordingsPath;
+
+    /**
+     * @var string Path to SQLite database relative to uploads base directory.
+     */
     private string $databasePath;
 
+    /**
+     * Initializes the renderer with WordPress-configured paths.
+     *
+     * Retrieves the recordings and database paths from WordPress options,
+     * falling back to defaults if not set.
+     */
     public function __construct()
     {
         // Retrieve the dynamic values from the WordPress options
@@ -25,6 +48,12 @@ class WhoBirdRenderer
         $this->databasePath = get_option('wp-whobird_database_path', 'WhoBird/databases/BirdDatabase.db');
     }
 
+    /**
+     * Get a read-only SQLite3 database connection for bird observations.
+     *
+     * @return SQLite3
+     * @throws \Exception if database cannot be opened.
+     */
     private function getDatabaseConnection(): SQLite3
     {
         $dbPath = wp_get_upload_dir()['basedir'] . '/' . $this->databasePath;
@@ -37,6 +66,12 @@ class WhoBirdRenderer
         return $db;
     }
 
+    /**
+     * Resolve and return a comma-separated list of URLs for valid recordings.
+     *
+     * @param string $recordingIdsString Comma-separated string of recording IDs.
+     * @return string Comma-separated URLs of the recordings.
+     */
     private function getRecordingsUrls(string $recordingIdsString): string
     {
         $recordingIds = explode(',', $recordingIdsString);
@@ -57,6 +92,11 @@ class WhoBirdRenderer
         return implode(',', $recordingUrls);
     }
 
+    /**
+     * Render the HTML for the bird audio player controls.
+     *
+     * @return string HTML markup for the audio player.
+     */
     private function playerDisplay(): string
     {
         return '<div id="audio-player-container">
@@ -73,6 +113,13 @@ class WhoBirdRenderer
             </div>';
     }
 
+    /**
+     * Query and render a list of bird observations within a given time range.
+     *
+     * @param int $startTime Start timestamp (milliseconds).
+     * @param int $endTime End timestamp (milliseconds).
+     * @return string Rendered HTML list of bird observations.
+     */
     private function getObservationsList($startTime, $endTime): string
     {
         $db = $this->getDatabaseConnection();
@@ -107,6 +154,16 @@ class WhoBirdRenderer
         return $list;
     }
 
+    /**
+     * Display bird observations for a given period.
+     *
+     * Calculates the start and end timestamps based on attributes,
+     * queries for matching observations, and returns the formatted HTML
+     * for display, including a player if observations exist.
+     *
+     * @param array $attributes Attributes from the shortcode or block.
+     * @return string HTML markup for observations or a message if none.
+     */
     public function displayObservations($attributes): string
     {
         // error_log('attributes: ' . print_r($attributes, true));
@@ -141,3 +198,4 @@ class WhoBirdRenderer
         }
     }
 }
+
