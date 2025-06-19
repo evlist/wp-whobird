@@ -15,7 +15,6 @@
 
 if (!defined('ABSPATH')) exit;
 
-global $WHOBIRD_MAPPING_SOURCES;
 global $WHOBIRD_MAPPING_TABLE;
 
 require_once __DIR__ . '/bird-mappings.php';
@@ -131,7 +130,7 @@ class WhoBIRD_Mapping_Sources_Table extends WP_List_Table {
 
 // ---- Instantiate source objects for use/display/update ----
 $whobird_source_instances = [];
-foreach ($WHOBIRD_MAPPING_SOURCES as $key => $cfg) {
+foreach (whobird_get_mapping_sources() as $key => $cfg) {
     $whobird_source_instances[$key] = whobird_get_source_instance($key, $cfg, $WHOBIRD_MAPPING_TABLE);
 }
 
@@ -142,9 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
         if (isset($_POST['update_' . $key])) {
             list($ok, $msg) = $srcObj->update();
             if ($ok) {
-                echo '<div class="updated notice"><p>' . esc_html($WHOBIRD_MAPPING_SOURCES[$key]['label'] . ': ' . __($msg, 'wp-whobird')) . '</p></div>';
+                echo '<div class="updated notice"><p>' . esc_html(whobird_get_mapping_sources()[$key]['label'] . ': ' . __($msg, 'wp-whobird')) . '</p></div>';
             } else {
-                echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($WHOBIRD_MAPPING_SOURCES[$key]['label'] . ': ' . __($msg, 'wp-whobird')) . '</p></div>';
+                echo '<div class="notice notice-error is-dismissible"><p>' . esc_html(whobird_get_mapping_sources()[$key]['label'] . ': ' . __($msg, 'wp-whobird')) . '</p></div>';
             }
         }
         // Handle mapping table update from source.
@@ -153,11 +152,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
             if ($ok) {
                 echo '<div class="updated notice"><p>' . sprintf(
                     // Translators: %s is mapping source label.
-                    esc_html__('Update table (%s): ', 'wp-whobird'), esc_html($WHOBIRD_MAPPING_SOURCES[$key]['label'])
+                    esc_html__('Update table (%s): ', 'wp-whobird'), esc_html(whobird_get_mapping_sources()[$key]['label'])
                 ) . esc_html__($msg, 'wp-whobird') . '</p></div>';
             } else {
                 echo '<div class="notice notice-error is-dismissible"><p>' . sprintf(
-                    esc_html__('Update table (%s): ', 'wp-whobird'), esc_html($WHOBIRD_MAPPING_SOURCES[$key]['label'])
+                    esc_html__('Update table (%s): ', 'wp-whobird'), esc_html(whobird_get_mapping_sources()[$key]['label'])
                 ) . esc_html__($msg, 'wp-whobird') . '</p></div>';
             }
         }
@@ -171,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
         <h2><?php echo esc_html__('Mapping Sources', 'wp-whobird'); ?></h2>
         <form method="POST">
             <?php
-                $mapping_table = new WhoBIRD_Mapping_Sources_Table($WHOBIRD_MAPPING_SOURCES, $WHOBIRD_MAPPING_TABLE, $whobird_source_instances);
+                $mapping_table = new WhoBIRD_Mapping_Sources_Table(whobird_get_mapping_sources(), $WHOBIRD_MAPPING_TABLE, $whobird_source_instances);
                 $mapping_table->prepare_items();
                 $mapping_table->display();
             ?>

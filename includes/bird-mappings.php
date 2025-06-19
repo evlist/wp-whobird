@@ -1,17 +1,19 @@
 <?php
-
-// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
-
 /**
+ * SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @license   GPL-3.0-or-later
+ *
  * Handles bird mapping sources configuration and mapping table logic for the WhoBird plugin.
  * 
  * Provides:
- * - Source configuration for mapping data files and Wikidata queries
- * - Stepwise database schema and data manipulation for mapping tables
- * - WordPress admin export action
- * - Utility functions for mapping step execution
+ * - Deferred source configuration for mapping data files and Wikidata queries (via whobird_get_mapping_sources()).
+ * - Stepwise database schema and data manipulation for mapping tables.
+ * - WordPress admin export action.
+ * - Utility functions for mapping step execution.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -29,47 +31,64 @@ use WPWhoBird\Config;
 // ---- CONFIGURATION ----
 
 /**
- * @var array $WHOBIRD_MAPPING_SOURCES
- * Defines sources for mapping: BirdNET, eBird, and Wikidata species lists.
+ * Returns sources for mapping: BirdNET, eBird, and Wikidata species lists.
+ * All user-facing strings are localized using the 'wp-whobird' text domain.
+ * This function should only be called after the 'init' action to ensure translations are loaded.
+ *
+ * @return array[]
  */
-$WHOBIRD_MAPPING_SOURCES = [
-    'taxo_code' => [
-        'label' => __('whoBIRD taxo_code.txt', 'wp-whobird'),
-        'description' => __('Maps BirdNET IDs to eBird IDs', 'wp-whobird'),
-        'github_repo' => 'woheller69/whoBIRD',
-        'github_path' => 'app/src/main/assets/taxo_code.txt',
-        'raw_url' => 'https://github.com/woheller69/whoBIRD/raw/master/app/src/main/assets/taxo_code.txt',
-    ],
-    'birdnet_species' => [
-        'label' => __('whoBIRD BirdNET species file (labels_en.txt)', 'wp-whobird'),
-        'description' => __('BirdNET species list (ID, scientific name, common name, etc.) from whoBIRD, kept in sync with taxo_code.txt.', 'wp-whobird'),
-        'github_repo' => 'woheller69/whoBIRD',
-        'github_path' => 'app/src/main/assets/labels_en.txt',
-        'raw_url' => 'https://github.com/woheller69/whoBIRD/raw/master/app/src/main/assets/labels_en.txt',
-    ],
-    'wikidata_species' => [
-        'label' => __('Wikidata birds SPARQL export (English names, eBird IDs)', 'wp-whobird'),
-        'description' => __('Bird species exported from Wikidata via SPARQL. Includes Wikidata Q ID, English common name, scientific name, taxon rank, and eBird taxon ID.', 'wp-whobird'),
-        'sparql_url' => 'https://query.wikidata.org/sparql',
-        'query' => <<<SPARQL
-        SELECT ?item ?itemLabel ?scientificName ?taxonRankLabel ?eBirdID WHERE {
-            ?item wdt:P105 wd:Q7432.  # Taxon (species)
-                ?item wdt:P225 ?scientificName.
-                OPTIONAL { ?item wdt:P3444 ?eBirdID. }
-            OPTIONAL { ?item wdt:P105 ?taxonRank. }
-            ?item wdt:P171* wd:Q5113.  # Descendant of Aves (birds)
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-        }
+function whobird_get_mapping_sources() {
+    static $sources = null;
+    if ($sources !== null) {
+        return $sources;
+    }
+
+    // Each mapping source provides information for aligning BirdNET, eBird, and Wikidata bird species data.
+    $sources = [
+        'taxo_code' => [
+            // whoBIRD mapping file between BirdNET and eBird
+            'label'       => __('whoBIRD taxo_code.txt', 'wp-whobird'),
+            'description' => __('Maps BirdNET IDs to eBird IDs', 'wp-whobird'),
+            'github_repo' => 'woheller69/whoBIRD',
+            'github_path' => 'app/src/main/assets/taxo_code.txt',
+            'raw_url'     => 'https://github.com/woheller69/whoBIRD/raw/master/app/src/main/assets/taxo_code.txt',
+        ],
+        'birdnet_species' => [
+            // BirdNET species list, kept in sync with taxo_code.txt
+            'label'       => __('whoBIRD BirdNET species file (labels_en.txt)', 'wp-whobird'),
+            'description' => __('BirdNET species list (ID, scientific name, common name, etc.) from whoBIRD, kept in sync with taxo_code.txt.', 'wp-whobird'),
+            'github_repo' => 'woheller69/whoBIRD',
+            'github_path' => 'app/src/main/assets/labels_en.txt',
+            'raw_url'     => 'https://github.com/woheller69/whoBIRD/raw/master/app/src/main/assets/labels_en.txt',
+        ],
+        'wikidata_species' => [
+            // Wikidata SPARQL query for bird species
+            'label'       => __('Wikidata birds SPARQL export (English names, eBird IDs)', 'wp-whobird'),
+            'description' => __('Bird species exported from Wikidata via SPARQL. Includes Wikidata Q ID, English common name, scientific name, taxon rank, and eBird taxon ID.', 'wp-whobird'),
+            'sparql_url'  => 'https://query.wikidata.org/sparql',
+            // This is a multi-line string, not for translation.
+            'query'       => <<<SPARQL
+SELECT ?item ?itemLabel ?scientificName ?taxonRankLabel ?eBirdID WHERE {
+    ?item wdt:P105 wd:Q7432.  # Taxon (species)
+        ?item wdt:P225 ?scientificName.
+        OPTIONAL { ?item wdt:P3444 ?eBirdID. }
+    OPTIONAL { ?item wdt:P105 ?taxonRank. }
+    ?item wdt:P171* wd:Q5113.  # Descendant of Aves (birds)
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
 SPARQL,
-    ],
-];
+        ],
+    ];
+
+    return $sources;
+}
 
 // ---- DATABASE TABLE ----
 
 global $wpdb;
 /**
- * @var string $WHOBIRD_MAPPING_TABLE
  * Table name for storing remote mapping files (used for tracking sources).
+ * @var string
  */
 $WHOBIRD_MAPPING_TABLE = $wpdb->prefix . 'whobird_remote_files';
 
@@ -95,10 +114,10 @@ function whobird_get_mapping_steps() {
         // Step 2: Create mapping table
         'create_table' => [
             'sql' => "CREATE TABLE {$mapping_table} (
-                    birdnet_id INT(10) UNSIGNED PRIMARY KEY,
-                    scientific_name VARCHAR(128),
-                    wikidata_qid VARCHAR(64)
-                    )",
+                birdnet_id INT(10) UNSIGNED PRIMARY KEY,
+                scientific_name VARCHAR(128),
+                wikidata_qid VARCHAR(64)
+                )",
             'msg' => __('Created mapping table.', 'wp-whobird'),
         ],
         // Step 3: Create index on scientific name in Wikidata species table
@@ -159,7 +178,7 @@ function whobird_execute_mapping_step($step) {
     }
 
     global $wpdb;
-    global $WHOBIRD_MAPPING_SOURCES;
+    $sources = whobird_get_mapping_sources();
 
     $mapping_table = $wpdb->prefix . 'whobird_mapping';
 
@@ -231,11 +250,11 @@ function whobird_execute_mapping_step($step) {
         $p225_mode = $step === 'update_mapping_from_wikidata_truthy' ? 'wdt' : 'ps';
 
         $missing = $wpdb->get_col("SELECT scientific_name FROM {$mapping_table} WHERE wikidata_qid IS NULL AND scientific_name IS NOT NULL");
-        error_log("Step $step, missing from $mapping_table: $missing");
+        error_log("Step $step, missing from $mapping_table: " . print_r($missing, true));
         if (!$missing) {
             return [ 'success' => true, 'msg' => $steps[$step]['msg'] . ' (' . __('none missing', 'wp-whobird') . ')' ];
         }
-        $sparql_url = $WHOBIRD_MAPPING_SOURCES['wikidata_species']['sparql_url'];
+        $sparql_url = $sources['wikidata_species']['sparql_url'];
         $updated = 0;
         $chunks = array_chunk($missing, 50); // batch
 
@@ -247,18 +266,18 @@ function whobird_execute_mapping_step($step) {
             if ($p225_mode === 'wdt') {
                 // Direct property (fastest, returns entity URL in ?item)
                 $sparql = <<<SPARQL
-                    SELECT ?item ?scientificName WHERE {
-                        ?item wdt:P225 ?scientificName .
-                            VALUES ?scientificName { $values }
-                    }
+SELECT ?item ?scientificName WHERE {
+    ?item wdt:P225 ?scientificName .
+        VALUES ?scientificName { $values }
+}
 SPARQL;
             } else { // ps
                 // Statement property (also returns entity URL in ?item)
                 $sparql = <<<SPARQL
-                    SELECT ?item ?scientificName WHERE {
-                        ?item p:P225/ps:P225 ?scientificName .
-                            VALUES ?scientificName { $values }
-                    }
+SELECT ?item ?scientificName WHERE {
+    ?item p:P225/ps:P225 ?scientificName .
+        VALUES ?scientificName { $values }
+}
 SPARQL;
             }
             error_log("Step $step, sparql: $sparql");

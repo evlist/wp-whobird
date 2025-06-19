@@ -13,7 +13,6 @@
 if (!defined('ABSPATH')) exit;
 
 global $wpdb;
-global $WHOBIRD_MAPPING_SOURCES;
 require_once __DIR__ . '/WhoBirdSources.php';
 require_once __DIR__ . '/bird-mappings.php';
 
@@ -27,7 +26,7 @@ $data = $wpdb->get_results("SELECT birdnet_id, scientific_name, wikidata_qid FRO
  * Build an array of source information including label, commit SHA, commit date, 
  * last update time, and SPARQL query (for Wikidata).
  */
-$sources_cfg = $WHOBIRD_MAPPING_SOURCES;
+$sources_cfg = whobird_get_mapping_sources();
 $sources_info = [];
 foreach ($sources_cfg as $key => $cfg) {
     $source = whobird_get_source_instance($key, $cfg, $wpdb->prefix . 'whobird_remote_files');
