@@ -2,9 +2,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import { __ } from '@wordpress/i18n';
+
 /**
  * JavaScript for the WhoBird block front-end view.
- * 
+ *
  * Handles interactive features such as audio player controls and Ajax-based bird entry updates.
  * This file is enqueued on the front end via the block.json "viewScript" property.
  */
@@ -34,7 +36,7 @@ function initializePlayer() {
 
   // Updates the UI with the current track information.
   const updateTrackInfo = () => {
-    const trackText = "Track";
+    const trackText = __('Track', 'wp-whobird');
     currentTrackInfo.textContent = `${trackText} ${currentIndex + 1} / ${recordings.length} (${currentListItem.textContent})`;
   };
 
@@ -42,14 +44,14 @@ function initializePlayer() {
   const playAudio = () => {
     audio.play();
     isPlaying = true;
-    playPauseButton.textContent = "⏸";
+    playPauseButton.textContent = __('⏸', 'wp-whobird');
   };
 
   // Pauses the current audio track.
   const pauseAudio = () => {
     audio.pause();
     isPlaying = false;
-    playPauseButton.textContent = "▶️";
+    playPauseButton.textContent = __('▶️', 'wp-whobird');
   };
 
   // Loads recordings from the clicked list item.
@@ -146,7 +148,7 @@ function initializeAjaxQueue() {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(__('HTTP error! status:', 'wp-whobird') + ` ${response.status}`);
         }
         return response.json();
       })
@@ -161,7 +163,7 @@ function initializeAjaxQueue() {
         }
       })
       .catch(() => {
-        console.error(`Error updating bird data for ${birdnetId}.`);
+        console.error(__('Error updating bird data for', 'wp-whobird') + ` ${birdnetId}.`);
       })
       .finally(() => {
         isProcessing = false;

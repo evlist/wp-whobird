@@ -2,9 +2,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import { __ } from '@wordpress/i18n';
+
 /**
  * Handles the admin mapping generation process for the WhoBird plugin.
- * 
+ *
  * This script enables step-by-step mapping generation via Ajax when the admin clicks
  * the "generate mapping" button. Progress and results are displayed in a status list.
  */
@@ -30,7 +32,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function doStep(step) {
         // Display feedback for the current step.
         const li = document.createElement('li');
-        li.textContent = step ? `Running step: ${step}...` : 'Starting...';
+        li.textContent = step
+            ? __('Running step: ', 'wp-whobird') + step + '...'
+            : __('Starting...', 'wp-whobird');
         statusList.appendChild(li);
 
         // Prepare data for Ajax request.
@@ -56,16 +60,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     btn.disabled = false;
                     const done = document.createElement('li');
-                    done.innerHTML = '<strong>All steps completed!</strong>';
+                    done.innerHTML = '<strong>' + __('All steps completed!', 'wp-whobird') + '</strong>';
                     statusList.appendChild(done);
                 }
             } else {
-                li.textContent = `❌ ${resp.data && resp.data.msg ? resp.data.msg : 'Error.'}`;
+                li.textContent = `❌ ${resp.data && resp.data.msg ? resp.data.msg : __('Error.', 'wp-whobird')}`;
                 btn.disabled = false;
             }
         })
         .catch(e => {
-            li.textContent = `❌ AJAX error`;
+            li.textContent = `❌ ${__('AJAX error', 'wp-whobird')}`;
             btn.disabled = false;
         });
     }
