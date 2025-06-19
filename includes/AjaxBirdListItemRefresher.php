@@ -74,12 +74,12 @@ function update_bird_data()
     $bird_renderer  = new BirdListItemRenderer($birdnet_id, $locale);
     $wikidataQuery = new WikidataQuery($locale);
 
-    error_log('Step 1 - Initializations: ' . (microtime(true) - $startTime) . ' seconds');
+    error_log(sprintf(__('Step 1 - Initializations: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 
     // Fetch latest bird data from Wikidata (with caching)
     $fresh_data = $wikidataQuery->fetchAndUpdateCachedData($birdnet_id, $wikidata_qid);
 
-    error_log('Step 2 - Data fetched: ' . (microtime(true) - $startTime) . ' seconds');
+    error_log(sprintf(__('Step 2 - Data fetched: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 
     if (!$fresh_data) {
         wp_send_json_error(['message' => __('Could not fetch bird data.', 'wp-whobird')]);
@@ -89,15 +89,14 @@ function update_bird_data()
     // Render HTML output for the updated bird entry
     $html = $bird_renderer->renderBirdData($fresh_data);
 
-    error_log('Step 3 - HTML rendered: ' . (microtime(true) - $startTime) . ' seconds');
+    error_log(sprintf(__('Step 3 - HTML rendered: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 
     // Return JSON response with rendered HTML
     wp_send_json_success(['html' => $html]);
 
-    error_log('Total execution time: ' . (microtime(true) - $startTime) . ' seconds');
+    error_log(sprintf(__('Total execution time: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 }
 
 // Register AJAX handlers for logged-in and non-logged-in users
 add_action('wp_ajax_update_bird_data', __NAMESPACE__ . '\\update_bird_data');
 add_action('wp_ajax_nopriv_update_bird_data', __NAMESPACE__ . '\\update_bird_data');
-

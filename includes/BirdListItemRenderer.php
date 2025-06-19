@@ -97,7 +97,7 @@ class BirdListItemRenderer
         // Prepare display fields from Wikidata or defaults
         $description = $birdData['description'] ?? '';
         $latinName = $birdData['latinName'] ?? '';
-        $commonName = $birdData['commonName'] ?? '???';
+        $commonName = $birdData['commonName'] ?? esc_html__('???', 'wp-whobird');
         $image = $birdData['image'] ?? plugins_url('resources/images/whoBIRD.svg', dirname(__FILE__));
         $wikipedia = '';
 
@@ -124,11 +124,14 @@ class BirdListItemRenderer
              <div class="bird-wikipedia-container">
                 %s
              </div>',
-            $thumbnailUrl ? sprintf('<img src="%s" alt="%s">', esc_url($thumbnailUrl), esc_attr($commonName)) : '',
+            $thumbnailUrl ? sprintf(
+                '<img src="%s" alt="%s">',
+                esc_url($thumbnailUrl),
+                esc_attr($commonName)
+            ) : '',
             esc_html($commonName),
             esc_html($latinName),
             $wikipedia
         );
     }
 }
-

@@ -38,7 +38,7 @@ function whobird_ajax_generate_mapping_handler() {
         $step = sanitize_text_field($_POST['step']);
         $step_index = array_search($step, $all_steps, true);
         if ($step_index === false) {
-            wp_send_json_error(['msg' => 'Unknown step.']);
+            wp_send_json_error(['msg' => __('Unknown step.', 'wp-whobird')]);
         }
     } else {
         // If no step provided, start from the first step.
@@ -56,12 +56,12 @@ function whobird_ajax_generate_mapping_handler() {
             $next_step = $all_steps[$step_index + 1];
         }
         wp_send_json_success([
-            'msg' => $result['msg'],
+            'msg' => isset($result['msg']) ? __($result['msg'], 'wp-whobird') : '',
             'next_step' => $next_step,
         ]);
     } else {
         wp_send_json_error([
-            'msg' => $result['msg'],
+            'msg' => isset($result['msg']) ? __($result['msg'], 'wp-whobird') : '',
         ]);
     }
 }

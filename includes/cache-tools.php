@@ -1,8 +1,19 @@
 <?php
-
-// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/**
+ * SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @license   GPL-3.0-or-later
+ * 
+ * Cache management tools for the WhoBird plugin.
+ * 
+ * This file provides a UI section and logic for clearing the WhoBird cache table from the WordPress admin.
+ * - Handles cache clearing form submission and nonce verification.
+ * - Provides user feedback on cache clearance.
+ * - Outputs a form/button to trigger cache clearing.
+ */
 
 namespace WPWhoBird;
 
@@ -26,19 +37,19 @@ function whobird_render_cache_tools_section() {
         $result = $wpdb->query("TRUNCATE TABLE $table_name");
         if ($result === false) {
             // Display error notice if cache clearing fails.
-            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Failed to clear the cache table. Please check the table configuration.', 'wpwhobird') . '</p></div>';
+            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Failed to clear the cache table. Please check the table configuration.', 'wp-whobird') . '</p></div>';
         } else {
             // Display success notice if cache clearance is successful.
-            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Cache table has been cleared successfully!', 'wpwhobird') . '</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Cache table has been cleared successfully!', 'wp-whobird') . '</p></div>';
         }
     }
     ?>
     <div id="cache-tool-wrapper" style="margin-bottom:2em;">
-        <h2><?php echo esc_html__('Cache Tool', 'wpwhobird'); ?></h2>
+        <h2><?php echo esc_html__('Cache Tool', 'wp-whobird'); ?></h2>
         <form method="post" action="">
             <?php wp_nonce_field('wpwhobird_clear_cache_action', 'wpwhobird_clear_cache_nonce'); ?>
-            <p><?php echo esc_html__('Click the button below to clear the WhoBird cache table.', 'wpwhobird'); ?></p>
-            <input type="submit" name="wpwhobird_clear_cache" class="button button-primary" value="<?php echo esc_attr__('Clear Cache', 'wpwhobird'); ?>">
+            <p><?php echo esc_html__('Click the button below to clear the WhoBird cache table.', 'wp-whobird'); ?></p>
+            <input type="submit" name="wpwhobird_clear_cache" class="button button-primary" value="<?php echo esc_attr__('Clear Cache', 'wp-whobird'); ?>">
         </form>
     </div>
     <?php

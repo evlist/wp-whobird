@@ -34,8 +34,8 @@ class WhoBirdAdminSettings
     public function addSettingsPage()
     {
         add_options_page(
-            __('WhoBird Settings', 'wpwhobird'),
-            __('WhoBird Settings', 'wpwhobird'),
+            __('WhoBird Settings', 'wp-whobird'),
+            __('WhoBird Settings', 'wp-whobird'),
             'manage_options',
             'wpwhobird-settings',
             [$this, 'renderSettingsPage']
@@ -49,7 +49,7 @@ class WhoBirdAdminSettings
     {
         ?>
         <div class="wrap">
-            <h1><?php echo esc_html__('WhoBird Settings', 'wpwhobird'); ?></h1>
+            <h1><?php echo esc_html__('WhoBird Settings', 'wp-whobird'); ?></h1>
             <form method="post" action="options.php">
                 <?php
                 settings_fields('wpwhobird_settings');
@@ -90,19 +90,19 @@ class WhoBirdAdminSettings
         // Add settings section
         add_settings_section(
             'wpwhobird_main_settings',
-            __('Main Settings', 'wpwhobird'),
+            __('Main Settings', 'wp-whobird'),
             null,
             'wpwhobird-settings'
         );
 
         // Add settings fields
-        $this->addTextField('wpwhobird_recordings_path', __('Recordings Path', 'wpwhobird'));
-        $this->addTextField('wpwhobird_database_path', __('Database Path', 'wpwhobird'));
-        $this->addNumberField('wpwhobird_threshold', __('Threshold', 'wpwhobird'), 0, 1, 0.01);
+        $this->addTextField('wpwhobird_recordings_path', __('Recordings Path', 'wp-whobird'));
+        $this->addTextField('wpwhobird_database_path', __('Database Path', 'wp-whobird'));
+        $this->addNumberField('wpwhobird_threshold', __('Threshold', 'wp-whobird'), 0, 1, 0.01);
         $this->addCheckboxField(
             'wpwhobird_should_generate_text_when_no_observations',
-            __('Generate text if there are no observations for the selected period', 'wpwhobird'),
-            __('If checked, a message will be generated when there are no observations for the selected period.', 'wpwhobird'),
+            __('Generate text if there are no observations for the selected period', 'wp-whobird'),
+            __('If checked, a message will be generated when there are no observations for the selected period.', 'wp-whobird'),
             true
         );
     }
@@ -126,7 +126,7 @@ class WhoBirdAdminSettings
                        name="<?php echo esc_attr($optionName); ?>"
                        value="<?php echo esc_attr($value); ?>" class="regular-text">
                 <?php if ($description): ?>
-                    <p class="description"><?php echo esc_html($description); ?></p>
+                    <p class="description"><?php echo esc_html__($description, 'wp-whobird'); ?></p>
                 <?php endif; ?>
                 <?php
             },
@@ -185,7 +185,7 @@ class WhoBirdAdminSettings
                        name="<?php echo esc_attr($optionName); ?>"
                        value="1" <?php checked($value); ?>>
                 <?php if ($description): ?>
-                    <p class="description"><?php echo esc_html($description); ?></p>
+                    <p class="description"><?php echo esc_html__($description, 'wp-whobird'); ?></p>
                 <?php endif; ?>
                 <?php
             },
@@ -209,4 +209,3 @@ class WhoBirdAdminSettings
 
 // Initialize the settings page
 new WhoBirdAdminSettings();
-

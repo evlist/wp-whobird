@@ -102,12 +102,12 @@ class WhoBirdRenderer
         return '<div id="audio-player-container">
             <div id="audio-player">
             <div class="player">
-            <button id="prev" class="control-button">⏮</button>
-            <button id="play-pause" class="control-button">▶️</button>
-            <button id="next" class="control-button">⏭</button>
+            <button id="prev" class="control-button" title="' . esc_attr__('Previous', 'wp-whobird') . '">⏮</button>
+            <button id="play-pause" class="control-button" title="' . esc_attr__('Play/Pause', 'wp-whobird') . '">▶️</button>
+            <button id="next" class="control-button" title="' . esc_attr__('Next', 'wp-whobird') . '">⏭</button>
             </div>
             <div class="track-info">
-            <span id="current-track">Track 1</span>
+            <span id="current-track">' . esc_html__('Track', 'wp-whobird') . '</span>
             </div>
             </div>
             </div>';
@@ -198,4 +198,3 @@ class WhoBirdRenderer
         }
     }
 }
-

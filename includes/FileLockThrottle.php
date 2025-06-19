@@ -42,7 +42,13 @@ class FileLockThrottle extends Throttle {
 
         // Ensure the throttle directory exists
         if (!is_dir($this->throttleDirectory)) {
-            throw new \RuntimeException("Throttle directory does not exist: {$this->throttleDirectory}");
+            throw new \RuntimeException(
+                sprintf(
+                    /* translators: %s is the throttle directory path */
+                    __('Throttle directory does not exist: %s', 'wp-whobird'),
+                    $this->throttleDirectory
+                )
+            );
         }
     }
 
@@ -95,4 +101,3 @@ class FileLockThrottle extends Throttle {
         touch($this->getThrottleFile());
     }
 }
-

@@ -1,8 +1,17 @@
 <?php
-
-// SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
-//
-// SPDX-License-Identifier: GPL-3.0-or-later
+/**
+ * SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * @package   WPWhoBird
+ * @author    Eric van der Vlist <vdv@dyomedea.com>
+ * @license   GPL-3.0-or-later
+ *
+ * Configuration utility class for the WhoBird plugin.
+ * 
+ * Provides static methods to retrieve key database table names (using the current WordPress prefix)
+ * and to fetch plugin options.
+ */
 
 namespace WPWhoBird;
 

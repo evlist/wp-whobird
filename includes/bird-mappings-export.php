@@ -35,7 +35,8 @@ foreach ($sources_cfg as $key => $cfg) {
     if ($row) {
         $entry = [
             'key' => $key,
-            'label' => $cfg['label'],
+            // Translators: %s is the source label key.
+            'label' => isset($cfg['label']) ? __($cfg['label'], 'wp-whobird') : '',
         ];
         if (!empty($row['source_commit_sha'])) {
             $entry['commit_sha'] = $row['source_commit_sha'];
@@ -73,7 +74,9 @@ $output = [
 
 // 5. Output the export as a downloadable JSON file with proper headers.
 header('Content-Type: application/json');
-header('Content-Disposition: attachment; filename="whobird_mapping.json"');
+// Translators: %s is the filename for the mapping export.
+$export_filename = sprintf(__('whobird_mapping.json', 'wp-whobird'));
+header('Content-Disposition: attachment; filename="' . $export_filename . '"');
 echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 exit;
 ?>

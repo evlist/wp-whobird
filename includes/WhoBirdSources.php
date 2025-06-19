@@ -64,7 +64,7 @@ abstract class WhoBirdAbstractSource {
      */
     public function uploadToTable() {
         // Implement in subclasses as needed
-        return [false, 'Not implemented for this source.'];
+        return [false, __('Not implemented for this source.', 'wp-whobird')];
     }
 
     /**
@@ -133,11 +133,11 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
         global $wpdb;
         list($latest_sha, $latest_date) = $this->fetchLatestCommit();
         if (!$latest_sha || !$latest_date) {
-            return [false, 'Could not get commit info from GitHub.'];
+            return [false, __('Could not get commit info from GitHub.', 'wp-whobird')];
         }
         $content = $this->fetchRawFile();
         if (!$content) {
-            return [false, 'File download error.'];
+            return [false, __('File download error.', 'wp-whobird')];
         }
         $now = current_time('mysql');
         $latest_date_sql = date('Y-m-d H:i:s', strtotime($latest_date));
@@ -151,7 +151,7 @@ abstract class WhoBirdGithubSource extends WhoBirdAbstractSource {
                 'source_commit_date' => $latest_date_sql,
                 ]
                 );
-        return [true, 'File updated successfully.'];
+        return [true, __('File updated successfully.', 'wp-whobird')];
     }
 
     /**
@@ -202,7 +202,7 @@ class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
         // Get raw content
         $row = $this->getDBRow();
         if (!$row || !isset($row['raw_content']) || $row['raw_content'] === '') {
-            return [false, 'No raw content available for import.'];
+            return [false, __('No raw content available for import.', 'wp-whobird')];
         }
 
         // Insert each line (line number = birdnet_id, line content = ebird_id)
@@ -217,14 +217,14 @@ class WhoBirdTaxoCodeSource extends WhoBirdGithubSource {
                     'ebird_id' => $ebird_id
             ]);
             if ($result === false) {
-                $errors[] = "Insert error for birdnet_id=$i : " . $wpdb->last_error;
+                $errors[] = sprintf(__('Insert error for birdnet_id=%d : %s', 'wp-whobird'), $i, $wpdb->last_error);
             } else {
                 $inserted++;
             }
         }
-        $msg = "Imported $inserted rows to $table_name.";
+        $msg = sprintf(__('Imported %d rows to %s.', 'wp-whobird'), $inserted, $table_name);
         if ($errors) {
-            $msg .= " " . count($errors) . " insert errors occurred. First error: " . $errors[0];
+            $msg .= ' ' . sprintf(_n('%d insert error occurred. First error: %s', '%d insert errors occurred. First error: %s', count($errors), 'wp-whobird'), count($errors), $errors[0]);
         }
         return [empty($errors), $msg];
     }
@@ -257,7 +257,7 @@ class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
         // Get raw content
         $row = $this->getDBRow();
         if (!$row || !isset($row['raw_content']) || $row['raw_content'] === '') {
-            return [false, 'No raw content available for import.'];
+            return [false, __('No raw content available for import.', 'wp-whobird')];
         }
 
         // Insert each line (line number = birdnet_id, content split by "_")
@@ -276,14 +276,14 @@ class WhoBirdBirdnetSpeciesSource extends WhoBirdGithubSource {
                     'english_name' => $english
             ]);
             if ($result === false) {
-                $errors[] = "Insert error for birdnet_id=$i : " . $wpdb->last_error;
+                $errors[] = sprintf(__('Insert error for birdnet_id=%d : %s', 'wp-whobird'), $i, $wpdb->last_error);
             } else {
                 $inserted++;
             }
         }
-        $msg = "Imported $inserted rows to $table_name.";
+        $msg = sprintf(__('Imported %d rows to %s.', 'wp-whobird'), $inserted, $table_name);
         if ($errors) {
-            $msg .= " " . count($errors) . " insert errors occurred. First error: " . $errors[0];
+            $msg .= ' ' . sprintf(_n('%d insert error occurred. First error: %s', '%d insert errors occurred. First error: %s', count($errors), 'wp-whobird'), count($errors), $errors[0]);
         }
         return [empty($errors), $msg];
     }
@@ -316,11 +316,11 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
                 'timeout' => 60
         ]);
         if (is_wp_error($response)) {
-            return [false, 'SPARQL query error: ' . $response->get_error_message()];
+            return [false, __('SPARQL query error: ', 'wp-whobird') . $response->get_error_message()];
         }
         $content = wp_remote_retrieve_body($response);
         if (!$content || strlen($content) < 10) {
-            return [false, 'No results from Wikidata.'];
+            return [false, __('No results from Wikidata.', 'wp-whobird')];
         }
         $now = current_time('mysql');
         $wpdb->replace(
@@ -333,7 +333,7 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
                 'source_commit_date' => null,
                 ]
                 );
-        return [true, 'Wikidata SPARQL result updated successfully.'];
+        return [true, __('Wikidata SPARQL result updated successfully.', 'wp-whobird')];
     }
 
     /**
@@ -378,12 +378,12 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
         // Get raw content
         $row = $this->getDBRow();
         if (!$row || !isset($row['raw_content']) || $row['raw_content'] === '') {
-            return [false, 'No raw content available for import.'];
+            return [false, __('No raw content available for import.', 'wp-whobird')];
         }
 
         $json = json_decode($row['raw_content'], true);
         if (!$json || !isset($json['head']['vars']) || !isset($json['results']['bindings'])) {
-            return [false, 'Invalid or unexpected Wikidata SPARQL result.'];
+            return [false, __('Invalid or unexpected Wikidata SPARQL result.', 'wp-whobird')];
         }
 
         // Drop and recreate table
@@ -413,15 +413,18 @@ class WhoBirdWikidataSource extends WhoBirdAbstractSource {
             if (!empty($row_data['wikidata_qid'])) {
                 $result = $wpdb->insert($table_name, $row_data);
                 if ($result === false) {
-                    $errors[] = "Insert error for wikidata_qid=" . esc_html($row_data['wikidata_qid']) . ": " . $wpdb->last_error;
+                    $errors[] = sprintf(__('Insert error for wikidata_qid=%s: %s', 'wp-whobird'),
+                        esc_html($row_data['wikidata_qid']),
+                        $wpdb->last_error
+                    );
                 } else {
                     $inserted++;
                 }
             }
         }
-        $msg = "Imported $inserted rows to $table_name.";
+        $msg = sprintf(__('Imported %d rows to %s.', 'wp-whobird'), $inserted, $table_name);
         if ($errors) {
-            $msg .= " " . count($errors) . " insert errors occurred. First error: " . $errors[0];
+            $msg .= ' ' . sprintf(_n('%d insert error occurred. First error: %s', '%d insert errors occurred. First error: %s', count($errors), 'wp-whobird'), count($errors), $errors[0]);
         }
         return [empty($errors), $msg];
     }
@@ -447,7 +450,7 @@ function whobird_get_source_instance($key, $cfg, $table) {
         case 'wikidata_species':
             return new WhoBirdWikidataSource($key, $cfg, $table);
         default:
-            throw new Exception("Unknown mapping source key: $key");
+            throw new Exception(sprintf(__('Unknown mapping source key: %s', 'wp-whobird'), $key));
     }
 }
 ?>

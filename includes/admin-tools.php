@@ -21,8 +21,8 @@ if (!defined('ABSPATH')) exit;
 // Add a submenu under Tools (not a top-level menu)
 add_action('admin_menu', function() {
     add_management_page(
-        'whoBIRD tools',
-        'whoBIRD tools',
+        __('whoBIRD tools', 'wp-whobird'),
+        __('whoBIRD tools', 'wp-whobird'),
         'manage_options',
         'whobird-admin-tools',
         'whobird_admin_tools_page'
@@ -37,7 +37,7 @@ function whobird_admin_tools_page() {
     <div class="wrap">
         <h1 style="display:flex;align-items:center;gap:10px;">
             <img src="<?php echo esc_url(plugins_url('../resources/images/whoBIRD.svg', __FILE__)); ?>" alt="whoBIRD" style="height:32px;width:auto;vertical-align:middle;">
-            <?php echo esc_html__('whoBIRD tools', 'wpwhobird'); ?>
+            <?php echo esc_html__('whoBIRD tools', 'wp-whobird'); ?>
         </h1>
         <?php
         // Cache Tools Section
@@ -49,4 +49,3 @@ function whobird_admin_tools_page() {
     </div>
     <?php
 }
-

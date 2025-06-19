@@ -59,12 +59,12 @@ class WikidataQuery {
         $tableName = Config::getTableSparqlCache();
 
         $cachedResult = $wpdb->get_row(
-                $wpdb->prepare(
-                    "SELECT result, expiration FROM $tableName WHERE birdnet_id = %d",
-                    $birdnetId
-                    ),
-                ARRAY_A
-                );
+            $wpdb->prepare(
+                "SELECT result, expiration FROM $tableName WHERE birdnet_id = %d",
+                $birdnetId
+            ),
+            ARRAY_A
+        );
 
         if (!$cachedResult) {
             return null;
@@ -96,15 +96,15 @@ class WikidataQuery {
         }
 
         $sparqlQuery = $this->buildSparqlQuery($wikidataId);
-#        error_log('sparqlQuery: ' . $sparqlQuery);
+        #        error_log('sparqlQuery: ' . $sparqlQuery);
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($sparqlQuery);
         $sparqlHeaders = ["Accept: application/json"];
         $startCurl = microtime(true);
         $sparqlResponse = $this->executeCurl($sparqlUrl, $sparqlHeaders);
-        error_log('cURL execution time: ' . (microtime(true) - $startCurl) . ' seconds');
+        error_log(sprintf(__('cURL execution time: %s seconds', 'wp-whobird'), (microtime(true) - $startCurl)));
         $sparqlData = json_decode($sparqlResponse, true);
 
-#        error_log('sparqlData: ' . print_r($sparqlData, true));
+        #        error_log('sparqlData: ' . print_r($sparqlData, true));
         return $this->processAndCacheData($birdnetId, $sparqlData);
     }
 
@@ -120,7 +120,9 @@ class WikidataQuery {
      */
     private function buildSparqlQuery(string $wikidataId): string {
         if (!preg_match('/^Q\d+$/', $wikidataId)) {
-            throw new \InvalidArgumentException("Invalid Wikidata Q-id: $wikidataId");
+            throw new \InvalidArgumentException(
+                sprintf(__('Invalid Wikidata Q-id: %s', 'wp-whobird'), $wikidataId)
+            );
         }
         return <<<SPARQL
             SELECT ?itemLabel ?itemDescription ?latinName ?alias ?image ?wikipedia WHERE {
@@ -194,13 +196,13 @@ class WikidataQuery {
 
         // Cache the result in the database with random expiration to avoid thundering herd
         $wpdb->replace(
-                $tableName,
-                [
+            $tableName,
+            [
                 'birdnet_id' => $birdnetId,
                 'result' => json_encode($result),
                 'expiration' => date('Y-m-d H:i:s', time() + $randSeconds),
-                ]
-                );
+            ]
+        );
 
         return $result;
     }
@@ -229,4 +231,3 @@ class WikidataQuery {
         return $response;
     }
 }
-

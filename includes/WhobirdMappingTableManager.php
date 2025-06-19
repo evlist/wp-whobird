@@ -39,7 +39,14 @@ function whobirdMappingTableInit() {
     $file_path = plugin_dir_path( __FILE__ ) . '../resources/data/whobird_mapping.json';
 
     if ( ! file_exists( $file_path ) ) {
-        error_log( "The file $file_path was not found. The table $table_name was not modified." );
+        error_log(
+            sprintf(
+                /* translators: 1: path to missing JSON file, 2: table name */
+                __('The file %1$s was not found. The table %2$s was not modified.', 'wp-whobird'),
+                $file_path,
+                $table_name
+            )
+        );
         return;
     }
 
@@ -47,7 +54,14 @@ function whobirdMappingTableInit() {
     $data = json_decode($json, true);
 
     if ( ! $data || ! isset($data['data']) ) {
-        error_log( "The file $file_path did not contain valid mapping data. The table $table_name was not modified." );
+        error_log(
+            sprintf(
+                /* translators: 1: path to invalid JSON file, 2: table name */
+                __('The file %1$s did not contain valid mapping data. The table %2$s was not modified.', 'wp-whobird'),
+                $file_path,
+                $table_name
+            )
+        );
         return;
     }
 
@@ -94,4 +108,3 @@ function getMappingByBirdnetId(int $birdnetId): ?array {
 
     return $result ?: null;
 }
-

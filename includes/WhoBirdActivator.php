@@ -78,14 +78,18 @@ class WhoBirdActivator
         // --- 3. Populate mapping table from JSON ---
         $json_path = plugin_dir_path(__DIR__) . 'resources/data/whobird_mapping.json';
         if (!file_exists($json_path)) {
-            error_log("whobird: Mapping JSON not found at $json_path");
+            error_log(sprintf(
+                /* translators: %s: path to missing JSON file */
+                __('whobird: Mapping JSON not found at %s', 'wp-whobird'),
+                $json_path
+            ));
             return;
         }
         $json = file_get_contents($json_path);
         $data = json_decode($json, true);
 
         if (!$data || !isset($data['data'])) {
-            error_log("whobird: Invalid or empty mapping JSON.");
+            error_log(__('whobird: Invalid or empty mapping JSON.', 'wp-whobird'));
             return;
         }
 
@@ -105,8 +109,11 @@ class WhoBirdActivator
             if ($result) $inserted++;
         }
 
-        error_log("whobird: Mapping table recreated and $inserted rows inserted.");
+        error_log(sprintf(
+            /* translators: %d: row count */
+            __('whobird: Mapping table recreated and %d rows inserted.', 'wp-whobird'),
+            $inserted
+        ));
 
     }
 }
-
