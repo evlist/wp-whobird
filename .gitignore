@@ -43,3 +43,7 @@ sandbox/
 # Build directory
 
 build/
+.vscode/*.dist
+.vscode/*.bak.*
+.devcontainer/tmp/
+.devcontainer/var/

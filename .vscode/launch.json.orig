@@ -1,0 +1,21 @@
+{
+  // Static VS Code PHP debug config.
+  // NOTE: /var/www is symlinked or bind-mounted to ${workspaceFolder}/.devcontainer/var/www
+  // (set up in bootstrap or devcontainer mounts). This single root mapping aligns
+  // Xdebug's server paths (e.g., /var/www/html/...) with files in the workspace so
+  // breakpoints verify in WordPress core and plugins. If you change the mount/symlink
+  // target, update the right-hand path accordingly.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Listen for Xdebug",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "log": true,
+      "pathMappings": {
+        "/var/www/html": "${workspaceFolder}/.devcontainer/var/www/html"
+      }
+    }
+  ]
+}

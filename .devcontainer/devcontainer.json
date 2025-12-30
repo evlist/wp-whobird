@@ -1,0 +1,29 @@
+{
+  "name": "WP Plugin Codespace (single-container LAMP)",
+  "dockerFile": "Dockerfile",
+  "remoteUser": "vscode",
+  "forwardPorts": [80],
+  "initializeCommand": ".devcontainer/bin/merge-env.sh",
+  "runArgs": ["--env-file", ".devcontainer/tmp/.env.merged"],
+  "postStartCommand": ".devcontainer/bin/bootstrap-wp.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "xdebug.php-debug",
+        "ikappas.phpcs",
+        "neilbrayfield.php-docblocker",
+        "johnbillion.vscode-wordpress-hooks",    // optional: WP hooks IntelliSense
+        "ms-azuretools.vscode-docker"            // Microsoft Docker (Container Tools)
+      ],
+      "settings": {
+        "files.associations": {
+          "*.php": "php",
+          "*.inc": "php",
+          "*.module": "php"
+        },
+        "php.validate.executablePath": "/usr/bin/php"
+      }
+    }
+  }
+}
