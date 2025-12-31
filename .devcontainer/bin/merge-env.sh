@@ -9,11 +9,11 @@ set -euo pipefail
 log() { printf "[merge-env] %s\n" "$*"; }
 die() { printf "[merge-env:ERROR] %s\n" "$*" >&2; exit 1; }
 
-LOCALENV=${PWD}/.env
+LOCALENV=${PWD}/.cs_env
 DEVCONTAINER=${PWD}/.devcontainer
-DEFAULTENV=${DEVCONTAINER}/.env
+DEFAULTENV=${DEVCONTAINER}/.cs_env
 TMP=${DEVCONTAINER}/tmp
-MERGEDENV=${TMP}/.env.merged
+MERGEDENV=${TMP}/.cs_env.merged
 
 mkdir -p $TMP
 rm -f $MERGEDENV

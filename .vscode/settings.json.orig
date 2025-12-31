@@ -4,7 +4,7 @@
     "*.inc": "php",
     "*.module": "php"
   },
-  "intelephense.environment.phpVersion": "8.2",
+  "intelephense.cs_environment.phpVersion": "8.2",
   "intelephense.diagnostics.runtime": "8.2",
   "php.validate.executablePath": "/usr/bin/php",
   "phpcs.standard": "WordPress",

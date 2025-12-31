@@ -1,0 +1,18 @@
+# WordPress database
+WP_DB_NAME=wordpress
+WP_DB_USER=wordpress
+WP_DB_PASS=wordpress
+WP_DB_HOST=127.0.0.1
+
+# Site and admin
+WP_TITLE=Codespace Dev
+WP_ADMIN_USER=admin
+WP_ADMIN_PASS=admin
+WP_ADMIN_EMAIL=admin@example.com
+
+# Local Plugin Configuration
+PLUGIN_SLUG=local-hello-world
+PLUGIN_DIR=plugins-src/hello-world
+
+# Additional Plugins (comma-separated)
+WP_PLUGINS=loco-translate

@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later OR MIT
+
 # Install or update .devcontainer and .vscode from a shared upstream.
 # - .devcontainer: force-sync (rsync --delete)
 # - .vscode: baseline-aware with side-by-side *.orig / *.dist and apt-style prompts.
 #
 # First-run helpers (only when NOT in --dry-run):
-# - Suggest and optionally append .gitignore lines
+# - Optionally append .gitignore lines
 # - Optionally insert a Codespaces badge + "Codespace created by" credit in README.md
 #
 set -euo pipefail
@@ -55,7 +60,6 @@ if [ -e /dev/tty ]; then
 fi
 
 prompt() {
-  # Usage: prompt "Message" varname
   local _msg="$1" _var="$2" _ans
   if [ -n "${ASSUME_YES:-}" ]; then
     _ans="y"
@@ -68,7 +72,6 @@ prompt() {
 }
 
 prompt_yesno() {
-  # Usage: prompt_yesno "Message" default(var: y|n)
   local _msg="$1" _default="${2:-n}" _ans
   if [ -n "${ASSUME_YES:-}" ]; then
     _ans="y"
@@ -141,6 +144,82 @@ git clone --depth=1 --branch "$UPSTREAM_REF" "$UPSTREAM_REPO" "$TMPDIR/src" >/de
 UPSTREAM_COMMIT="$(git -C "$TMPDIR/src" rev-parse --short HEAD)"
 say "Upstream commit: $UPSTREAM_COMMIT"
 
+# Preflight: use upstream tree to detect .gitignore impact before copying.
+# Behavior:
+# - Normal mode: abort if any ignored destination is detected.
+# - Dry-run mode: print issues and continue (no changes made).
+preflight_gitignore_from_upstream() {
+  say "Preflight: scanning .gitignore impact against upstream paths (before copy)"
+
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    warn "Not inside a Git work tree; skipping ignore scan."
+    return 0
+  fi
+
+  local up_vscode="$TMPDIR/src/.vscode"
+  local up_devcontainer="$TMPDIR/src/.devcontainer"
+  if [ ! -d "$up_vscode" ] && [ ! -d "$up_devcontainer" ]; then
+    say "No upstream .vscode or .devcontainer found; skipping ignore scan."
+    return 0
+  fi
+
+  build_paths_stream() {
+    local base="$TMPDIR/src"
+    if [ -d "$up_vscode" ] || [ -d "$up_devcontainer" ]; then
+      find "$up_vscode" "$up_devcontainer" -type d -print0 2>/dev/null \
+      | while IFS= read -r -d '' p; do printf '%s\0' "${p#"$base/"}"; done
+      find "$up_vscode" "$up_devcontainer" -type f -print0 2>/dev/null \
+      | while IFS= read -r -d '' p; do printf '%s\0' "${p#"$base/"}"; done
+    fi
+  }
+
+  local ignored_lines=""
+  if git check-ignore -h 2>&1 | grep -q -- "--stdin"; then
+    ignored_lines="$(
+      build_paths_stream \
+      | git check-ignore -v --stdin -z 2>/dev/null \
+      | tr '\0' '\n' || true
+    )"
+  else
+    local tmp_list; tmp_list="$(mktemp)"
+    build_paths_stream | tr '\0' '\n' > "$tmp_list"
+    while IFS= read -r rel; do
+      [ -z "$rel" ] && continue
+      git check-ignore -v "$rel" || true
+    done < "$tmp_list" > "$tmp_list.out"
+    ignored_lines="$(cat "$tmp_list.out" 2>/dev/null || true)"
+    rm -f "$tmp_list" "$tmp_list.out"
+  fi
+
+  if [ -n "$ignored_lines" ]; then
+    say "Ignored upstream destinations detected (pre-copy):"
+    while IFS= read -r line; do
+      if printf '%s' "$line" | grep -q $'\t'; then
+        rule="${line%%$'\t'*}"
+        path="${line#*$'\t'}"
+        say "  $path"
+        say "    rule: $rule"
+      else
+        say "  $line"
+      fi
+    done <<< "$ignored_lines"
+
+    if [ -n "$DRY_RUN" ]; then
+      say "Dry-run: please fix .gitignore. Continuing without changes."
+      return 0
+    else
+      die "Aborting: .gitignore would ignore files needed under .vscode/.devcontainer."
+    fi
+  else
+    say "No problematic ignores detected for upstream .vscode/.devcontainer destinations."
+  fi
+
+  say "Preflight upstream ignore scan complete."
+}
+
+# Run the preflight scan here (before any sync/copy)
+preflight_gitignore_from_upstream
+
 # 1) Update .devcontainer (force-sync)
 if [ -d "$TMPDIR/src/.devcontainer" ]; then
   say "Updating .devcontainer (force-sync; local changes may be overwritten)"
@@ -149,7 +228,7 @@ if [ -d "$TMPDIR/src/.devcontainer" ]; then
   fi
   RSYNC_OPTS=(-a --delete)
   [ -n "$DRY_RUN" ] && RSYNC_OPTS+=(--dry-run)
-  EXCLUDES=(--exclude "tmp/")
+  EXCLUDES=(--exclude "tmp/" --exclude "var/")
   rsync "${RSYNC_OPTS[@]}" "${EXCLUDES[@]}" "$TMPDIR/src/.devcontainer/" ".devcontainer/"
 else
   warn "Upstream has no .devcontainer; skipping."
@@ -168,17 +247,15 @@ udiff() {
 # 2) Update .vscode with .orig baselines
 if [ -d "$TMPDIR/src/.vscode" ]; then
   say "Updating .vscode (baseline: .orig; interactive prompts)"
-  # Do not create directories in dry-run
   [ -n "$DRY_RUN" ] || mkdir -p ".vscode"
   umask 022
 
   while IFS= read -r -d '' uf; do
-    rel="${uf#"$TMPDIR/src/"}"          # ".vscode/filename"
+    rel="${uf#"$TMPDIR/src/"}"
     dest="$REPO_ROOT/$rel"
-    base="${dest}.orig"                 # baseline side-by-side
-    dist="${dest}.dist"                 # upstream sample when keeping local
+    base="${dest}.orig"
+    dist="${dest}.dist"
 
-    # Ensure parent dirs only when not dry-run
     [ -n "$DRY_RUN" ] || mkdir -p "$(dirname "$dest")"
 
     # New file case
@@ -232,7 +309,7 @@ if [ -d "$TMPDIR/src/.vscode" ]; then
       continue
     fi
 
-    # Differing states: interactive loop (view multiple diffs before choosing an action)
+    # Differing states: interactive loop (view diffs before choosing action)
     if [ -n "$ASSUME_YES" ]; then
       choice="y"
     else
@@ -254,7 +331,8 @@ if [ -d "$TMPDIR/src/.vscode" ]; then
               say "[DRY] replace $rel"
             else
               say "replace $rel"; install -m 0644 "$uf" "$dest"; install -m 0644 "$uf" "$base"
-            fi; break ;;
+            fi
+            break ;;
           n|N) say "keep local $rel"; break ;;
           b|B)
             if [ -n "$DRY_RUN" ]; then
@@ -262,27 +340,33 @@ if [ -d "$TMPDIR/src/.vscode" ]; then
             else
               bak="${dest}.bak.$(date +%Y%m%d%H%M%S)"; say "backup local to $(basename "$bak") and replace $rel"
               cp -p "$dest" "$bak"; install -m 0644 "$uf" "$dest"; install -m 0644 "$uf" "$base"
-            fi; break ;;
+            fi
+            break ;;
           u|U)
             if [ -n "$DRY_RUN" ]; then
               say "[DRY] save upstream sample -> $dist"
             else
               say "save upstream sample to $dist; keeping local $rel"; install -m 0644 "$uf" "$dist"
-            fi; break ;;
+            fi
+            break ;;
           m|M)
             if [ -n "$DRY_RUN" ]; then
               say "[DRY] attempt merge $rel"
             else
               say "attempt 3-way merge $rel (baseline, local, upstream)"
               merged="$(mktemp)"
-              if command -v git >/dev/null 2>&1; then git merge-file -p "$dest" "$base" "$uf" > "$merged" || true
-              else diff3 -m "$dest" "$base" "$uf" > "$merged" || true
+              if command -v git >/dev/null 2>&1; then
+                git merge-file -p "$dest" "$base" "$uf" > "$merged" || true
+              else
+                diff3 -m "$dest" "$base" "$uf" > "$merged" || true
               fi
               say "---- merged preview (first 60 lines) ----"; head -n 60 "$merged" || true
               prompt "Apply merged result to $rel? [y/N]: " apply
               if [ "${apply:-N}" = "y" ] || [ "${apply:-N}" = "Y" ]; then
                 install -m 0644 "$merged" "$dest"; install -m 0644 "$uf" "$base"; say "merged applied"; rm -f "$merged"; break
-              else say "merge discarded; leaving local unchanged"; rm -f "$merged"; continue; fi
+              else
+                say "merge discarded; leaving local unchanged"; rm -f "$merged"; continue
+              fi
             fi ;;
           r|R)
             if [ -n "$DRY_RUN" ]; then
@@ -290,7 +374,8 @@ if [ -d "$TMPDIR/src/.vscode" ]; then
             else
               bak="${dest}.bak.$(date +%Y%m%d%H%M%S)"; say "revert local to baseline; backup to $(basename "$bak")"
               cp -p "$dest" "$bak"; install -m 0644 "$base" "$dest"
-            fi; break ;;
+            fi
+            break ;;
           s|S|*) say "skip $rel"; break ;;
         esac
       done
@@ -315,8 +400,8 @@ else
   } > "$PROVENANCE_FILE"
 fi
 
-# First-run guidance: suggest/apply .gitignore entries and offer README badge+credit insert
-if [ "$FIRST_RUN" -eq 1 ]; then
+# First-run guidance (only in normal mode)
+if [ "$FIRST_RUN" -eq 1 ] && [ -z "$DRY_RUN" ]; then
   say ""
   say "First-run detected."
   say "Suggested .gitignore entries:"
@@ -328,31 +413,29 @@ if [ "$FIRST_RUN" -eq 1 ]; then
   say "  .devcontainer/tmp/"
   say "  .devcontainer/var/"
 
-  if [ -n "$DRY_RUN" ]; then
-    say "[DRY] README badge/credit and .gitignore prompts suppressed; no changes will be made."
-  else
-    if prompt_yesno "Append .gitignore entries now? [Y/n]: " y; then
-      ensure_gitignore_line ".vscode/*.dist"
-      ensure_gitignore_line ".vscode/*.bak.*"
-      ensure_gitignore_line ".devcontainer/tmp/"
-      ensure_gitignore_line ".devcontainer/var/"
-      say ".gitignore updated with recommended entries."
-      if prompt_yesno "Also ignore baselines (*.orig)? [y/N]: " n; then
-        ensure_gitignore_line ".vscode/*.orig"
-        say "Added .vscode/*.orig to .gitignore."
-      fi
-      if prompt_yesno "Do you want to keep *.dist untracked? [Y/n]: " y; then
-        say "*.dist will be ignored by git."
-      else
-        if [ -f ".gitignore" ]; then
-          sed -i.bak '/^\.vscode\/\*\.dist$/d' ".gitignore"; rm -f ".gitignore.bak"
-          say "Removed .vscode/*.dist from .gitignore (dist files will be tracked)."
-        fi
+  if prompt_yesno "Append .gitignore entries now? [Y/n]: " y; then
+    ensure_gitignore_line ".vscode/*.dist"
+    ensure_gitignore_line ".vscode/*.bak.*"
+    ensure_gitignore_line ".devcontainer/tmp/"
+    ensure_gitignore_line ".devcontainer/var/"
+    say ".gitignore updated with recommended entries."
+    if prompt_yesno "Also ignore baselines (*.orig)? [y/N]: " n; then
+      ensure_gitignore_line ".vscode/*.orig"
+      say "Added .vscode/*.orig to .gitignore."
+    fi
+    if prompt_yesno "Do you want to keep *.dist untracked? [Y/n]: " y; then
+      say "*.dist will be ignored by git."
+    else
+      if [ -f ".gitignore" ]; then
+        # Remove the previously added dist line if user opted to track dist files
+        sed -i.bak '/^\.vscode\/\*\.dist$/d' ".gitignore"; rm -f ".gitignore.bak"
+        say "Removed .vscode/*.dist from .gitignore (dist files will be tracked)."
       fi
     fi
-    if prompt_yesno "Insert Codespaces badge and wp-plugin-codespace credit into README.md now? [Y/n]: " y; then
-      insert_badge_and_credit_in_readme
-    fi
+  fi
+
+  if prompt_yesno "Insert Codespaces badge and wp-plugin-codespace credit into README.md now? [Y/n]: " y; then
+    insert_badge_and_credit_in_readme
   fi
 fi
 
