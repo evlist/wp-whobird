@@ -8,7 +8,7 @@ use WPWhoBird\BirdListItemRenderer;
 require_once dirname( __DIR__ ) . '/includes/BirdListItemRenderer.php';
 
 /**
- * Tests of the data-index* attributes on the bird entries (slice 001).
+ * Tests of the data-index mark on the bird entries (slices 001 and 002).
  */
 class BirdListItemRendererTest extends TestCase {
 
@@ -51,28 +51,61 @@ class BirdListItemRendererTest extends TestCase {
 		$this->assertStringNotContainsString( 'data-index', $this->render() );
 	}
 
+	/**
+	 * Decode the JSON mark from the data-index attribute of the <li> tag.
+	 */
+	private function mark( string $tag ): array {
+		$this->assertSame( 1, preg_match( '/ data-index="([^"]*)"/', $tag, $m ), 'data-index present' );
+		$mark = json_decode( html_entity_decode( $m[1], ENT_QUOTES, 'UTF-8' ), true );
+		$this->assertIsArray( $mark );
+		return $mark;
+	}
+
 	public function test_qid_without_wikidata_data_has_no_label(): void {
 		$GLOBALS['wpwbd_test_mapping'] = array( 'scientific_name' => 'Fringilla coelebs', 'wikidata_qid' => 'Q25471' );
-		$tag = $this->liTag( $this->render() );
-		$this->assertStringContainsString( ' data-index="wikidata:Q25471" data-index-kind="species"', $tag );
-		$this->assertStringNotContainsString( 'data-index-label', $tag );
+		$mark = $this->mark( $this->liTag( $this->render() ) );
+		$this->assertSame(
+			array(
+				'topic'  => 'wikidata:Q25471',
+				'kind'   => 'species',
+				'source' => 'whobird',
+			),
+			$mark
+		);
 	}
 
 	public function test_qid_with_wikidata_name_has_label(): void {
 		$GLOBALS['wpwbd_test_mapping'] = array( 'scientific_name' => 'Fringilla coelebs', 'wikidata_qid' => 'Q25471' );
 		$GLOBALS['wpwbd_test_cache']   = $this->freshCache( 'Pinson des arbres' );
 		$tag = $this->liTag( $this->render() );
-		$this->assertStringContainsString( 'data-index-label="Pinson des arbres"', $tag );
+		$this->assertSame( 'Pinson des arbres', $this->mark( $tag )['label'] );
 		$this->assertStringNotContainsString( 'data-birdnet-id', $tag, 'fresh cache needs no refresh' );
 	}
 
-	public function test_label_is_escaped(): void {
+	public function test_old_companion_attributes_are_gone(): void {
 		$GLOBALS['wpwbd_test_mapping'] = array( 'scientific_name' => 'x', 'wikidata_qid' => 'Q1' );
-		$GLOBALS['wpwbd_test_cache']   = $this->freshCache( 'Oiseau "rare" <b>' );
-		$this->assertStringContainsString(
-			'data-index-label="Oiseau &quot;rare&quot; &lt;b&gt;"',
-			$this->liTag( $this->render() )
-		);
+		$GLOBALS['wpwbd_test_cache']   = $this->freshCache( 'Pinson des arbres' );
+		$tag = $this->liTag( $this->render() );
+		$this->assertStringNotContainsString( 'data-index-kind', $tag );
+		$this->assertStringNotContainsString( 'data-index-label', $tag );
+		$this->assertSame( 1, substr_count( $tag, 'data-index=' ) );
+	}
+
+	public function test_accents_are_not_escaped_as_unicode_sequences(): void {
+		$GLOBALS['wpwbd_test_mapping'] = array( 'scientific_name' => 'x', 'wikidata_qid' => 'Q1' );
+		$GLOBALS['wpwbd_test_cache']   = $this->freshCache( 'Pic épeiche' );
+		$tag = $this->liTag( $this->render() );
+		$this->assertStringContainsString( 'Pic épeiche', $tag );
+		$this->assertStringNotContainsString( '\\u00', $tag );
+	}
+
+	public function test_label_with_quotes_and_apostrophe_round_trips(): void {
+		$GLOBALS['wpwbd_test_mapping'] = array( 'scientific_name' => 'x', 'wikidata_qid' => 'Q1' );
+		$name                          = 'Oiseau "rare" <b> de l\'île';
+		$GLOBALS['wpwbd_test_cache']   = $this->freshCache( $name );
+		$tag = $this->liTag( $this->render() );
+		$this->assertStringNotContainsString( '<b>', $tag );
+		$this->assertSame( $name, $this->mark( $tag )['label'] );
 	}
 
 	public function test_stale_cache_keeps_refresh_attribute_and_label(): void {
@@ -82,6 +115,6 @@ class BirdListItemRendererTest extends TestCase {
 		$GLOBALS['wpwbd_test_cache']   = $cache;
 		$tag = $this->liTag( $this->render() );
 		$this->assertStringContainsString( 'data-birdnet-id="42"', $tag );
-		$this->assertStringContainsString( 'data-index-label="Pinson des arbres"', $tag );
+		$this->assertSame( 'Pinson des arbres', $this->mark( $tag )['label'] );
 	}
 }

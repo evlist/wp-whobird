@@ -33,6 +33,11 @@ if ( ! function_exists( 'esc_html__' ) ) {
 		return $text;
 	}
 }
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	function wp_json_encode( $data, $flags = 0 ) {
+		return json_encode( $data, $flags );
+	}
+}
 if ( ! function_exists( 'get_locale' ) ) {
 	function get_locale() {
 		return 'fr_FR';

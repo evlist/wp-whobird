@@ -6,6 +6,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 # Slice 001: index markup on bird entries
 
+> The attribute format below is superseded by [slice 002](002-index-markup-json.md) (one JSON `data-index` attribute). The rest still applies.
+
 ## Why
 
 The `wp-otherguise` plugin (Index module) builds a topic index from the pages

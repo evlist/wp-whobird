@@ -11,3 +11,4 @@ One document per feature, written before the code.
 | Slice | Title | Depends on |
 | --- | --- | --- |
 | [001](001-index-markup.md) | Index markup on bird entries | none |
+| [002](002-index-markup-json.md) | Index mark as one JSON attribute | 001 |

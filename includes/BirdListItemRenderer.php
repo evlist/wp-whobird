@@ -90,28 +90,34 @@ class BirdListItemRenderer
     }
 
     /**
-     * Build the data-index* attributes used by the wp-otherguise index.
+     * Build the data-index attribute read by the wp-otherguise index (slice 002).
      *
-     * Empty when the mapping table has no well-formed Wikidata QID, so the
-     * output is then identical to what it was before these attributes existed.
-     * The label is only given when the name comes from Wikidata.
+     * The value is one JSON object: topic, kind, source and, when the name comes
+     * from Wikidata, label. Empty when the mapping table has no well-formed
+     * Wikidata QID, so the output is then identical to what it was before.
      *
      * @param string|null $wikidataLabel Common name from Wikidata, or null.
-     * @return string Attributes, with a leading space, or an empty string.
+     * @return string Attribute, with a leading space, or an empty string.
      */
     private function renderIndexAttributes(?string $wikidataLabel): string
     {
         $mapping = getMappingByBirdnetId($this->birdnetId);
         $qid = $mapping['wikidata_qid'] ?? '';
-        if (!is_string($qid) || !preg_match('/^Q[0-9]+$/', $qid)) {
+        if (!is_string($qid) || !preg_match('/^Q[0-9]+$/D', $qid)) {
             return '';
         }
 
-        $attributes = ' data-index="' . esc_attr('wikidata:' . $qid) . '" data-index-kind="species"';
+        $mark = [
+            'topic' => 'wikidata:' . $qid,
+            'kind'  => 'species',
+        ];
         if ($wikidataLabel !== null && $wikidataLabel !== '') {
-            $attributes .= ' data-index-label="' . esc_attr($wikidataLabel) . '"';
+            $mark['label'] = $wikidataLabel;
         }
-        return $attributes;
+        $mark['source'] = 'whobird';
+
+        $json = wp_json_encode($mark, JSON_UNESCAPED_UNICODE);
+        return $json ? ' data-index="' . esc_attr($json) . '"' : '';
     }
 
     /**
