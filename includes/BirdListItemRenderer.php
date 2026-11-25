@@ -65,12 +65,14 @@ class BirdListItemRenderer
         $birdData = [
             'commonName' => $speciesName
         ];
+        $fromWikidata = false;
 
         // Use cached data if available
         if ($cache) {
             $needsRefresh = !$cache['isFresh'];
             if ($cache['data']) {
                 $birdData = $cache['data'];
+                $fromWikidata = true;
             }
         }
 
@@ -79,11 +81,37 @@ class BirdListItemRenderer
 
         // Render the <li> element with all details
         return sprintf(
-            '<li class="wpwbd-bird-entry" data-recordings="%s"%s>%s</li>',
+            '<li class="wpwbd-bird-entry" data-recordings="%s"%s%s>%s</li>',
             esc_attr($recordingsUrls),
             $dataBirdnetId,
+            $this->renderIndexAttributes($fromWikidata ? ($birdData['commonName'] ?? null) : null),
             $this->renderBirdData($birdData)
         );
+    }
+
+    /**
+     * Build the data-index* attributes used by the wp-otherguise index.
+     *
+     * Empty when the mapping table has no well-formed Wikidata QID, so the
+     * output is then identical to what it was before these attributes existed.
+     * The label is only given when the name comes from Wikidata.
+     *
+     * @param string|null $wikidataLabel Common name from Wikidata, or null.
+     * @return string Attributes, with a leading space, or an empty string.
+     */
+    private function renderIndexAttributes(?string $wikidataLabel): string
+    {
+        $mapping = getMappingByBirdnetId($this->birdnetId);
+        $qid = $mapping['wikidata_qid'] ?? '';
+        if (!is_string($qid) || !preg_match('/^Q[0-9]+$/', $qid)) {
+            return '';
+        }
+
+        $attributes = ' data-index="' . esc_attr('wikidata:' . $qid) . '" data-index-kind="species"';
+        if ($wikidataLabel !== null && $wikidataLabel !== '') {
+            $attributes .= ' data-index-label="' . esc_attr($wikidataLabel) . '"';
+        }
+        return $attributes;
     }
 
     /**

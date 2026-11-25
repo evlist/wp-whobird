@@ -47,3 +47,7 @@ build/
 .vscode/*.bak.*
 .devcontainer/tmp/
 .devcontainer/var/
+
+# Composer
+vendor/
+.phpunit.result.cache
