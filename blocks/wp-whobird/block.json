@@ -14,7 +14,7 @@
 	"textdomain": "wp-whobird",
 	"editorScript": "wpwbd-wp-whobird-editor-script",
 	"editorStyle": "file:./editor.css",
-	"style": "file:./style.css",
+	"style": [ "wpwhobird-fontawesome", "file:./style.css" ],
 	"render": "file:./render.php",
 	"viewScript": "wpwbd-wp-whobird-view-script",
 	"attributes": {

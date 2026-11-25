@@ -263,7 +263,6 @@ function whobird_execute_mapping_step($step) {
         $p225_mode = $step === 'update_mapping_from_wikidata_truthy' ? 'wdt' : 'ps';
 
         $missing = $wpdb->get_col("SELECT scientific_name FROM {$mapping_table} WHERE wikidata_qid IS NULL AND scientific_name IS NOT NULL");
-        error_log("Step $step, missing from $mapping_table: " . print_r($missing, true));
         if (!$missing) {
             return [ 'success' => true, 'msg' => $steps[$step]['msg'] . ' (' . __('none missing', 'wp-whobird') . ')' ];
         }
@@ -293,7 +292,6 @@ SELECT ?item ?scientificName WHERE {
 }
 SPARQL;
             }
-            error_log("Step $step, sparql: $sparql");
             $response = wp_remote_post($sparql_url, [
                 'timeout' => 30,
                 'headers' => [

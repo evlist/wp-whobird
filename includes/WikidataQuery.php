@@ -96,15 +96,11 @@ class WikidataQuery {
         }
 
         $sparqlQuery = $this->buildSparqlQuery($wikidataId);
-        #        error_log('sparqlQuery: ' . $sparqlQuery);
         $sparqlUrl = "https://query.wikidata.org/sparql?query=" . urlencode($sparqlQuery);
         $sparqlHeaders = ["Accept: application/json"];
-        $startCurl = microtime(true);
         $sparqlResponse = $this->executeCurl($sparqlUrl, $sparqlHeaders);
-        error_log(sprintf(__('cURL execution time: %s seconds', 'wp-whobird'), (microtime(true) - $startCurl)));
         $sparqlData = json_decode($sparqlResponse, true);
 
-        #        error_log('sparqlData: ' . print_r($sparqlData, true));
         return $this->processAndCacheData($birdnetId, $sparqlData);
     }
 

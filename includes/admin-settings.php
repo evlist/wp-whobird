@@ -167,7 +167,7 @@ class WhoBirdAdminSettings
                        name="<?php echo esc_attr($optionName); ?>"
                        value="<?php echo esc_attr($value); ?>" class="regular-text">
                 <?php if ($description): ?>
-                    <p class="description"><?php echo esc_html__($description, 'wp-whobird'); ?></p>
+                    <p class="description"><?php echo esc_html($description); ?></p>
                 <?php endif; ?>
                 <?php
             },
@@ -226,7 +226,7 @@ class WhoBirdAdminSettings
                        name="<?php echo esc_attr($optionName); ?>"
                        value="1" <?php checked($value); ?>>
                 <?php if ($description): ?>
-                    <p class="description"><?php echo esc_html__($description, 'wp-whobird'); ?></p>
+                    <p class="description"><?php echo esc_html($description); ?></p>
                 <?php endif; ?>
                 <?php
             },

@@ -173,16 +173,13 @@ class WhoBirdRenderer
      */
     public function displayObservations($attributes): string
     {
-        // error_log('attributes: ' . print_r($attributes, true));
         $periodNumber = isset($attributes['periodNumber']) ? intval($attributes['periodNumber']) : 1;
         $periodUnit = isset($attributes['periodUnit']) ? $attributes['periodUnit'] : 'day';
         $isoDate = get_the_date('Y-m-d');
         $date = new DateTime($isoDate);
         $date->modify('+1 day');
-        // error_log('end: '.$date->format('Y-m-d'));
         $endTime = $date->getTimestamp() * 1000;
         $date->modify("-{$periodNumber} {$periodUnit}");
-        // error_log('start: '.$date->format('Y-m-d'));
         $startTime = $date->getTimestamp() * 1000;
         $list = $this->getObservationsList($startTime, $endTime);
 

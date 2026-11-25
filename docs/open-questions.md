@@ -79,3 +79,19 @@ not read anywhere else in the plugin today.
 Question: is `wpwhobird_fallback_languages` still wanted? If yes, the hook has to
 be registered from `wp-whobird.php`; if not, remove the method and the option
 (and its line in `uninstall.php`).
+
+## 3. Coding standard: reformat the existing code? (found in slice 007)
+
+**Status: open, nothing reformatted.**
+
+`composer lint` (phpcs, WordPress standard) now runs. On the existing code it
+reports about 4,800 errors and 370 warnings, of which about 4,200 can be fixed
+automatically (`phpcbf`). Most are indentation: the code is indented with spaces,
+while WordPress and `.editorconfig` say tabs. The rest: Yoda conditions, missing
+or misformatted doc comments, escaping of output (some of these are real
+security-relevant findings, to be looked at one by one).
+
+Questions: reformat everything in one commit (a large diff that hides `git blame`;
+`.git-blame-ignore-revs` can hide it), or only touch the files edited from now on,
+or drop the WordPress indentation rules and keep the spaces? The escaping and
+nonce warnings should be reviewed whichever is chosen.

@@ -6,7 +6,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 <ruleset name="wp-whobird">
     <description>Coding standard for wp-whobird (WordPress).</description>
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
     <file>includes</file>
+    <file>uninstall.php</file>
+    <file>wp-whobird.php</file>
+    <file>blocks</file>
     <file>tests</file>
     <rule ref="WordPress"/>
 </ruleset>

@@ -44,8 +44,6 @@ if (!defined('ABSPATH')) {
  */
 function update_bird_data()
 {
-    $startTime = microtime(true);
-
     // Validate and sanitize input parameters
     $birdnet_id = isset($_POST['birdnet_id']) ? absint(wp_unslash($_POST['birdnet_id'])) : 0;
     if ($birdnet_id <= 0) {
@@ -75,8 +73,6 @@ function update_bird_data()
     $bird_renderer  = new BirdListItemRenderer($birdnet_id, $locale);
     $wikidataQuery = new WikidataQuery($locale);
 
-    error_log(sprintf(__('Step 1 - Initializations: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
-
     // A fresh cache entry is enough: no throttle wait, no network request.
     $cache = $wikidataQuery->getCachedData($birdnet_id);
     if ($cache && $cache['isFresh'] && !empty($cache['data'])) {
@@ -86,7 +82,6 @@ function update_bird_data()
         $fresh_data = $wikidataQuery->fetchAndUpdateCachedData($birdnet_id, $wikidata_qid);
     }
 
-    error_log(sprintf(__('Step 2 - Data fetched: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 
     if (!$fresh_data) {
         wp_send_json_error(['message' => __('Could not fetch bird data.', 'wp-whobird')]);
@@ -96,12 +91,10 @@ function update_bird_data()
     // Render HTML output for the updated bird entry
     $html = $bird_renderer->renderBirdData($fresh_data);
 
-    error_log(sprintf(__('Step 3 - HTML rendered: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 
     // Return JSON response with rendered HTML
     wp_send_json_success(['html' => $html]);
 
-    error_log(sprintf(__('Total execution time: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 }
 
 // Register AJAX handlers for logged-in and non-logged-in users

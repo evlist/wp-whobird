@@ -70,7 +70,8 @@ class WpTestDie extends Exception {
 }
 
 function add_action( $hook, $callback, $priority = 10, $args = 1 ) {
-	$GLOBALS['wpwbd_test_actions'][ $hook ][] = $callback;
+	$GLOBALS['wpwbd_test_actions'][ $hook ][]    = $callback;
+	$GLOBALS['wpwbd_test_priorities'][ $hook ][] = $priority;
 }
 function current_user_can( $capability ) {
 	return $GLOBALS['wpwbd_test_can'];
@@ -179,6 +180,50 @@ function switch_to_blog( $id ) {
 function restore_current_blog() {
 	$GLOBALS['wpwbd_test_blog_switches'][] = 'restore';
 	$GLOBALS['wpdb']->prefix                = 'wp_';
+}
+
+// ---- Scripts, styles, blocks: the calls are recorded for the tests. ----
+$GLOBALS['wpwbd_test_priorities'] = array();   // add_action() priorities, by hook name.
+$GLOBALS['wpwbd_test_calls']      = array();   // Recorded calls, by function name.
+
+function wpwbd_test_record( $function, array $args ) {
+	$GLOBALS['wpwbd_test_calls'][ $function ][] = $args;
+}
+function wp_register_style( ...$args ) {
+	wpwbd_test_record( 'wp_register_style', $args );
+}
+function wp_register_script( ...$args ) {
+	wpwbd_test_record( 'wp_register_script', $args );
+}
+function wp_enqueue_script( ...$args ) {
+	wpwbd_test_record( 'wp_enqueue_script', $args );
+}
+function wp_set_script_translations( ...$args ) {
+	wpwbd_test_record( 'wp_set_script_translations', $args );
+}
+function wp_add_inline_script( ...$args ) {
+	wpwbd_test_record( 'wp_add_inline_script', $args );
+}
+function wp_localize_script( ...$args ) {
+	wpwbd_test_record( 'wp_localize_script', $args );
+}
+function register_block_type( ...$args ) {
+	wpwbd_test_record( 'register_block_type', $args );
+}
+function load_plugin_textdomain( ...$args ) {
+	wpwbd_test_record( 'load_plugin_textdomain', $args );
+}
+function wp_create_nonce( $action = -1 ) {
+	return 'nonce-for-' . $action;
+}
+function admin_url( $path = '' ) {
+	return 'http://example.test/wp-admin/' . $path;
+}
+function plugin_dir_url( $file ) {
+	return 'http://example.test/wp-content/plugins/wp-whobird/';
+}
+function plugin_basename( $file ) {
+	return 'wp-whobird/' . basename( $file );
 }
 
 /** Minimal $wpdb: records queries, answers with what the test sets. */

@@ -63,15 +63,17 @@ test( 'edit falls back to the defaults', () => {
 	assert.strictEqual( tree.children[ 2 ].props.value, 'day' );
 } );
 
-test( 'block.json references handles and files that exist', () => {
+test( 'block.json references handles registered in PHP and files that exist', () => {
 	const json = JSON.parse( fs.readFileSync( path.join( blockDir, 'block.json' ), 'utf8' ) );
-	for ( const key of [ 'editorStyle', 'style', 'render' ] ) {
-		assert.ok( json[ key ].startsWith( 'file:./' ), key );
-		assert.ok( fs.existsSync( path.join( blockDir, json[ key ].slice( 7 ) ) ), key );
-	}
-	const php = fs.readFileSync( path.join( blockDir, '..', '..', 'wp-whobird.php' ), 'utf8' );
-	for ( const key of [ 'editorScript', 'viewScript' ] ) {
-		assert.ok( php.includes( `'${ json[ key ] }'` ), `${ key } handle is registered in wp-whobird.php` );
+	const php = fs.readFileSync( path.join( blockDir, '..', '..', 'includes', 'plugin-setup.php' ), 'utf8' );
+	const refs = [ json.editorScript, json.viewScript, json.editorStyle, json.render ].concat( json.style );
+	assert.strictEqual( refs.length, 6 );
+	for ( const ref of refs ) {
+		if ( ref.startsWith( 'file:./' ) ) {
+			assert.ok( fs.existsSync( path.join( blockDir, ref.slice( 7 ) ) ), ref );
+		} else {
+			assert.ok( php.includes( `'${ ref }'` ), `${ ref } handle is registered in includes/plugin-setup.php` );
+		}
 	}
 } );
 

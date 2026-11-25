@@ -62,12 +62,12 @@ function whobird_ajax_generate_mapping_handler() {
             $next_step = $all_steps[$step_index + 1];
         }
         wp_send_json_success([
-            'msg' => isset($result['msg']) ? __($result['msg'], 'wp-whobird') : '',
+            'msg' => isset($result['msg']) ? $result['msg'] : '',
             'next_step' => $next_step,
         ]);
     } else {
         wp_send_json_error([
-            'msg' => isset($result['msg']) ? __($result['msg'], 'wp-whobird') : '',
+            'msg' => isset($result['msg']) ? $result['msg'] : '',
         ]);
     }
 }

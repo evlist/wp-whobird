@@ -35,7 +35,7 @@ foreach ($sources_cfg as $key => $cfg) {
         $entry = [
             'key' => $key,
             // Translators: %s is the source label key.
-            'label' => isset($cfg['label']) ? __($cfg['label'], 'wp-whobird') : '',
+            'label' => isset($cfg['label']) ? $cfg['label'] : '',
         ];
         if (!empty($row['source_commit_sha'])) {
             $entry['commit_sha'] = $row['source_commit_sha'];

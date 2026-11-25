@@ -60,7 +60,7 @@ function whobird_process_mapping_sources_request(array $post, array $sources, ar
             // Handle source file update.
             list($ok, $msg) = $instances[$key]->update();
             $html .= '<div class="' . ($ok ? 'updated notice' : 'notice notice-error is-dismissible') . '"><p>'
-                . esc_html($label . ': ' . __($msg, 'wp-whobird')) . '</p></div>';
+                . esc_html($label . ': ' . $msg) . '</p></div>';
         } else {
             // Handle mapping table update from source.
             list($ok, $msg) = $instances[$key]->uploadToTable();
@@ -69,7 +69,7 @@ function whobird_process_mapping_sources_request(array $post, array $sources, ar
                     // Translators: %s is mapping source label.
                     esc_html__('Update table (%s): ', 'wp-whobird'),
                     esc_html($label)
-                ) . esc_html__($msg, 'wp-whobird') . '</p></div>';
+                ) . esc_html($msg) . '</p></div>';
         }
     }
     return $html;
