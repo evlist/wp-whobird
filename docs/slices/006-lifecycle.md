@@ -63,10 +63,11 @@ Then remove the old `languages/wp-whobird-fr_FR-4c85…json`.
 
 ## Known limits, open
 
-- Re-activating the plugin drops and recreates the mapping table and the cache
-  (`WhoBirdActivator::activate()` and `whobirdMappingTableInit()` both do it, and
-  the second wins with a different schema). A mapping regenerated from
-  Wikidata is lost on re-activation. Not changed here (behaviour decision).
+- Activation recreates the mapping table and the cache, so re-activating the
+  plugin loses a regenerated mapping; see
+  [open question 1](../open-questions.md). Not changed here (behaviour decision).
+- The activation hook of the settings class never fires; see
+  [open question 2](../open-questions.md).
 - Strings passed to `__()` as variables (messages returned by the mapping
   sources) cannot be extracted; that is the clean-up slice.
 
