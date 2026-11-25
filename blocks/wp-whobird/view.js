@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { __ } from '@wordpress/i18n';
+(function () {
+'use strict';
+const { __ } = wp.i18n;
 
 /**
  * JavaScript for the WhoBird block front-end view.
@@ -180,3 +182,4 @@ function initializeAjaxQueue() {
     queueBirdForUpdate(birdnetId);
   });
 }
+})();

@@ -23,7 +23,7 @@ This plugin, whoBIRD observations, lets you easily showcase your birdwatching re
 == Installation ==
 
 1. Upload the plugin files to the `/wp-content/plugins/wp-whobird` directory, or install the plugin through the WordPress plugins screen directly.
-2. Run `npm install && npm run build` if you’re installing from source (GitHub).
+2. If you install from source (GitHub), no build step is needed: copy the repository, or create a zip with `bin/make-zip.sh`.
 3. Activate the plugin through the 'Plugins' screen in WordPress.
 4. Upload the SQLite whoBIRD export and (optional) the sound .wav recordings.
 5. Go to the plugin admin page to set the paths for the SQLite exports and (optional) the directory with the sound recordings.

@@ -1,6 +1,7 @@
 {
     "name": "wp-whobird",
     "version": "1.0.0",
+    "private": true,
     "description": "Display whoBIRD identifications",
     "author": "Eric van der Vlist <vdv@dyomedea.com> (https://e.vli.st)",
     "license": "GPL-3.0-or-later",
@@ -18,22 +19,8 @@
         "gutenberg",
         "whoBIRD"
     ],
-    "main": "build/index.js",
     "scripts": {
-        "build": "wp-scripts build --webpack-copy-php --blocks-manifest",
-        "format": "wp-scripts format",
-        "lint:css": "wp-scripts lint-style",
-        "lint:js": "wp-scripts lint-js",
-        "packages-update": "wp-scripts packages-update",
-        "plugin-zip": "wp-scripts plugin-zip",
-        "postplugin-zip": "mkdir -p wp-whobird; cp -r resources LICENSES wp-whobird; zip -r wp-whobird.zip wp-whobird ; rm -rf wp-whobird/",
-        "start": "wp-scripts start --webpack-copy-php --blocks-manifest"
-    },
-    "devDependencies": {
-        "@wordpress/scripts": "^30.15.0",
-        "copy-webpack-plugin": "^13.0.0"
-    },
-    "dependencies": {
-        "@fortawesome/fontawesome-free": "^6.7.2"
+        "test": "node --test tests/js/block.test.js",
+        "zip": "bin/make-zip.sh"
     }
 }

@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Files left out of the release zip (bin/make-zip.sh uses git archive).
+/.devcontainer export-ignore
+/.vscode export-ignore
+/.editorconfig export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/.vimrc export-ignore
+/assets export-ignore
+/bin export-ignore
+/docs export-ignore
+/tests export-ignore
+/composer.json export-ignore
+/composer.json.license export-ignore
+/composer.lock export-ignore
+/composer.lock.license export-ignore
+/package.json export-ignore
+/package.json.license export-ignore
+/phpcs.xml.dist export-ignore
+/phpunit.xml.dist export-ignore
+/sync-readme-to-php.js export-ignore
+/README.md export-ignore

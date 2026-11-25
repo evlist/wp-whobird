@@ -12,5 +12,5 @@
  */
 
 .wp-block-wpwbd-wp-whobird {
-	border: 1px dotted #f00; // Highlight the block in the editor
+	border: 1px dotted #f00; /* Highlight the block in the editor */
 }

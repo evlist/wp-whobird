@@ -22,7 +22,7 @@
 
 @media (min-width: 768px) {
     .wpwbd_list {
-        grid-template-columns: repeat(2, 1fr); // Two columns for wider screens
+        grid-template-columns: repeat(2, 1fr); /* Two columns for wider screens */
     }
 }
 
@@ -32,7 +32,7 @@
     }
     #audio-player-container,
     .bird-wikipedia-container {
-        display: none; // Hide these elements when printing
+        display: none; /* Hide these elements when printing */
     }
     .wpwbd-bird-entry {
         page-break-before: auto;

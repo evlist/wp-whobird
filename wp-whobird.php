@@ -27,22 +27,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Registers the block using a `blocks-manifest.php` file, which improves the performance of block type registration.
+ * Registers the script handles and the block (no build step: the files in
+ * blocks/wp-whobird are loaded as they are).
+ *
+ * The handles are referenced by name in block.json; their script dependencies
+ * are declared here by hand.
  */
 function wpwbd_wp_whobird_block_init() {
-    if ( function_exists( 'wp_register_block_types_from_metadata_collection' ) ) {
-        wp_register_block_types_from_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
-        return;
+    $block_dir = __DIR__ . '/blocks/wp-whobird';
+    $block_url = plugin_dir_url( __FILE__ ) . 'blocks/wp-whobird';
+
+    $scripts = [
+        'wpwbd-wp-whobird-editor-script' => [
+            'file' => 'index.js',
+            'deps' => [ 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ],
+        ],
+        'wpwbd-wp-whobird-view-script'   => [
+            'file' => 'view.js',
+            'deps' => [ 'wp-i18n' ],
+        ],
+    ];
+    foreach ( $scripts as $handle => $script ) {
+        wp_register_script(
+            $handle,
+            $block_url . '/' . $script['file'],
+            $script['deps'],
+            (string) filemtime( $block_dir . '/' . $script['file'] ),
+            true
+        );
+        wp_set_script_translations( $handle, 'wp-whobird', __DIR__ . '/languages' );
     }
 
-    if ( function_exists( 'wp_register_block_metadata_collection' ) ) {
-        wp_register_block_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
-    }
-
-    $manifest_data = require __DIR__ . '/build/blocks-manifest.php';
-    foreach ( array_keys( $manifest_data ) as $block_type ) {
-        register_block_type( __DIR__ . "/build/{$block_type}" );
-    }
+    register_block_type( $block_dir );
 }
 add_action( 'init', 'wpwbd_wp_whobird_block_init' );
 
@@ -52,7 +68,7 @@ add_action( 'init', 'wpwbd_wp_whobird_block_init' );
 function wpwhobird_enqueue_fontawesome_local() {
     wp_enqueue_style(
             'font-awesome',
-            plugin_dir_url( __FILE__ ) . 'build/css/all.min.css',
+            plugin_dir_url( __FILE__ ) . 'third-party/fontawesome/css/all.min.css',
             [],
             '6.7.2' // Update to the correct version
             );
@@ -113,11 +129,12 @@ add_action('admin_enqueue_scripts', function($hook) {
         // error_log($hook);
         wp_enqueue_script(
                 'wpwhobird-admin-mapping',
-                plugins_url('build/wp-whobird/admin-mapping.js', __FILE__),
-                [],
-                filemtime(plugin_dir_path(__FILE__) . 'build/wp-whobird/admin-mapping.js'),
+                plugins_url('blocks/wp-whobird/admin-mapping.js', __FILE__),
+                [ 'wp-i18n' ],
+                filemtime(plugin_dir_path(__FILE__) . 'blocks/wp-whobird/admin-mapping.js'),
                 true
                 );
+        wp_set_script_translations( 'wpwhobird-admin-mapping', 'wp-whobird', plugin_dir_path( __FILE__ ) . 'languages' );
         wp_localize_script(
                 'wpwhobird-admin-mapping',
                 'wpwhobirdMappingVars',

@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { __ } from '@wordpress/i18n';
+(function () {
+'use strict';
+const { __ } = wp.i18n;
 
 /**
  * Handles the admin mapping generation process for the WhoBird plugin.
@@ -74,3 +76,4 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+})();
