@@ -17,3 +17,4 @@ One document per feature, written before the code.
 | [005](005-settings.md) | Read the registered settings, keep paths inside uploads | 004 |
 | [006](006-lifecycle.md) | Uninstall and translations | 001, 005 |
 | [007](007-cleanup.md) | Clean-up (debug code, assets, hooks, strings) | 003, 006 |
+| [008](008-documentation.md) | Documentation | 001 to 007 |

@@ -26,7 +26,7 @@ This plugin, whoBIRD observations, lets you easily showcase your birdwatching re
 2. If you install from source (GitHub), no build step is needed: copy the repository, or create a zip with `bin/make-zip.sh`.
 3. Activate the plugin through the 'Plugins' screen in WordPress.
 4. Upload the SQLite whoBIRD export and (optional) the sound .wav recordings.
-5. Go to the plugin admin page to set the paths for the SQLite exports and (optional) the directory with the sound recordings.
+5. Go to Settings > WhoBird Settings to set the path of the SQLite export and (optional) of the directory with the sound recordings. Both are relative to the WordPress uploads directory (no `..`, no absolute path).
 6. Use the whoBIRD block from the editor to embed your observations.
 
 == Frequently Asked Questions ==
@@ -41,11 +41,11 @@ If there was a need, it would be easy, though, to implement a shortcode to displ
 
 = How do I export and upload the whoBIRD SQLite database? =
 
-In the whoBIRD app, click on the "eye" icom to get the list of observations and then on the save (disket) icon to export your observations. This will save the database in a zip file. You'll need to unzip this file and upload the BirdDatabase.db somewhere on your WordPress server.
+In the whoBIRD app, click on the "eye" icom to get the list of observations and then on the save (disket) icon to export your observations. This will save the database in a zip file. You'll need to unzip this file and upload the BirdDatabase.db into the WordPress uploads directory (by default `wp-content/uploads/WhoBird/databases/BirdDatabase.db`; the path can be changed in the settings).
 
 = How do I upload the whoBIRD sound recordings (optional)  =
 
-whoBIRD has an option to save .wav files into the Music/whoBIRD directory. If you find a way to upload these files on your WordPress server, visitors will be able to hear these recordings when they select a bird.
+whoBIRD has an option to save .wav files into the Music/whoBIRD directory. If you upload these files into the WordPress uploads directory (by default `wp-content/uploads/WhoBird/recordings`, named after the observation time in milliseconds, `<time>.wav`), visitors will be able to hear these recordings when they select a bird.
 
 = How do I select the period to display? =
 
@@ -89,4 +89,12 @@ Special thanks to:
 
 This plugin is licensed under the GPL-3.0-or-later. See `LICENSES/GPL-3.0-or-later.txt` for full license text.
 
+== Changelog ==
 
+= Unreleased =
+* The settings page now takes effect: the threshold, the database path and the recordings path were saved but never read.
+* The two paths must be relative to the uploads directory.
+* Security: capability and nonce checks on the admin actions and on the mapping export; the public refresh of bird entries ignores the browser's language and answers from the cache when it is fresh.
+* The block's data attributes (`data-index`) let the wp-otherguise index see the birds.
+* No more build step to install from source; FontAwesome loads only on pages that show the block.
+* Deleting the plugin removes its tables and options.
