@@ -20,29 +20,42 @@ namespace WPWhoBird;
 use WPWhoBird\Config;
 
 /**
+ * Clears the cache table when the request asks for it, and returns the notice HTML.
+ *
+ * Requires the manage_options capability and a valid nonce; returns an empty
+ * string when the request is not a cache clearing request.
+ *
+ * @param array $post The POST data (normally $_POST).
+ * @return string HTML notice, or an empty string.
+ */
+function clear_cache_if_requested(array $post): string {
+    if (!isset($post['wpwhobird_clear_cache'])) {
+        return '';
+    }
+    if (!current_user_can('manage_options')) {
+        return '<div class="notice notice-error is-dismissible"><p>' . esc_html__('You are not allowed to do this.', 'wp-whobird') . '</p></div>';
+    }
+    // Dies on an invalid nonce.
+    check_admin_referer('wpwhobird_clear_cache_action', 'wpwhobird_clear_cache_nonce');
+
+    global $wpdb;
+    $table_name = Config::getTableSparqlCache();
+    $result = $wpdb->query("TRUNCATE TABLE $table_name");
+    if ($result === false) {
+        return '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Failed to clear the cache table. Please check the table configuration.', 'wp-whobird') . '</p></div>';
+    }
+    return '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Cache table has been cleared successfully!', 'wp-whobird') . '</p></div>';
+}
+
+/**
  * Renders the cache tools section for the WhoBird admin page.
  *
- * - Handles cache clearing form submission.
- * - Provides user feedback on cache table clearance.
+ * - Handles cache clearing form submission (see clear_cache_if_requested()).
  * - Outputs a form/button to trigger cache clearing.
  */
 function whobird_render_cache_tools_section() {
-    // Handle cache clearing form submission with nonce verification.
-    if (
-        isset($_POST['wpwhobird_clear_cache']) &&
-        check_admin_referer('wpwhobird_clear_cache_action', 'wpwhobird_clear_cache_nonce')
-    ) {
-        global $wpdb;
-        $table_name = Config::getTableSparqlCache();
-        $result = $wpdb->query("TRUNCATE TABLE $table_name");
-        if ($result === false) {
-            // Display error notice if cache clearing fails.
-            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('Failed to clear the cache table. Please check the table configuration.', 'wp-whobird') . '</p></div>';
-        } else {
-            // Display success notice if cache clearance is successful.
-            echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Cache table has been cleared successfully!', 'wp-whobird') . '</p></div>';
-        }
-    }
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in clear_cache_if_requested().
+    echo clear_cache_if_requested($_POST); // Already escaped HTML.
     ?>
     <div id="cache-tool-wrapper" style="margin-bottom:2em;">
         <h2><?php echo esc_html__('Cache Tool', 'wp-whobird'); ?></h2>
@@ -55,5 +68,3 @@ function whobird_render_cache_tools_section() {
     <?php
 }
 
-// Render the cache tools section immediately.
-whobird_render_cache_tools_section();

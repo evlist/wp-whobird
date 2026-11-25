@@ -15,7 +15,7 @@ require_once __DIR__ . '/bird-mappings.php';
 /**
  * Handles the AJAX request to generate mapping steps for Whobird.
  *
- * - Validates the AJAX nonce for security.
+ * - Validates the AJAX nonce and requires the manage_options capability.
  * - Determines the current mapping step, either from the POST data or defaults to the first step.
  * - Executes the corresponding mapping step.
  * - Returns a JSON response indicating success or failure, and the next step if applicable.
@@ -27,6 +27,12 @@ require_once __DIR__ . '/bird-mappings.php';
  */
 function whobird_ajax_generate_mapping_handler() {
     check_ajax_referer('whobird-generate-mapping');
+
+    // The nonce proves the request comes from our page; the capability proves the user may run it.
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error(['msg' => __('You are not allowed to do this.', 'wp-whobird')], 403);
+        return;
+    }
 
     // Get all mapping steps and initialize variables.
     $all_steps = array_keys(whobird_get_mapping_steps());

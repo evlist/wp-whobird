@@ -21,10 +21,23 @@ if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/WhoBirdSources.php';
 
 // Register export handler for mapping table as JSON.
-add_action('admin_post_whobird_export_mapping_json', function() {
+add_action('admin_post_whobird_export_mapping_json', 'whobird_export_mapping_json_handler');
+
+/**
+ * Handles the mapping table export (admin-post.php), for users who may manage options.
+ */
+function whobird_export_mapping_json_handler() {
+    if (!current_user_can('manage_options')) {
+        wp_die(
+            esc_html__('You are not allowed to do this.', 'wp-whobird'),
+            '',
+            ['response' => 403]
+        );
+        return;
+    }
     require_once __DIR__ . '/bird-mappings-export.php';
     exit;
-});
+}
 
 use WPWhoBird\Config;
 

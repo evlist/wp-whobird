@@ -18,6 +18,7 @@ if (!defined('ABSPATH')) exit;
 global $WHOBIRD_MAPPING_TABLE;
 
 require_once __DIR__ . '/bird-mappings.php';
+require_once __DIR__ . '/mapping-sources-actions.php';
 
 // Ensure WP_List_Table is available for custom table rendering in admin.
 if (!class_exists('WP_List_Table')) {
@@ -135,32 +136,10 @@ foreach (whobird_get_mapping_sources() as $key => $cfg) {
 }
 
 // ---- Handle POST actions for updating sources or mapping tables ----
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options')) {
-    foreach ($whobird_source_instances as $key => $srcObj) {
-        // Handle source file update.
-        if (isset($_POST['update_' . $key])) {
-            list($ok, $msg) = $srcObj->update();
-            if ($ok) {
-                echo '<div class="updated notice"><p>' . esc_html(whobird_get_mapping_sources()[$key]['label'] . ': ' . __($msg, 'wp-whobird')) . '</p></div>';
-            } else {
-                echo '<div class="notice notice-error is-dismissible"><p>' . esc_html(whobird_get_mapping_sources()[$key]['label'] . ': ' . __($msg, 'wp-whobird')) . '</p></div>';
-            }
-        }
-        // Handle mapping table update from source.
-        if (isset($_POST['update_table_' . $key])) {
-            list($ok, $msg) = $srcObj->uploadToTable();
-            if ($ok) {
-                echo '<div class="updated notice"><p>' . sprintf(
-                    // Translators: %s is mapping source label.
-                    esc_html__('Update table (%s): ', 'wp-whobird'), esc_html(whobird_get_mapping_sources()[$key]['label'])
-                ) . esc_html__($msg, 'wp-whobird') . '</p></div>';
-            } else {
-                echo '<div class="notice notice-error is-dismissible"><p>' . sprintf(
-                    esc_html__('Update table (%s): ', 'wp-whobird'), esc_html(whobird_get_mapping_sources()[$key]['label'])
-                ) . esc_html__($msg, 'wp-whobird') . '</p></div>';
-            }
-        }
-    }
+// Capability and nonce are checked in whobird_process_mapping_sources_request() (it returns escaped HTML).
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.EscapeOutput.OutputNotEscaped
+    echo whobird_process_mapping_sources_request($_POST, whobird_get_mapping_sources(), $whobird_source_instances);
 }
 ?>
 <div id="mapping-tool-wrapper" style="margin-top:2em;">
@@ -170,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && current_user_can('manage_options'))
         <h2><?php echo esc_html__('Mapping Sources', 'wp-whobird'); ?></h2>
         <form method="POST">
             <?php
+                wp_nonce_field(WHOBIRD_MAPPING_SOURCES_NONCE_ACTION, WHOBIRD_MAPPING_SOURCES_NONCE_FIELD);
                 $mapping_table = new WhoBIRD_Mapping_Sources_Table(whobird_get_mapping_sources(), $WHOBIRD_MAPPING_TABLE, $whobird_source_instances);
                 $mapping_table->prepare_items();
                 $mapping_table->display();

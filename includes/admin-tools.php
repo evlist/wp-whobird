@@ -42,6 +42,7 @@ function whobird_admin_tools_page() {
         <?php
         // Cache Tools Section
         include_once __DIR__ . '/cache-tools.php';
+        \WPWhoBird\whobird_render_cache_tools_section();
 
         // Mapping Tools Section
         include_once __DIR__ . '/bird-mappings-ui.php';

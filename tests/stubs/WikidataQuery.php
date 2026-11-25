@@ -5,12 +5,23 @@
 namespace WPWhoBird;
 
 /**
- * Test stand-in for the Wikidata cache access (shadows includes/WikidataQuery.php).
+ * Test stand-in for the Wikidata cache and fetch (shadows includes/WikidataQuery.php).
+ *
+ * Globals set by the tests: wpwbd_test_cache (answer of getCachedData),
+ * wpwbd_test_fetch_result (answer of fetchAndUpdateCachedData).
+ * Globals filled for the tests: wpwbd_test_wq_locales, wpwbd_test_fetch_calls.
  */
 class WikidataQuery {
-	public function __construct( $language ) {}
+	public function __construct( $language ) {
+		$GLOBALS['wpwbd_test_wq_locales'][] = $language;
+	}
 
 	public function getCachedData( $birdnetId ) {
 		return $GLOBALS['wpwbd_test_cache'];
+	}
+
+	public function fetchAndUpdateCachedData( $birdnetId, $wikidataId ) {
+		$GLOBALS['wpwbd_test_fetch_calls'][] = array( $birdnetId, $wikidataId );
+		return $GLOBALS['wpwbd_test_fetch_result'];
 	}
 }

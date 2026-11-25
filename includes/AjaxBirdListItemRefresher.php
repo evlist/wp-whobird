@@ -9,7 +9,8 @@
  *
  * Handles AJAX requests to fetch and refresh bird list item details via BirdNET and Wikidata.
  *
- * Expects POST parameter 'birdnet_id' (integer), and optional 'locale' (string).
+ * Expects POST parameter 'birdnet_id' (positive integer). The locale is always the
+ * site locale: the browser's choice is not trusted (the cache is keyed by BirdNET ID only).
  * Outputs a JSON response with rendered HTML for the bird entry or an error message.
  *
  * @package   WPWhoBird
@@ -35,7 +36,8 @@ if (!defined('ABSPATH')) {
 /**
  * Handles the AJAX request to update bird data by BirdNET ID.
  *
- * Expects POST parameter 'birdnet_id' (integer) and optional 'locale' (string).
+ * Expects POST parameter 'birdnet_id' (positive integer). A fresh cache entry is answered
+ * from the cache without any throttle wait or network request.
  * Outputs JSON (success or error).
  *
  * @return void
@@ -45,15 +47,14 @@ function update_bird_data()
     $startTime = microtime(true);
 
     // Validate and sanitize input parameters
-    if (!isset($_POST['birdnet_id']) || empty($_POST['birdnet_id'])) {
+    $birdnet_id = isset($_POST['birdnet_id']) ? absint(wp_unslash($_POST['birdnet_id'])) : 0;
+    if ($birdnet_id <= 0) {
         wp_send_json_error(['message' => __('Missing BirdNET ID.', 'wp-whobird')]);
         return;
     }
 
-    $birdnet_id = (int) $_POST['birdnet_id'];
-
-    // Optionally handle locale if passed, fallback to site locale
-    $locale = isset($_POST['locale']) ? sanitize_text_field($_POST['locale']) : get_locale();
+    // The locale is the site's, never the browser's: the cache is keyed by BirdNET ID only.
+    $locale = get_locale();
 
     // Retrieve Wikidata QID for the given BirdNET ID
     global $wpdb;
@@ -76,8 +77,14 @@ function update_bird_data()
 
     error_log(sprintf(__('Step 1 - Initializations: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 
-    // Fetch latest bird data from Wikidata (with caching)
-    $fresh_data = $wikidataQuery->fetchAndUpdateCachedData($birdnet_id, $wikidata_qid);
+    // A fresh cache entry is enough: no throttle wait, no network request.
+    $cache = $wikidataQuery->getCachedData($birdnet_id);
+    if ($cache && $cache['isFresh'] && !empty($cache['data'])) {
+        $fresh_data = $cache['data'];
+    } else {
+        // Fetch latest bird data from Wikidata (throttled, and cached).
+        $fresh_data = $wikidataQuery->fetchAndUpdateCachedData($birdnet_id, $wikidata_qid);
+    }
 
     error_log(sprintf(__('Step 2 - Data fetched: %s seconds', 'wp-whobird'), (microtime(true) - $startTime)));
 
