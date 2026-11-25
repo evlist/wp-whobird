@@ -156,6 +156,31 @@ function esc_attr__( $text, $domain = 'default' ) {
 	return $text;
 }
 
+// ---- Options deletion and multisite. ----
+$GLOBALS['wpwbd_test_deleted_options'] = array();
+$GLOBALS['wpwbd_test_sites']           = null;  // null: single site; array of ids: multisite.
+$GLOBALS['wpwbd_test_blog_switches']   = array();
+
+function delete_option( $name ) {
+	$GLOBALS['wpwbd_test_deleted_options'][] = $name;
+	unset( $GLOBALS['wpwbd_test_options'][ $name ] );
+	return true;
+}
+function is_multisite() {
+	return null !== $GLOBALS['wpwbd_test_sites'];
+}
+function get_sites( $args = array() ) {
+	return $GLOBALS['wpwbd_test_sites'];
+}
+function switch_to_blog( $id ) {
+	$GLOBALS['wpwbd_test_blog_switches'][] = 'switch:' . $id;
+	$GLOBALS['wpdb']->prefix                = 'wp_' . $id . '_';
+}
+function restore_current_blog() {
+	$GLOBALS['wpwbd_test_blog_switches'][] = 'restore';
+	$GLOBALS['wpdb']->prefix                = 'wp_';
+}
+
 /** Minimal $wpdb: records queries, answers with what the test sets. */
 class WpTestDb {
 	public $prefix       = 'wp_';

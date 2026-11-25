@@ -71,7 +71,7 @@ class WhoBirdActivator
                 scientific_name VARCHAR(255) DEFAULT NULL,
                 wikidata_qid VARCHAR(32) DEFAULT NULL,
                 PRIMARY KEY (birdnet_id)
-                ) $charset_collate;";
+                ) $charsetCollate;";
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_mapping);
 

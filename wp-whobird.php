@@ -16,6 +16,8 @@
  * Version: 1.0.0
  * Contributors: @evlist
  * Tags: block, birds, observations, gutenberg, taxonomy
+ * Text Domain: wp-whobird
+ * Domain Path: /languages
  */
 /**
  *
