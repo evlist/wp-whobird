@@ -66,25 +66,31 @@ class WhoBirdAdminSettings
      */
     public function registerSettings()
     {
-        // Register existing settings
-        register_setting('wpwhobird_settings', 'wpwhobird_recordings_path', [
-            'default' => 'WhoBird/recordings',
+        // Register the settings (names and defaults come from Config, which also reads them).
+        register_setting('wpwhobird_settings', Config::OPTION_RECORDINGS_PATH, [
+            'default' => Config::DEFAULT_RECORDINGS_PATH,
+            'sanitize_callback' => function ($value) {
+                return $this->sanitizePathSetting(Config::OPTION_RECORDINGS_PATH, $value, Config::DEFAULT_RECORDINGS_PATH);
+            },
         ]);
-        register_setting('wpwhobird_settings', 'wpwhobird_database_path', [
-            'default' => 'WhoBird/databases/BirdDatabase.db',
+        register_setting('wpwhobird_settings', Config::OPTION_DATABASE_PATH, [
+            'default' => Config::DEFAULT_DATABASE_PATH,
+            'sanitize_callback' => function ($value) {
+                return $this->sanitizePathSetting(Config::OPTION_DATABASE_PATH, $value, Config::DEFAULT_DATABASE_PATH);
+            },
         ]);
-        register_setting('wpwhobird_settings', 'wpwhobird_threshold', [
-            'default' => 0.4,
+        register_setting('wpwhobird_settings', Config::OPTION_THRESHOLD, [
+            'default' => Config::DEFAULT_THRESHOLD,
             'sanitize_callback' => function ($value) {
                 $value = floatval($value);
-                return ($value >= 0 && $value <= 1) ? $value : 0.7; // Ensure it's between 0 and 1
+                return ($value >= 0 && $value <= 1) ? $value : Config::DEFAULT_THRESHOLD; // Ensure it's between 0 and 1
             },
         ]);
 
         // Register new setting for generating a message when there are no observations for the selected period
-        register_setting('wpwhobird_settings', 'wpwhobird_should_generate_text_when_no_observations', [
+        register_setting('wpwhobird_settings', Config::OPTION_GENERATE_TEXT, [
             'type' => 'boolean',
-            'default' => false,
+            'default' => Config::DEFAULT_GENERATE_TEXT,
         ]);
 
         // Add settings section
@@ -96,15 +102,49 @@ class WhoBirdAdminSettings
         );
 
         // Add settings fields
-        $this->addTextField('wpwhobird_recordings_path', __('Recordings Path', 'wp-whobird'));
-        $this->addTextField('wpwhobird_database_path', __('Database Path', 'wp-whobird'));
-        $this->addNumberField('wpwhobird_threshold', __('Threshold', 'wp-whobird'), 0, 1, 0.01);
+        $this->addTextField(
+            Config::OPTION_RECORDINGS_PATH,
+            __('Recordings Path', 'wp-whobird'),
+            __('Relative to the uploads directory. No "..", no absolute path.', 'wp-whobird'),
+            Config::DEFAULT_RECORDINGS_PATH
+        );
+        $this->addTextField(
+            Config::OPTION_DATABASE_PATH,
+            __('Database Path', 'wp-whobird'),
+            __('Relative to the uploads directory. No "..", no absolute path.', 'wp-whobird'),
+            Config::DEFAULT_DATABASE_PATH
+        );
+        $this->addNumberField(Config::OPTION_THRESHOLD, __('Threshold', 'wp-whobird'), 0, 1, 0.01);
         $this->addCheckboxField(
-            'wpwhobird_should_generate_text_when_no_observations',
+            Config::OPTION_GENERATE_TEXT,
             __('Generate text if there are no observations for the selected period', 'wp-whobird'),
             __('If checked, a message will be generated when there are no observations for the selected period.', 'wp-whobird'),
-            true
+            Config::DEFAULT_GENERATE_TEXT
         );
+    }
+
+    /**
+     * Sanitize a path setting: it must stay relative to the uploads directory.
+     *
+     * An unacceptable value is refused with an error message and the previous value is kept.
+     *
+     * @param string $option  Option name.
+     * @param mixed  $value   Submitted value.
+     * @param string $default Default path.
+     * @return string The value to store.
+     */
+    public function sanitizePathSetting($option, $value, $default)
+    {
+        $path = Config::sanitizeRelativePath(is_string($value) ? wp_unslash($value) : $value);
+        if ($path !== '') {
+            return $path;
+        }
+        add_settings_error(
+            $option,
+            $option . '_invalid',
+            __('Invalid path: it must be relative to the uploads directory, without "..", and not absolute. The previous value was kept.', 'wp-whobird')
+        );
+        return Config::sanitizeRelativePath(get_option($option, $default)) ?: $default;
     }
 
     /**
@@ -113,14 +153,15 @@ class WhoBirdAdminSettings
      * @param string $optionName
      * @param string $label
      * @param string $description
+     * @param string $default Value shown when the option has not been saved yet.
      */
-    private function addTextField($optionName, $label, $description = '')
+    private function addTextField($optionName, $label, $description = '', $default = '')
     {
         add_settings_field(
             $optionName,
             $label,
-            function () use ($optionName, $description) {
-                $value = get_option($optionName, '');
+            function () use ($optionName, $description, $default) {
+                $value = get_option($optionName, $default);
                 ?>
                 <input type="text" id="<?php echo esc_attr($optionName); ?>"
                        name="<?php echo esc_attr($optionName); ?>"
@@ -150,7 +191,7 @@ class WhoBirdAdminSettings
             $optionName,
             $label,
             function () use ($optionName, $min, $max, $step) {
-                $value = get_option($optionName, '0.7');
+                $value = get_option($optionName, Config::DEFAULT_THRESHOLD);
                 ?>
                 <input type="number" id="<?php echo esc_attr($optionName); ?>"
                        name="<?php echo esc_attr($optionName); ?>"

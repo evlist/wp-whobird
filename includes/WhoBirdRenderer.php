@@ -44,8 +44,8 @@ class WhoBirdRenderer
     public function __construct()
     {
         // Retrieve the dynamic values from the WordPress options
-        $this->recordingsPath = get_option('wp-whobird_recordings_path', 'WhoBird/recordings');
-        $this->databasePath = get_option('wp-whobird_database_path', 'WhoBird/databases/BirdDatabase.db');
+        $this->recordingsPath = Config::getRecordingsPath();
+        $this->databasePath = Config::getDatabasePath();
     }
 
     /**
@@ -56,7 +56,13 @@ class WhoBirdRenderer
      */
     private function getDatabaseConnection(): SQLite3
     {
-        $dbPath = wp_get_upload_dir()['basedir'] . '/' . $this->databasePath;
+        $uploadsDir = wp_get_upload_dir()['basedir'];
+        $dbPath = $uploadsDir . '/' . $this->databasePath;
+
+        // The database must really be inside the uploads directory (symbolic links resolved).
+        if (!Config::isInsideDirectory($dbPath, $uploadsDir)) {
+            throw new \Exception(__('Failed to open database at', 'wp-whobird') . ' ' . $dbPath);
+        }
 
         $db = new SQLite3($dbPath, SQLITE3_OPEN_READONLY);
         if (!$db) {
@@ -83,7 +89,8 @@ class WhoBirdRenderer
             if ($recordingId - $previousRecordingId >= 3000) {
                 $previousRecordingId = $recordingId;
                 $recordingPath = $uploadDir['basedir'] . '/' . $this->recordingsPath . '/' . $recordingId . '.wav';
-                if (is_file($recordingPath) && is_readable($recordingPath)) {
+                if (is_file($recordingPath) && is_readable($recordingPath)
+                    && Config::isInsideDirectory($recordingPath, $uploadDir['basedir'])) {
                     $recordingUrl = $uploadDir['baseurl'] . '/' . $this->recordingsPath . '/' . $recordingId . '.wav';
                     $recordingUrls[] = $recordingUrl;
                 }}
@@ -125,7 +132,7 @@ class WhoBirdRenderer
         $db = $this->getDatabaseConnection();
 
         // Get the threshold value from the admin settings
-        $threshold = floatval(get_option('wp-whobird_threshold', 0.7));
+        $threshold = Config::getThreshold();
 
         $query = $db->prepare(
                 "SELECT BirdNET_ID, SpeciesName, group_concat(TimeInMillis) as timestamps 

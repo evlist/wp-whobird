@@ -14,3 +14,4 @@ One document per feature, written before the code.
 | [002](002-index-markup-json.md) | Index mark as one JSON attribute | 001 |
 | [003](003-no-build.md) | Remove the build step | none |
 | [004](004-security.md) | Capability and nonce checks | 001 (test set-up) |
+| [005](005-settings.md) | Read the registered settings, keep paths inside uploads | 004 |

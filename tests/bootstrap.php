@@ -126,6 +126,36 @@ function plugin_dir_path( $file ) {
 	return __DIR__ . '/stubs/';
 }
 
+// ---- Options, settings API, uploads directory. ----
+$GLOBALS['wpwbd_test_options']        = array();   // Saved options, by name.
+$GLOBALS['wpwbd_test_registered']     = array();   // register_setting() calls, by option name.
+$GLOBALS['wpwbd_test_settings_error'] = array();   // add_settings_error() calls.
+$GLOBALS['wpwbd_test_uploads']        = array( 'basedir' => sys_get_temp_dir() . '/wpwbd-uploads', 'baseurl' => 'http://example.test/uploads' );
+$GLOBALS['wpwbd_test_post_date']      = '2026-01-10';
+
+function get_option( $name, $default = false ) {
+	return array_key_exists( $name, $GLOBALS['wpwbd_test_options'] ) ? $GLOBALS['wpwbd_test_options'][ $name ] : $default;
+}
+function register_setting( $group, $name, $args = array() ) {
+	$GLOBALS['wpwbd_test_registered'][ $name ] = $args;
+}
+function add_settings_section( ...$args ) {}
+function add_settings_field( ...$args ) {}
+function add_options_page( ...$args ) {}
+function register_activation_hook( ...$args ) {}
+function add_settings_error( $setting, $code, $message, $type = 'error' ) {
+	$GLOBALS['wpwbd_test_settings_error'][] = array( $setting, $code );
+}
+function wp_get_upload_dir() {
+	return $GLOBALS['wpwbd_test_uploads'];
+}
+function get_the_date( $format = '' ) {
+	return $GLOBALS['wpwbd_test_post_date'];
+}
+function esc_attr__( $text, $domain = 'default' ) {
+	return $text;
+}
+
 /** Minimal $wpdb: records queries, answers with what the test sets. */
 class WpTestDb {
 	public $prefix       = 'wp_';
