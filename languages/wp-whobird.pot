@@ -1,157 +1,389 @@
 # SPDX-FileCopyrightText: 2025 Eric van der Vlist <vdv@dyomedea.com>
 # SPDX-License-Identifier: GPL-3.0-or-later
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: WhoBIRD observations\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-19 14:01+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Project-Id-Version: whoBIRD observations 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-whobird\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: \n"
-"Language: \n"
-"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.7.2; wp-6.8.1\n"
-"X-Domain: wp-whobird"
+"POT-Creation-Date: 2026-11-25T13:02:22+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wp-whobird\n"
 
-#: includes/WhoBirdSources.php:227 includes/WhoBirdSources.php:286
-#: includes/WhoBirdSources.php:427
-#, php-format
-msgid "%d insert error occurred. First error: %s"
-msgid_plural "%d insert errors occurred. First error: %s"
-msgstr[0] ""
-msgstr[1] ""
-
-#: includes/bird-mappings-ui.php:87
-msgid "(never)"
+#. Plugin Name of the plugin
+#: wp-whobird.php
+msgid "whoBIRD observations"
 msgstr ""
 
-#: includes/bird-mappings-ui.php:83
-msgid "(none)"
+#. Description of the plugin
+#: wp-whobird.php
+msgid "Display your whoBIRD observations in WordPress posts and pages using a custom Gutenberg block."
 msgstr ""
 
-#: includes/bird-mappings-ui.php:93
-msgid "(unknown)"
+#: includes/admin-settings.php:37
+#: includes/admin-settings.php:38
+#: includes/admin-settings.php:52
+msgid "WhoBird Settings"
 msgstr ""
 
-#: includes/BirdListItemRenderer.php:100
-msgid "???"
+#: includes/admin-settings.php:99
+msgid "Main Settings"
 msgstr ""
 
-#: includes/bird-mappings-ui.php:67
-msgid "Actions"
+#: includes/admin-settings.php:107
+msgid "Recordings Path"
 msgstr ""
 
-#: includes/bird-mappings.php:112
-msgid ""
-"Added index on eBird id in wikidata_species table (if not already present)."
+#: includes/admin-settings.php:108
+#: includes/admin-settings.php:114
+msgid "Relative to the uploads directory. No \"..\", no absolute path."
 msgstr ""
 
-#: includes/bird-mappings.php:107
-msgid ""
-"Added index on scientificName in wikidata_species table (if not already "
-"present)."
+#: includes/admin-settings.php:113
+msgid "Database Path"
 msgstr ""
 
-#: includes/bird-mappings.php:185 includes/bird-mappings.php:210
-msgid "already present"
+#: includes/admin-settings.php:117
+msgid "Threshold"
 msgstr ""
 
-#: includes/bird-mappings.php:52
-msgid ""
-"Bird species exported from Wikidata via SPARQL. Includes Wikidata Q ID, "
-"English common name, scientific name, taxon rank, and eBird taxon ID."
+#: includes/admin-settings.php:120
+msgid "Generate text if there are no observations for the selected period"
 msgstr ""
 
-#: includes/bird-mappings.php:45
-msgid ""
-"BirdNET species list (ID, scientific name, common name, etc.) from whoBIRD, "
-"kept in sync with taxo_code.txt."
+#: includes/admin-settings.php:121
+msgid "If checked, a message will be generated when there are no observations for the selected period."
 msgstr ""
 
-#: build/wp-whobird/block.json:1
-msgctxt "block description"
-msgid "Display your WhoBIRD observations"
+#: includes/admin-settings.php:145
+msgid "Invalid path: it must be relative to the uploads directory, without \"..\", and not absolute. The previous value was kept."
 msgstr ""
 
-#: build/wp-whobird/block.json:1
-msgctxt "block title"
-msgid "WhoBIRD observations"
+#: includes/admin-tools.php:24
+#: includes/admin-tools.php:25
+#: includes/admin-tools.php:40
+msgid "whoBIRD tools"
 msgstr ""
 
-#: includes/cache-tools.php:43
-msgid "Cache table has been cleared successfully!"
+#: includes/ajax-generate-mapping.php:33
+#: includes/bird-mappings.php:32
+#: includes/cache-tools.php:36
+msgid "You are not allowed to do this."
 msgstr ""
 
-#: includes/cache-tools.php:48
-msgid "Cache Tool"
+#: includes/ajax-generate-mapping.php:47
+msgid "Unknown step."
 msgstr ""
 
-#: includes/cache-tools.php:52
-msgid "Clear Cache"
+#: includes/AjaxBirdListItemRefresher.php:50
+msgid "Missing BirdNET ID."
 msgstr ""
 
-#: includes/cache-tools.php:51
-msgid "Click the button below to clear the WhoBird cache table."
-msgstr ""
-
-#: includes/AjaxBirdListItemRefresher.php:85
-msgid "Could not fetch bird data."
-msgstr ""
-
-#: includes/AjaxBirdListItemRefresher.php:69
+#: includes/AjaxBirdListItemRefresher.php:68
 msgid "Could not find Wikidata ID for this BirdNET ID."
 msgstr ""
 
-#: includes/WhoBirdSources.php:136
-msgid "Could not get commit info from GitHub."
+#: includes/AjaxBirdListItemRefresher.php:87
+msgid "Could not fetch bird data."
 msgstr ""
 
-#: includes/bird-mappings.php:183 includes/bird-mappings.php:208
-msgid "created"
+#. Translators: %s is the filename for the mapping export.
+#: includes/bird-mappings-export.php:77
+msgid "whobird_mapping.json"
 msgstr ""
 
-#: includes/bird-mappings.php:102
-msgid "Created mapping table."
-msgstr ""
-
-#: includes/WikidataQuery.php:104
-#, php-format
-msgid "cURL execution time: %s seconds"
-msgstr ""
-
-#: includes/admin-settings.php:100
-msgid "Database Path"
+#: includes/bird-mappings-ui.php:61
+msgid "Source Name"
 msgstr ""
 
 #: includes/bird-mappings-ui.php:62
 msgid "Description"
 msgstr ""
 
-#. Description of the plugin
-msgid ""
-"Display your whoBIRD observations in WordPress posts and pages using a "
-"custom Gutenberg block."
+#: includes/bird-mappings-ui.php:63
+msgid "Stored Commit"
 msgstr ""
 
-#: includes/bird-mappings-ui.php:187
+#: includes/bird-mappings-ui.php:64
+msgid "Last Downloaded"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:65
+msgid "GitHub Commit"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:66
+msgid "Status"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:67
+msgid "Actions"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:68
+#: includes/bird-mappings-ui.php:117
+msgid "Update Table"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:83
+msgid "(none)"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:87
+msgid "(never)"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:93
+msgid "(unknown)"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:98
+#: includes/bird-mappings-ui.php:103
+msgid "Not downloaded"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:102
+#: includes/bird-mappings-ui.php:108
+msgid "Up to date"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:106
+msgid "New version available!"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:112
+msgid "Update"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:147
+msgid "For maintainers: Mapping Sources"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:149
+msgid "Mapping Sources"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:159
+msgid "Generate/Update mapping table"
+msgstr ""
+
+#: includes/bird-mappings-ui.php:166
 msgid "Download Mapping Table (JSON)"
 msgstr ""
 
-#: includes/bird-mappings.php:93
+#: includes/bird-mappings-ui.php:170
+msgid "Last commit = last change in the file’s GitHub repository. Last downloaded = when you last imported it."
+msgstr ""
+
+#: includes/bird-mappings-ui.php:171
+msgid "For Wikidata, only last downloaded/imported is shown."
+msgstr ""
+
+#: includes/bird-mappings.php:63
+msgid "whoBIRD taxo_code.txt"
+msgstr ""
+
+#: includes/bird-mappings.php:64
+msgid "Maps BirdNET IDs to eBird IDs"
+msgstr ""
+
+#: includes/bird-mappings.php:71
+msgid "whoBIRD BirdNET species file (labels_en.txt)"
+msgstr ""
+
+#: includes/bird-mappings.php:72
+msgid "BirdNET species list (ID, scientific name, common name, etc.) from whoBIRD, kept in sync with taxo_code.txt."
+msgstr ""
+
+#: includes/bird-mappings.php:79
+msgid "Wikidata birds SPARQL export (English names, eBird IDs)"
+msgstr ""
+
+#: includes/bird-mappings.php:80
+msgid "Bird species exported from Wikidata via SPARQL. Includes Wikidata Q ID, English common name, scientific name, taxon rank, and eBird taxon ID."
+msgstr ""
+
+#: includes/bird-mappings.php:125
 msgid "Dropped previous mapping table (if any)."
 msgstr ""
 
-#: includes/cache-tools.php:40
+#: includes/bird-mappings.php:134
+msgid "Created mapping table."
+msgstr ""
+
+#: includes/bird-mappings.php:139
+msgid "Added index on scientificName in wikidata_species table (if not already present)."
+msgstr ""
+
+#: includes/bird-mappings.php:144
+msgid "Added index on eBird id in wikidata_species table (if not already present)."
+msgstr ""
+
+#: includes/bird-mappings.php:150
+msgid "Inserted BirdNET species into mapping table."
+msgstr ""
+
+#: includes/bird-mappings.php:157
+msgid "Updated Wikidata IDs using scientific names."
+msgstr ""
+
+#: includes/bird-mappings.php:166
+msgid "Updated Wikidata IDs using eBird IDs for unmatched rows."
+msgstr ""
+
+#: includes/bird-mappings.php:171
+msgid "Queried Wikidata for truthy scientific names and updated mapping table."
+msgstr ""
+
+#: includes/bird-mappings.php:176
+msgid "Queried Wikidata for all scientific names and updated mapping table."
+msgstr ""
+
+#: includes/bird-mappings.php:190
+#, php-format
+msgid "Unknown step: %s"
+msgstr ""
+
+#: includes/bird-mappings.php:213
+msgid "SQL error creating index on scientific name: "
+msgstr ""
+
+#: includes/bird-mappings.php:215
+#: includes/bird-mappings.php:240
+msgid "created"
+msgstr ""
+
+#: includes/bird-mappings.php:217
+#: includes/bird-mappings.php:242
+msgid "already present"
+msgstr ""
+
+#: includes/bird-mappings.php:238
+#: includes/bird-mappings.php:332
+msgid "SQL error, see error in the log"
+msgstr ""
+
+#: includes/bird-mappings.php:250
+msgid "none to update"
+msgstr ""
+
+#: includes/bird-mappings.php:258
+#: includes/bird-mappings.php:317
+msgid "updated"
+msgstr ""
+
+#: includes/bird-mappings.php:267
+msgid "none missing"
+msgstr ""
+
+#: includes/BirdListItemRenderer.php:134
+msgid "???"
+msgstr ""
+
+#: includes/cache-tools.php:45
 msgid "Failed to clear the cache table. Please check the table configuration."
 msgstr ""
 
-#: includes/WhoBirdRenderer.php:63
+#: includes/cache-tools.php:47
+msgid "Cache table has been cleared successfully!"
+msgstr ""
+
+#: includes/cache-tools.php:61
+msgid "Cache Tool"
+msgstr ""
+
+#: includes/cache-tools.php:64
+msgid "Click the button below to clear the WhoBird cache table."
+msgstr ""
+
+#: includes/cache-tools.php:65
+msgid "Clear Cache"
+msgstr ""
+
+#. translators: %s is the throttle directory path
+#: includes/FileLockThrottle.php:48
+#, php-format
+msgid "Throttle directory does not exist: %s"
+msgstr ""
+
+#: includes/mapping-sources-actions.php:52
+msgid "You are not allowed to do this, or the page has expired. Please reload it and try again."
+msgstr ""
+
+#. Translators: %s is mapping source label.
+#: includes/mapping-sources-actions.php:70
+#, php-format
+msgid "Update table (%s): "
+msgstr ""
+
+#. translators: %s: path to missing JSON file
+#: includes/WhoBirdActivator.php:83
+#, php-format
+msgid "whobird: Mapping JSON not found at %s"
+msgstr ""
+
+#: includes/WhoBirdActivator.php:92
+msgid "whobird: Invalid or empty mapping JSON."
+msgstr ""
+
+#. translators: %d: row count
+#: includes/WhoBirdActivator.php:114
+#, php-format
+msgid "whobird: Mapping table recreated and %d rows inserted."
+msgstr ""
+
+#. translators: 1: path to missing JSON file, 2: table name
+#: includes/WhobirdMappingTableManager.php:45
+#, php-format
+msgid "The file %1$s was not found. The table %2$s was not modified."
+msgstr ""
+
+#. translators: 1: path to invalid JSON file, 2: table name
+#: includes/WhobirdMappingTableManager.php:60
+#, php-format
+msgid "The file %1$s did not contain valid mapping data. The table %2$s was not modified."
+msgstr ""
+
+#: includes/WhoBirdRenderer.php:64
+#: includes/WhoBirdRenderer.php:69
 msgid "Failed to open database at"
+msgstr ""
+
+#: includes/WhoBirdRenderer.php:112
+msgid "Previous"
+msgstr ""
+
+#: includes/WhoBirdRenderer.php:113
+msgid "Play/Pause"
+msgstr ""
+
+#: includes/WhoBirdRenderer.php:114
+msgid "Next"
+msgstr ""
+
+#: includes/WhoBirdRenderer.php:117
+#: blocks/wp-whobird/view.js:41
+msgid "Track"
+msgstr ""
+
+#: includes/WhoBirdRenderer.php:189
+msgid "We did not identify any birds with the whoBIRD application."
+msgstr ""
+
+#: includes/WhoBirdRenderer.php:196
+msgid "We heard and identified the following birds with the whoBIRD application:"
+msgstr ""
+
+#: includes/WhoBirdSources.php:67
+msgid "Not implemented for this source."
+msgstr ""
+
+#: includes/WhoBirdSources.php:136
+msgid "Could not get commit info from GitHub."
 msgstr ""
 
 #: includes/WhoBirdSources.php:140
@@ -162,41 +394,48 @@ msgstr ""
 msgid "File updated successfully."
 msgstr ""
 
-#: includes/bird-mappings-ui.php:169
-msgid "For maintainers: Mapping Sources"
+#: includes/WhoBirdSources.php:205
+#: includes/WhoBirdSources.php:260
+#: includes/WhoBirdSources.php:381
+msgid "No raw content available for import."
 msgstr ""
 
-#: includes/bird-mappings-ui.php:192
-msgid "For Wikidata, only last downloaded/imported is shown."
+#: includes/WhoBirdSources.php:220
+#: includes/WhoBirdSources.php:279
+#, php-format
+msgid "Insert error for birdnet_id=%d : %s"
 msgstr ""
 
-#: includes/admin-settings.php:104
-msgid "Generate text if there are no observations for the selected period"
-msgstr ""
-
-#: includes/bird-mappings-ui.php:180
-msgid "Generate/Update mapping table"
-msgstr ""
-
-#: includes/bird-mappings-ui.php:65
-msgid "GitHub Commit"
-msgstr ""
-
-#: includes/admin-settings.php:105
-msgid ""
-"If checked, a message will be generated when there are no observations for "
-"the selected period."
-msgstr ""
-
-#: includes/WhoBirdSources.php:225 includes/WhoBirdSources.php:284
+#: includes/WhoBirdSources.php:225
+#: includes/WhoBirdSources.php:284
 #: includes/WhoBirdSources.php:425
 #, php-format
 msgid "Imported %d rows to %s."
 msgstr ""
 
-#: includes/WhoBirdSources.php:220 includes/WhoBirdSources.php:279
+#: includes/WhoBirdSources.php:227
+#: includes/WhoBirdSources.php:286
+#: includes/WhoBirdSources.php:427
 #, php-format
-msgid "Insert error for birdnet_id=%d : %s"
+msgid "%d insert error occurred. First error: %s"
+msgid_plural "%d insert errors occurred. First error: %s"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/WhoBirdSources.php:319
+msgid "SPARQL query error: "
+msgstr ""
+
+#: includes/WhoBirdSources.php:323
+msgid "No results from Wikidata."
+msgstr ""
+
+#: includes/WhoBirdSources.php:336
+msgid "Wikidata SPARQL result updated successfully."
+msgstr ""
+
+#: includes/WhoBirdSources.php:386
+msgid "Invalid or unexpected Wikidata SPARQL result."
 msgstr ""
 
 #: includes/WhoBirdSources.php:416
@@ -204,269 +443,82 @@ msgstr ""
 msgid "Insert error for wikidata_qid=%s: %s"
 msgstr ""
 
-#: includes/bird-mappings.php:118
-msgid "Inserted BirdNET species into mapping table."
-msgstr ""
-
-#: includes/WhoBirdSources.php:386
-msgid "Invalid or unexpected Wikidata SPARQL result."
-msgstr ""
-
-#: includes/WikidataQuery.php:124
-#, php-format
-msgid "Invalid Wikidata Q-id: %s"
-msgstr ""
-
-#: includes/bird-mappings-ui.php:191
-msgid ""
-"Last commit = last change in the file’s GitHub repository. Last downloaded = "
-"when you last imported it."
-msgstr ""
-
-#: includes/bird-mappings-ui.php:64
-msgid "Last Downloaded"
-msgstr ""
-
-#: includes/admin-settings.php:93
-msgid "Main Settings"
-msgstr ""
-
-#: includes/bird-mappings-ui.php:171
-msgid "Mapping Sources"
-msgstr ""
-
-#: includes/bird-mappings.php:38
-msgid "Maps BirdNET IDs to eBird IDs"
-msgstr ""
-
-#: includes/AjaxBirdListItemRefresher.php:49
-msgid "Missing BirdNET ID."
-msgstr ""
-
-#: includes/bird-mappings-ui.php:106
-msgid "New version available!"
-msgstr ""
-
-#: includes/WhoBirdRenderer.php:107
-msgid "Next"
-msgstr ""
-
-#: includes/WhoBirdSources.php:205 includes/WhoBirdSources.php:260
-#: includes/WhoBirdSources.php:381
-msgid "No raw content available for import."
-msgstr ""
-
-#: includes/WhoBirdSources.php:323
-msgid "No results from Wikidata."
-msgstr ""
-
-#: includes/bird-mappings.php:236
-msgid "none missing"
-msgstr ""
-
-#: includes/bird-mappings.php:218
-msgid "none to update"
-msgstr ""
-
-#: includes/bird-mappings-ui.php:98 includes/bird-mappings-ui.php:103
-msgid "Not downloaded"
-msgstr ""
-
-#: includes/WhoBirdSources.php:67
-msgid "Not implemented for this source."
-msgstr ""
-
-#: includes/WhoBirdRenderer.php:106
-msgid "Play/Pause"
-msgstr ""
-
-#: includes/WhoBirdRenderer.php:105
-msgid "Previous"
-msgstr ""
-
-#: includes/bird-mappings.php:144
-msgid "Queried Wikidata for all scientific names and updated mapping table."
-msgstr ""
-
-#: includes/bird-mappings.php:139
-msgid "Queried Wikidata for truthy scientific names and updated mapping table."
-msgstr ""
-
-#: includes/admin-settings.php:99
-msgid "Recordings Path"
-msgstr ""
-
-#: includes/bird-mappings-ui.php:61
-msgid "Source Name"
-msgstr ""
-
-#: includes/WhoBirdSources.php:319
-msgid "SPARQL query error: "
-msgstr ""
-
-#: includes/bird-mappings.php:181
-msgid "SQL error creating index on scientific name: "
-msgstr ""
-
-#: includes/bird-mappings.php:206 includes/bird-mappings.php:302
-msgid "SQL error, see error in the log"
-msgstr ""
-
-#: includes/bird-mappings-ui.php:66
-msgid "Status"
-msgstr ""
-
-#: includes/AjaxBirdListItemRefresher.php:77
-#, php-format
-msgid "Step 1 - Initializations: %s seconds"
-msgstr ""
-
-#: includes/AjaxBirdListItemRefresher.php:82
-#, php-format
-msgid "Step 2 - Data fetched: %s seconds"
-msgstr ""
-
-#: includes/AjaxBirdListItemRefresher.php:92
-#, php-format
-msgid "Step 3 - HTML rendered: %s seconds"
-msgstr ""
-
-#: includes/bird-mappings-ui.php:63
-msgid "Stored Commit"
-msgstr ""
-
-#. 1: path to invalid JSON file, 2: table name
-#: includes/WhobirdMappingTableManager.php:60
-#, php-format
-msgid ""
-"The file %1$s did not contain valid mapping data. The table %2$s was not "
-"modified."
-msgstr ""
-
-#. 1: path to missing JSON file, 2: table name
-#: includes/WhobirdMappingTableManager.php:45
-#, php-format
-msgid "The file %1$s was not found. The table %2$s was not modified."
-msgstr ""
-
-#: includes/admin-settings.php:101
-msgid "Threshold"
-msgstr ""
-
-#. %s is the throttle directory path
-#: includes/FileLockThrottle.php:48
-#, php-format
-msgid "Throttle directory does not exist: %s"
-msgstr ""
-
-#: includes/AjaxBirdListItemRefresher.php:97
-#, php-format
-msgid "Total execution time: %s seconds"
-msgstr ""
-
-#: includes/WhoBirdRenderer.php:110
-msgid "Track"
-msgstr ""
-
 #: includes/WhoBirdSources.php:453
 #, php-format
 msgid "Unknown mapping source key: %s"
 msgstr ""
 
-#: includes/ajax-generate-mapping.php:41
-msgid "Unknown step."
-msgstr ""
-
-#: includes/bird-mappings.php:158
+#: includes/WikidataQuery.php:120
 #, php-format
-msgid "Unknown step: %s"
+msgid "Invalid Wikidata Q-id: %s"
 msgstr ""
 
-#: includes/bird-mappings-ui.php:102 includes/bird-mappings-ui.php:108
-msgid "Up to date"
+#: blocks/wp-whobird/admin-mapping.js:38
+msgid "Running step: "
 msgstr ""
 
-#: includes/bird-mappings-ui.php:112
-msgid "Update"
+#: blocks/wp-whobird/admin-mapping.js:39
+msgid "Starting..."
 msgstr ""
 
-#: includes/bird-mappings-ui.php:68 includes/bird-mappings-ui.php:117
-msgid "Update Table"
+#: blocks/wp-whobird/admin-mapping.js:65
+msgid "All steps completed!"
 msgstr ""
 
-#. %s is mapping source label.
-#: includes/bird-mappings-ui.php:156 includes/bird-mappings-ui.php:160
-#, php-format
-msgid "Update table (%s): "
+#: blocks/wp-whobird/admin-mapping.js:69
+msgid "Error."
 msgstr ""
 
-#: includes/bird-mappings.php:226 includes/bird-mappings.php:287
-msgid "updated"
+#: blocks/wp-whobird/admin-mapping.js:74
+msgid "AJAX error"
 msgstr ""
 
-#: includes/bird-mappings.php:134
-msgid "Updated Wikidata IDs using eBird IDs for unmatched rows."
+#: blocks/wp-whobird/index.js:38
+msgid "WhoBIRD observations"
 msgstr ""
 
-#: includes/bird-mappings.php:125
-msgid "Updated Wikidata IDs using scientific names."
+#: blocks/wp-whobird/index.js:41
+msgid "Observation Period"
 msgstr ""
 
-#: includes/WhoBirdRenderer.php:185
-msgid "We did not identify any birds with the whoBIRD application."
+#: blocks/wp-whobird/index.js:47
+msgid "Period Unit"
 msgstr ""
 
-#: includes/WhoBirdRenderer.php:192
-msgid ""
-"We heard and identified the following birds with the whoBIRD application:"
+#: blocks/wp-whobird/index.js:50
+msgid "Day(s)"
 msgstr ""
 
-#: includes/bird-mappings.php:44
-msgid "whoBIRD BirdNET species file (labels_en.txt)"
+#: blocks/wp-whobird/index.js:51
+msgid "Week(s)"
 msgstr ""
 
-#. Name of the plugin
-msgid "whoBIRD observations"
+#: blocks/wp-whobird/index.js:52
+msgid "Month(s)"
 msgstr ""
 
-#: includes/admin-settings.php:37 includes/admin-settings.php:38
-#: includes/admin-settings.php:52
-msgid "WhoBird Settings"
+#: blocks/wp-whobird/view.js:49
+msgid "⏸"
 msgstr ""
 
-#: includes/bird-mappings.php:37
-msgid "whoBIRD taxo_code.txt"
+#: blocks/wp-whobird/view.js:56
+msgid "▶️"
 msgstr ""
 
-#: includes/admin-tools.php:24 includes/admin-tools.php:25
-#: includes/admin-tools.php:40
-msgid "whoBIRD tools"
+#: blocks/wp-whobird/view.js:153
+msgid "HTTP error! status:"
 msgstr ""
 
-#: includes/WhoBirdActivator.php:92
-msgid "whobird: Invalid or empty mapping JSON."
+#: blocks/wp-whobird/view.js:168
+msgid "Error updating bird data for"
 msgstr ""
 
-#. %s: path to missing JSON file
-#: includes/WhoBirdActivator.php:83
-#, php-format
-msgid "whobird: Mapping JSON not found at %s"
+#: blocks/wp-whobird/block.json
+msgctxt "block title"
+msgid "WhoBIRD observations"
 msgstr ""
 
-#. %d: row count
-#: includes/WhoBirdActivator.php:114
-msgid "whobird: Mapping table recreated and %d rows inserted."
-msgstr ""
-
-#. %s is the filename for the mapping export.
-#: includes/bird-mappings-export.php:78
-msgid "whobird_mapping.json"
-msgstr ""
-
-#: includes/bird-mappings.php:51
-msgid "Wikidata birds SPARQL export (English names, eBird IDs)"
-msgstr ""
-
-#: includes/WhoBirdSources.php:336
-msgid "Wikidata SPARQL result updated successfully."
+#: blocks/wp-whobird/block.json
+msgctxt "block description"
+msgid "Display your WhoBIRD observations"
 msgstr ""

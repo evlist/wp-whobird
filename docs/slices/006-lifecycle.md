@@ -34,32 +34,35 @@ the block was rewritten; `languages/*.json` is keyed by the old `build/…` path
   the `uninstall.php` entry point itself), the text domain header, and a scan
   that every translation call in the PHP files uses the `wp-whobird` domain.
 
-## To run in the codespace (not done in this slice, see below)
+## Translations (done on 2026-11-25)
 
-The translation catalogues need WP-CLI and gettext, which were not available in
-the session that wrote this slice:
+Regenerated with WP-CLI 2.12.0 (the phar, run with `--allow-root`, outside the repository):
 
 ```bash
 wp i18n make-pot . languages/wp-whobird.pot --slug=wp-whobird --domain=wp-whobird \
-  --exclude=vendor,tests,third-party,docs,node_modules,languages
+  --exclude=vendor,tests,third-party,docs,node_modules,languages,bin
 ```
 
 ```bash
-msgmerge --update languages/wp-whobird-fr_FR.po languages/wp-whobird.pot
+wp i18n update-po languages/wp-whobird.pot languages/wp-whobird-fr_FR.po
 ```
-
-Translate the new French entries (the new messages of slices 004 and 005, for
-instance "You are not allowed to do this."), then:
 
 ```bash
-wp i18n make-mo languages
-wp i18n make-php languages
-wp i18n make-json languages --no-purge
+wp i18n make-mo languages && wp i18n make-php languages && wp i18n make-json languages --no-purge
 ```
 
-`make-json` produces the JavaScript translations from the `.po` references to
-`blocks/wp-whobird/*.js` (the scripts call `wp_set_script_translations()`).
-Then remove the old `languages/wp-whobird-fr_FR-4c85…json`.
+- The `.pot` has 117 entries, including the strings of the block scripts
+  (`blocks/wp-whobird/*.js`) and of the messages added by slices 004 and 005.
+- The 19 new French entries were translated by Claude and have to be reviewed by
+  Eric (the `.po` is a Loco file; its header and SPDX lines were kept, the
+  revision date was updated by hand).
+- `make-json` produced one file per script, named after the md5 of the path
+  (`index.js`, `view.js`, `admin-mapping.js`); the old file keyed by the
+  `build/…` path was removed. A test checks that the files match the scripts.
+- To do again whenever a string changes. `--no-purge` keeps the script strings in
+  the `.po`.
+- The warnings of `make-pot` ("placeholders but no translators comment") are
+  left; they are about messages that already existed.
 
 ## Known limits, open
 
@@ -78,5 +81,6 @@ Slices 001 (tests) and 005 (option names, `Config`).
 ## Verification status
 
 PHPUnit with WordPress functions stubbed. Not tried: a real deletion from the
-WordPress plugins screen (single site and network), the `.pot` / `.mo` /
-JavaScript translations (not regenerated).
+WordPress plugins screen (single site and network); the French translations on a
+site whose language is French (strings in the PHP code, in the editor, on the
+front end and in the admin mapping tool).

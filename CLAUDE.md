@@ -40,8 +40,8 @@ mapping table, names, images and Wikipedia links fetched from Wikidata. The map 
   `update_bird_data`, which has none on purpose (see slice 004). Paths from settings go through `Config::sanitizeRelativePath()`
   and stay inside the uploads directory. Settings names, defaults and getters are in `Config`.
 - **Hooks and handles** are set up in `includes/plugin-setup.php`, with explicit priority and prefixed handles.
-- **Translations**: text domain `wp-whobird`, never translate a variable. The `.pot`, `.mo` and JavaScript JSON files
-  are generated with WP-CLI (commands in slice 006); they were not regenerated yet.
+- **Translations**: text domain `wp-whobird`, never translate a variable. The `.pot`, `.po`, `.mo`, `.l10n.php` and JavaScript JSON files
+  are generated with WP-CLI (commands in slice 006); regenerate them whenever a string changes.
 - **Releases**: `bin/make-zip.sh` builds `wp-whobird.zip` from git (what `.gitattributes` marks `export-ignore` is left out).
   Plugins are tagged `rollout-N` for the blog's rollouts (see shared-room).
 - Files carry SPDX headers (GPL-3.0-or-later); JSON and binary files use a `.license` file next to them.

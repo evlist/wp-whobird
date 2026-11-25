@@ -125,4 +125,24 @@ class LifecycleTest extends TestCase {
 		}
 		$this->assertGreaterThan( 50, $count );
 	}
+
+	public function test_javascript_translations_exist_for_every_script_of_the_plugin(): void {
+		// WordPress looks for languages/<domain>-<locale>-<md5 of the script path>.json (see wp_set_script_translations()).
+		foreach ( array( 'index', 'view', 'admin-mapping' ) as $script ) {
+			$file = sprintf( '%s/languages/wp-whobird-fr_FR-%s.json', dirname( __DIR__ ), md5( "blocks/wp-whobird/$script.js" ) );
+			$this->assertFileExists( $file, $script );
+			$json = json_decode( file_get_contents( $file ), true );
+			$this->assertSame( "blocks/wp-whobird/$script.js", $json['source'] );
+			$this->assertNotEmpty( $json['locale_data']['messages'] );
+		}
+	}
+
+	public function test_no_stale_javascript_translation_files(): void {
+		$expected = array();
+		foreach ( array( 'index', 'view', 'admin-mapping' ) as $script ) {
+			$expected[] = 'wp-whobird-fr_FR-' . md5( "blocks/wp-whobird/$script.js" ) . '.json';
+		}
+		$found = array_map( 'basename', glob( dirname( __DIR__ ) . '/languages/wp-whobird-fr_FR-*.json' ) );
+		$this->assertEqualsCanonicalizing( $expected, $found );
+	}
 }
